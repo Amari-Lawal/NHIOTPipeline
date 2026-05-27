@@ -49,19 +49,19 @@ The technical architecture implemented within the `NHIOTPipeline` codebase acts 
     *   `CommandPayload` defines incoming commands using rigid Pydantic models.
 *   **Academic Justification**: A threat model analysis (STRIDE) reveals that roadside systems are highly vulnerable to eavesdropping and data injection. Utilizing mTLS guarantees that only authentic National Highways publisher instances can issue commands. Furthermore, because incoming parameters are explicitly parsed and validated using a Pydantic model (`CommandPayload`), the device is robustly protected against remote terminal command injection vulnerabilities.
 
-### 3.3 Hardware-Agnostic Compilation vs. Platform Fleet Heterogeneity
-*   **Operational Mandate**: Ensure the software release runs seamlessly across a diverse device fleet consisting of different processor architectures without requiring separate code repositories.
-*   **Code Implementation**: 
-    *   The `.github/workflows/main.yml` script coordinates a multi-architecture compiler matrix.
-    *   Uses cross-compilers (`x86_64-linux-gnu-gcc` and `aarch64-linux-gnu-gcc`) to package stand-alone executables.
-*   **Academic Justification**: Roadside systems have varied lifecycles; older devices run on 64-bit ARM boards (aarch64) while new smart units run on standard x86 systems. Rather than forcing manual builds or managing separate repos, the pipeline automatically compiles and hosts appropriate binary targets. The subscriber daemon dynamically detects its native OS architecture and downloads only the matching version, ensuring maximum fleet consistency and lowering maintenance overhead.
+### 3.3 Handling Fleet Heterogeneity (Hardware Diversity)
+*   **The Problem**: Roadside systems utilize multiple hardware platforms—some use modern x86-64 industrial PC gateways, while older cameras run on cost-effective ARM (ARM64/aarch64) SBC microcontrollers.
+*   **Outline Alignment (Section 5.2.1, 5.2.2 & 5.3.3)**:
+    *   **5.2.1 (Multi-Arch Build Matrix)**: Demonstrates how your GitHub Actions CI pipeline compiles parallel binaries for different architectures.
+    *   **5.2.2 (Cross-compilation)** and **5.3.3 (Artifact Service)**: Show how the system is hardware-agnostic; the edge device dynamically determines its native architecture and only retrieves its corresponding compiled C executable (`hello_aarch64` vs `hello_x86_64`).
+*   **Academic Justification**: Rather than managing multiple codebases or forcing manual compilation on site, your DevOps model coordinates automated targets. The edge client dynamically queries its native platform environment and updates the target executable transparently, minimizing remote management overhead and ensuring fleet consistency.
 
-### 3.4 Live Telemetry & Subprocess Testing vs. Diagnostic Downtime
-*   **Operational Mandate**: Enable remote operators to verify the arithmetic precision and diagnostics of roadside code blocks dynamically without taking cameras offline.
-*   **Code Implementation**:
-    *   `Executor.py` handles subprocess execution of the native C binaries, streaming outputs safely to parent standard buffers.
-    *   `hello.c` implements low-level high-performance math components (`add`, `minus`, `multiply`) mimicking remote image analytics or sensor computations.
-*   **Academic Justification**: To satisfy the rigorous requirements of a DTS Major Project, you must prove the system can handle live remote analytics computations. The `Executor` runs the native platform-specific binary in process isolation (subprocess), ensuring that if a compiled C function faults (e.g. segmentation fault), the parent subscriber python client survives. The C modules write output using the strict boundary format `<function_name>:<result>`, allowing your automated publisher test suite (`NHUnitPub.py`) to run remote E2E assertions over mTLS channels.
+### 3.4 Zero-Downtime Telemetry Verification (Testing & Operations)
+*   **The Problem**: Engineers need to run physical diagnostics (e.g. testing camera telemetry, camera filters, sensors) without causing service downtime.
+*   **Outline Alignment (Section 5.4.2 & 5.5.2)**:
+    *   **5.4.2 (Bidirectional MQTT Topics)**: Establishes distinct messaging pathways (`machineB/recv` and `machineA/recv`), separating commands and metrics.
+    *   **5.5.2 (Native C Contract)**: Integrates standard C diagnostics (`add`, `minus`, `multiply` functions serving as lightweight processing stubs) returning formatted payloads to the caller, showcasing how live camera analytics can be queried on the fly.
+*   **Academic Justification**: Standard telemetry testing must be asynchronous to prevent roadside edge crashes. The `Executor` runs these diagnostics in isolated processes (`subprocess.run`), shielding the main daemon. By structuring communications using bidirectional channels, remote administrators can trigger lightweight, in-memory diagnostic runs securely and receive validated telemetry data instantly.
 
 ---
 
