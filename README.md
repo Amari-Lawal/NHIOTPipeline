@@ -42,13 +42,88 @@ Libraries Needed for Microcontrollers
 3. requests (Python) -> C Equivalent.
 
 
-## Data Pipeline
-### Resources used.
-1. AWS IoT Core using MQTT - Cloud Architecture
-2. Github Actions - DevOps
-3. C/C++ Artifacts - Compile Programming.
-4. Python - MQTT Subscriptions
-5. Unittesting - Testing.
+## System Architecture
+An end-to-end, Over-the-Air (OTA) update and execution system designed for IoT edge nodes. It integrates automated cross-compilation pipelines, secure cloud messaging via AWS IoT Core, and distributed executable unit testing on target hardware architectures (e.g., Raspberry Pi, ARM, and Desktop Linux).
+
+### Architecture Diagram
+
+```mermaid
+flowchart TD
+    %% Node Styling Definitions
+    classDef devStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef gitStyle fill:#F3F4F6,stroke:#4B5563,stroke-width:2px;
+    classDef awsStyle fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px;
+    classDef edgeStyle fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
+    classDef pubStyle fill:#FDF2F8,stroke:#EC4899,stroke-width:2px;
+
+    %% Subgraphs
+    subgraph CI_CD ["CI/CD Pipeline & GitHub Automation"]
+        Developer["Developer Workstation<br>(hello.c update)"]:::devStyle
+        GH_Actions["GitHub Actions CI Workflow"]:::gitStyle
+        GH_Artifacts["GitHub Build Artifacts<br>(hello_x86_64 / hello_aarch64)"]:::gitStyle
+    end
+
+    subgraph AWS_Core ["Cloud Messaging (AWS IoT Core)"]
+        AWS_IoT["AWS IoT Core Broker<br>(Secure mTLS Connect)"]:::awsStyle
+        Topic_B["Topic: machineB/recv<br>(Function Commands)"]:::awsStyle
+        Topic_A["Topic: machineA/recv<br>(Execution Results)"]:::awsStyle
+    end
+
+    subgraph Edge_Device ["IoT Edge Device (Subscriber Node)"]
+        Sub_Daemon["NHIOTSubscriber Daemon<br>(Python Core)"]:::edgeStyle
+        Artifact_Service["Artifact Service<br>(Download / Verify)"]:::edgeStyle
+        Local_Binary["Downloaded C Executable<br>(hello_arch binary)"]:::edgeStyle
+        MQTT_Handler["MQTT Message Handler<br>(Pydantic validation)"]:::edgeStyle
+        Executor["Executor Service<br>(Subprocess Runner)"]:::edgeStyle
+    end
+
+    subgraph Control_Center ["Control & Verification (Publisher)"]
+        Pub_Client["NHUnitPub Unit Tester<br>(Admin/Testing Suite)"]:::pubStyle
+    end
+
+    %% CI/CD Flow
+    Developer -->|1. Git Push Code| GH_Actions
+    GH_Actions -->|2. Multi-Arch Compile| GH_Artifacts
+    
+    %% OTA Update Flow
+    Sub_Daemon -->|3. Polls Workflow Status| GH_Actions
+    GH_Artifacts -->|4. Downloads Target Binary| Artifact_Service
+    Artifact_Service -->|5. Installs Binary| Local_Binary
+
+    %% Message Flow - Execution Request
+    Pub_Client -->|6. Publishes Execution Request| Topic_B
+    Topic_B -->|7. Delivers Payload| MQTT_Handler
+    
+    %% Execution Flow on Edge
+    MQTT_Handler -->|8. Parses JSON & Invokes| Executor
+    Executor -->|9. Executes subprocess| Local_Binary
+    Local_Binary -->|10. Outputs stdout/stderr| Executor
+    Executor -->|11. Standardizes Output| MQTT_Handler
+    
+    %% Message Flow - Execution Response
+    MQTT_Handler -->|12. Publishes CommandResponse| Topic_A
+    Topic_A -->|13. Delivers Result| Pub_Client
+    
+    %% Association connections
+    AWS_IoT -.-> Topic_B
+    AWS_IoT -.-> Topic_A
+```
+
+### Component Details
+
+1. **CI/CD Pipeline (GitHub Actions)**:
+   - Compiles C executable code targeting multiple architectures (`x86_64` and `aarch64`) dynamically on commit to the `main` branch.
+   - Uploads compiled platform-specific executables as workflow build artifacts.
+2. **OTA Update Subscriber (Edge Daemon)**:
+   - Polling daemon running locally on the edge device that tracks GitHub workflow statuses.
+   - Automatically downloads, verifies, and launches newly compiled binaries dynamically upon successful completion of a remote build.
+3. **AWS IoT Core Message Broker**:
+   - Manages secure, bidirectional communication between the central controller and the edge devices using MQTT over mutual TLS (mTLS) authentication.
+4. **Edge Execution Subprocess**:
+   - Spawns the native C binary securely, executing request-driven business logic (`add`, `minus`, `multiply`) and formatting results (`stdout` and `stderr`) into a unified JSON format validated by **Pydantic**.
+5. **Publisher Controller**:
+   - Remote client triggering test execution, injecting payloads containing targeting functions and variables, and asserting the output from the edge device.
+
 
 # TODO 
 1. Determine testing metrics like *Mean Time To Repair (MTTR)* and Mean Time Between Failures (MTBF).
