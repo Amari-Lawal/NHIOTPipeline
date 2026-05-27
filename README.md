@@ -53,7 +53,9 @@ flowchart TD
     classDef devStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,stroke-dasharray: 5 5;
     classDef gitStyle fill:#F3F4F6,stroke:#4B5563,stroke-width:2px;
     classDef awsStyle fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px;
-    classDef edgeStyle fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
+    classDef edge1 fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
+    classDef edge2 fill:#F0FDFA,stroke:#0D9488,stroke-width:2px;
+    classDef edge3 fill:#F0FDF4,stroke:#16A34A,stroke-width:2px;
     classDef pubStyle fill:#FDF2F8,stroke:#EC4899,stroke-width:2px;
 
     %% Subgraphs
@@ -69,16 +71,35 @@ flowchart TD
         Topic_A["Topic: machineA/recv<br>(Execution Results)"]:::awsStyle
     end
 
-    subgraph Edge_Device ["IoT Edge Device (Subscriber Node)"]
-        Sub_Daemon["NHIOTSubscriber Daemon<br>(Python Core)"]:::edgeStyle
-        Artifact_Service["Artifact Service<br>(Download / Verify)"]:::edgeStyle
-        Local_Binary["Downloaded C Executable<br>(hello_arch binary)"]:::edgeStyle
-        MQTT_Handler["MQTT Message Handler<br>(Pydantic validation)"]:::edgeStyle
-        Executor["Executor Service<br>(Subprocess Runner)"]:::edgeStyle
-    end
-
     subgraph Control_Center ["Control & Verification (Publisher)"]
         Pub_Client["NHUnitPub Unit Tester<br>(Admin/Testing Suite)"]:::pubStyle
+    end
+
+    %% Device 1 Subgraph
+    subgraph Edge_Device_1 ["IoT Edge Device 1 (Raspberry Pi - aarch64)"]
+        Sub_Daemon_1["NHIOTSubscriber Daemon 1"]:::edge1
+        Artifact_Service_1["Artifact Service 1"]:::edge1
+        Local_Binary_1["Local C Binary<br>(hello_aarch64)"]:::edge1
+        MQTT_Handler_1["MQTT Message Handler 1"]:::edge1
+        Executor_1["Executor Service 1"]:::edge1
+    end
+
+    %% Device 2 Subgraph
+    subgraph Edge_Device_2 ["IoT Edge Device 2 (Smart Gateway - x86_64)"]
+        Sub_Daemon_2["NHIOTSubscriber Daemon 2"]:::edge2
+        Artifact_Service_2["Artifact Service 2"]:::edge2
+        Local_Binary_2["Local C Binary<br>(hello_x86_64)"]:::edge2
+        MQTT_Handler_2["MQTT Message Handler 2"]:::edge2
+        Executor_2["Executor Service 2"]:::edge2
+    end
+
+    %% Device 3 Subgraph
+    subgraph Edge_Device_3 ["IoT Edge Device 3 (Industrial PC - aarch64)"]
+        Sub_Daemon_3["NHIOTSubscriber Daemon 3"]:::edge3
+        Artifact_Service_3["Artifact Service 3"]:::edge3
+        Local_Binary_3["Local C Binary<br>(hello_aarch64)"]:::edge3
+        MQTT_Handler_3["MQTT Message Handler 3"]:::edge3
+        Executor_3["Executor Service 3"]:::edge3
     end
 
     %% CI/CD Flow
@@ -86,22 +107,48 @@ flowchart TD
     GH_Actions -->|2. Multi-Arch Compile| GH_Artifacts
     
     %% OTA Update Flow
-    Sub_Daemon -->|3. Polls Workflow Status| GH_Actions
-    GH_Artifacts -->|4. Downloads Target Binary| Artifact_Service
-    Artifact_Service -->|5. Installs Binary| Local_Binary
+    Sub_Daemon_1 -->|3a. Polls Workflow| GH_Actions
+    Sub_Daemon_2 -->|3b. Polls Workflow| GH_Actions
+    Sub_Daemon_3 -->|3c. Polls Workflow| GH_Actions
+
+    GH_Artifacts -->|4a. Downloads aarch64| Artifact_Service_1
+    GH_Artifacts -->|4b. Downloads x86_64| Artifact_Service_2
+    GH_Artifacts -->|4c. Downloads aarch64| Artifact_Service_3
+
+    Artifact_Service_1 -->|5a. Installs| Local_Binary_1
+    Artifact_Service_2 -->|5b. Installs| Local_Binary_2
+    Artifact_Service_3 -->|5c. Installs| Local_Binary_3
 
     %% Message Flow - Execution Request
-    Pub_Client -->|6. Publishes Execution Request| Topic_B
-    Topic_B -->|7. Delivers Payload| MQTT_Handler
+    Pub_Client -->|6. Publishes Request| Topic_B
     
-    %% Execution Flow on Edge
-    MQTT_Handler -->|8. Parses JSON & Invokes| Executor
-    Executor -->|9. Executes subprocess| Local_Binary
-    Local_Binary -->|10. Outputs stdout/stderr| Executor
-    Executor -->|11. Standardizes Output| MQTT_Handler
+    Topic_B -->|7a. Delivers Command| MQTT_Handler_1
+    Topic_B -->|7b. Delivers Command| MQTT_Handler_2
+    Topic_B -->|7c. Delivers Command| MQTT_Handler_3
+    
+    %% Execution Flow on Edge 1
+    MQTT_Handler_1 -->|8a. Invokes| Executor_1
+    Executor_1 -->|9a. Runs| Local_Binary_1
+    Local_Binary_1 -->|10a. Returns| Executor_1
+    Executor_1 -->|11a. Parses| MQTT_Handler_1
+
+    %% Execution Flow on Edge 2
+    MQTT_Handler_2 -->|8b. Invokes| Executor_2
+    Executor_2 -->|9b. Runs| Local_Binary_2
+    Local_Binary_2 -->|10b. Returns| Executor_2
+    Executor_2 -->|11b. Parses| MQTT_Handler_2
+
+    %% Execution Flow on Edge 3
+    MQTT_Handler_3 -->|8c. Invokes| Executor_3
+    Executor_3 -->|9c. Runs| Local_Binary_3
+    Local_Binary_3 -->|10c. Returns| Executor_3
+    Executor_3 -->|11c. Parses| MQTT_Handler_3
     
     %% Message Flow - Execution Response
-    MQTT_Handler -->|12. Publishes CommandResponse| Topic_A
+    MQTT_Handler_1 -->|12a. Publishes Response| Topic_A
+    MQTT_Handler_2 -->|12b. Publishes Response| Topic_A
+    MQTT_Handler_3 -->|12c. Publishes Response| Topic_A
+
     Topic_A -->|13. Delivers Result| Pub_Client
     
     %% Association connections
