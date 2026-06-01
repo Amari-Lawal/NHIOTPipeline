@@ -2259,9 +2259,26 @@
         }
 
         function showOtaModal(otaDuration, cutoverDowntime, netSavings) {
-            document.getElementById("modal-ota-duration").innerText = parseFloat(otaDuration).toFixed(1) + "s";
+            const standardPhysicalDowntimeSeconds = 45 * 60; // 2700s
+            const downtimeSavedSeconds = standardPhysicalDowntimeSeconds - parseFloat(cutoverDowntime);
+            
+            // Rate based on 45 minutes baseline = £4,750 -> £105.555 per unit
+            const ratePerUnit = 105.55555555555556;
+            
+            const otaDurationVal = parseFloat(otaDuration);
+            const appOverhead = otaDurationVal * ratePerUnit;
+            const netOtaSavings = 4750.00 - appOverhead;
+            
+            document.getElementById("modal-ota-duration").innerText = otaDurationVal.toFixed(1) + "s";
+            document.getElementById("modal-ota-duration-label").innerText = otaDurationVal.toFixed(1);
             document.getElementById("modal-ota-cutover").innerText = parseFloat(cutoverDowntime).toFixed(2) + "s";
-            document.getElementById("modal-ota-savings").innerText = "£" + netSavings.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById("modal-ota-savings").innerText = "£" + netOtaSavings.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById("modal-ota-sec-rate").innerText = "£" + (4750.00 / downtimeSavedSeconds).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / sec";
+            document.getElementById("modal-ota-min-rate").innerText = "£" + ratePerUnit.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / min";
+            
+            document.getElementById("modal-ota-overhead").innerText = "-£" + appOverhead.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
             const modal = document.getElementById("ota-modal");
             modal.style.display = "flex";
@@ -2336,20 +2353,30 @@
                     <div id="modal-ota-cutover" style="color: #ffffff; font-size: 18px; font-weight: 700; margin-top: 4px;">0.16s</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 4px; border: 1px solid var(--border);">
-                    <div style="color: #888888; font-size: 11px; text-transform: uppercase; font-weight: 600;">Avoided Labor Dispatch</div>
-                    <div style="color: var(--success); font-size: 18px; font-weight: 700; margin-top: 4px;">£4,750.00</div>
+                    <div style="color: #888888; font-size: 11px; text-transform: uppercase; font-weight: 600;">Savings Rate (Per Sec)</div>
+                    <div id="modal-ota-sec-rate" style="color: var(--success); font-size: 18px; font-weight: 700; margin-top: 4px;">£1.76 / sec</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 4px; border: 1px solid var(--border);">
-                    <div style="color: #888888; font-size: 11px; text-transform: uppercase; font-weight: 600;">Avoided Lane Block</div>
-                    <div style="color: #ffffff; font-size: 18px; font-weight: 700; margin-top: 4px;">45.00 min</div>
+                    <div style="color: #888888; font-size: 11px; text-transform: uppercase; font-weight: 600;">Savings Rate (Per Min)</div>
+                    <div id="modal-ota-min-rate" style="color: #ffffff; font-size: 18px; font-weight: 700; margin-top: 4px;">£105.56 / min</div>
                 </div>
             </div>
             
             <div style="background: rgba(16,185,129,0.05); border: 1px solid #10b981; padding: 15px; border-radius: 4px; margin-bottom: 25px; text-align: left;">
                 <div style="color: var(--success); font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Estimated Net Operational Savings</div>
-                <div id="modal-ota-savings" style="color: white; font-size: 26px; font-weight: 800; margin-top: 5px;">£4,750.00</div>
-                <div style="color: #888888; font-size: 11.5px; margin-top: 8px; line-height: 1.5;">
-                    <strong>System-Wide Scale Projection:</strong> Compiling and hot-swapping target binaries inside isolated subprocess wrappers reduces node downtime from <strong>45.00 min</strong> (physical lane-maintenance closures) to just <strong>0.16s</strong>—saving £4,750.00 in labor, road closure permits, and safety resource dispatch costs per node update.
+                <div id="modal-ota-savings" style="color: white; font-size: 26px; font-weight: 800; margin-top: 5px;">£4,380.54</div>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888888; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                    <span>Gross Dispatch Baseline (45 min):</span>
+                    <span style="color: white; font-weight: 600;">£4,750.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888888; margin-top: 5px;">
+                    <span>App Update Overhead (<span id="modal-ota-duration-label">3.5</span>s × £105.56):</span>
+                    <span id="modal-ota-overhead" style="color: #ef4444; font-weight: 600;">-£369.46</span>
+                </div>
+                
+                <div style="color: #888888; font-size: 11.5px; margin-top: 12px; line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                    <strong>System-Wide Scale Projection:</strong> Compiling and hot-swapping target binaries inside isolated subprocess wrappers reduces node downtime from <strong>45.00 min</strong> (physical lane-maintenance closures) to just <strong>0.16s</strong>—saving £4,380.54 in net labor, road closure permits, and safety resource dispatch costs per node update.
                 </div>
             </div>
             
