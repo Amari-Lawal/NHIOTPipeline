@@ -16,6 +16,16 @@ PROJECT_ROOT = os.path.dirname(current_dir)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+def get_python_executable() -> str:
+    """Resolve correct Python executable for subprocesses, decoupling host and container environments."""
+    if os.getenv("RUNNING_IN_DOCKER") == "true":
+        return sys.executable
+    venv_python = os.path.join(PROJECT_ROOT, "venv/bin/python")
+    if os.path.exists(venv_python):
+        return venv_python
+    return sys.executable
+
+
 # Setup basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("NHIOTFastAPI")
@@ -76,10 +86,7 @@ async def start_subscriber():
         sub_stdout_queue.get_nowait()
         
     try:
-        # Launch subscriber daemon in unbuffered mode (-u) to guarantee real-time line streams
-        python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
-        if not os.path.exists(python_executable):
-            python_executable = sys.executable
+        python_executable = get_python_executable()
         active_sub_process = await asyncio.create_subprocess_exec(
             python_executable, "-u", "-m", "NHIOTSub.main",
             stdout=asyncio.subprocess.PIPE,
@@ -157,10 +164,7 @@ async def simulate_outage_dropout():
         while not sub_stdout_queue.empty():
             sub_stdout_queue.get_nowait()
             
-        # 4. Restart the subscriber daemon (starts mTLS connection handshake with AWS!)
-        python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
-        if not os.path.exists(python_executable):
-            python_executable = sys.executable
+        python_executable = get_python_executable()
         active_sub_process = await asyncio.create_subprocess_exec(
             python_executable, "-u", "-m", "NHIOTSub.main",
             stdout=asyncio.subprocess.PIPE,
@@ -200,10 +204,7 @@ async def run_unit_tests():
         yield "data: [INFO] Command: python -m unittest discover -s NHIOTPub/tests -t .\n\n"
         
         try:
-            # Run the unbuffered unittest discover
-            python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
-            if not os.path.exists(python_executable):
-                python_executable = sys.executable
+            python_executable = get_python_executable()
             process = await asyncio.create_subprocess_exec(
                 python_executable, "-u", "-m", "unittest", "discover", "-s", "NHIOTPub/tests", "-t", ".",
                 stdout=asyncio.subprocess.PIPE,

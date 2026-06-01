@@ -22,6 +22,7 @@ EXPOSE 8080
 
 # Set environment variable to run python unbuffered (for real-time logging)
 ENV PYTHONUNBUFFERED=1
+ENV RUNNING_IN_DOCKER=true
 
 # Command to run the dashboard FastAPI application
 CMD ["python", "Dashboard/app.py"]
