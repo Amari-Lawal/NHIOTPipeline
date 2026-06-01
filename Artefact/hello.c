@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+// Trigger update check
 void add(int argc, char *argv[]) {
     
     int count = 0;

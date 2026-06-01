@@ -1534,7 +1534,7 @@
                 
                 pollInterval = setInterval(async () => {
                     try {
-                        const statusRes = await fetch("/api/ota/status");
+                        const statusRes = await fetch("/api/ota/status?sha=" + data.commit_hash);
                         if (!statusRes.ok) return;
                         const statusData = await statusRes.json();
                         

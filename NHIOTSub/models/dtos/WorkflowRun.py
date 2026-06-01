@@ -7,3 +7,4 @@ class WorkflowRun(BaseModel):
     head_branch: str
     status: str
     conclusion: Optional[str] = None
+    head_sha: str

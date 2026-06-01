@@ -274,7 +274,13 @@ async def trigger_ota_git_push():
         # 2. Add and commit changes or allow-empty
         if has_changes:
             # Commit local changes
-            await asyncio.create_subprocess_exec("git", "add", ".", stdout=asyncio.subprocess.DEVNULL)
+            add_proc = await asyncio.create_subprocess_exec(
+                "git", "add", ".",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await add_proc.communicate()
+            
             commit_proc = await asyncio.create_subprocess_exec(
                 "git", "commit", "-m", "Auto-trigger OTA: live deployment update",
                 stdout=asyncio.subprocess.PIPE,
@@ -289,6 +295,10 @@ async def trigger_ota_git_push():
             )
         
         c_stdout, c_stderr = await commit_proc.communicate()
+        c_rc = await commit_proc.wait()
+        if c_rc != 0:
+            c_err = c_stderr.decode("utf-8").strip()
+            logger.warning(f"Git commit process returned code {c_rc}: {c_err}")
         
         # 3. Push commit to remote branch
         branch = Envs.BRANCH or "main"
@@ -322,7 +332,7 @@ async def trigger_ota_git_push():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/ota/status")
-async def get_ota_workflow_status():
+async def get_ota_workflow_status(sha: str = None):
     try:
         from NHIOTSub.config import Envs
         from NHIOTSub.config import Config
@@ -337,7 +347,7 @@ async def get_ota_workflow_status():
         response = requests.get(
             workflow_url,
             headers=Config.GITHUB_HEADERS,
-            params={"per_page": 1}
+            params={"per_page": 10}
         )
         response.raise_for_status()
         data = response.json()
@@ -345,12 +355,32 @@ async def get_ota_workflow_status():
         if not data.get("workflow_runs"):
             return {"status": "unknown", "message": "No workflow runs found"}
             
-        latest_run = data["workflow_runs"][0]
+        target_run = None
+        if sha:
+            # Look for the run matching the pushed commit SHA
+            for run in data["workflow_runs"]:
+                run_sha = run.get("head_sha", "")
+                if run_sha == sha or run_sha.startswith(sha) or sha.startswith(run_sha):
+                    target_run = run
+                    break
+            
+            # If no run has registered for this SHA yet, it is still queued/registering
+            if not target_run:
+                return {
+                    "status": "queued",
+                    "conclusion": None,
+                    "run_number": None,
+                    "html_url": None,
+                    "message": "Commit registered, waiting for GitHub runner allocation..."
+                }
+        else:
+            target_run = data["workflow_runs"][0]
+            
         return {
-            "status": latest_run.get("status"),
-            "conclusion": latest_run.get("conclusion"),
-            "run_number": latest_run.get("run_number"),
-            "html_url": latest_run.get("html_url")
+            "status": target_run.get("status"),
+            "conclusion": target_run.get("conclusion"),
+            "run_number": target_run.get("run_number"),
+            "html_url": target_run.get("html_url")
         }
     except Exception as e:
         logger.error(f"Error checking workflow status: {e}")
