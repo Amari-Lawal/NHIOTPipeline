@@ -29,6 +29,11 @@ class DistributedEdgeOrchestrator:
         self.repo = os.getenv("REPO")
         self.workflow_id = os.getenv("WORKFLOW_ID")
         
+        # Load secure Raspberry Pi credentials
+        self.rpi_ip = os.getenv("RPI_IP")
+        self.rpi_username = os.getenv("RPI_USERNAME")
+        self.rpi_password = os.getenv("RPI_PASSWORD")
+        
         self._validate_config()
 
     def _validate_config(self):
@@ -223,8 +228,9 @@ except Exception as e:
         print("Telemetry merge complete! System metrics populated successfully.")
 
 if __name__ == "__main__":
-    # Demonstration of programmatic API usage
+    # Demonstration of programmatic API usage loading securely from .env
     orchestrator = DistributedEdgeOrchestrator()
     # To run:
-    # orchestrator.execute_remote_eval("192.168.1.11", "amari", "kya63amari")
-    # orchestrator.merge_telemetry_metrics()
+    # if orchestrator.rpi_ip and orchestrator.rpi_username and orchestrator.rpi_password:
+    #     orchestrator.execute_remote_eval(orchestrator.rpi_ip, orchestrator.rpi_username, orchestrator.rpi_password)
+    #     orchestrator.merge_telemetry_metrics()

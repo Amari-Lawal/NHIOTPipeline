@@ -1,351 +1,351 @@
 Execution ID,Attack Type,Trigger Payload,Secure Pipeline Action,Secure Pipeline Status,Secure Success Rate (%),Secure System Crash Count,Legacy Pipeline Action,Legacy Pipeline Status,Legacy Success Rate (%),Legacy System Crash Count
 SEC-350-001,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-002,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-002,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-003,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-004,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-005,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-006,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-006,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-007,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-008,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-009,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-010,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-010,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-011,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-012,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-013,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-014,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-014,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-015,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-016,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-017,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-018,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-018,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-019,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-020,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-021,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-022,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-022,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-023,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-024,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-025,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-026,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-026,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-027,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-028,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-029,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-030,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-030,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-031,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-032,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-033,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-034,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-034,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-035,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-036,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-037,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-038,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-038,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-039,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-040,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-041,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-042,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-042,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-043,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-044,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-045,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-046,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-046,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-047,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-048,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-049,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-050,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-050,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-051,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-052,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-053,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-054,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-054,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-055,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-056,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-057,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-058,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-058,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-059,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-060,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-061,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-062,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-062,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-063,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-064,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-065,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-066,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-066,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-067,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-068,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-069,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-070,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-070,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-071,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-072,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-073,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-074,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-074,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-075,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-076,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-077,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-078,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-078,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-079,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-080,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-081,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-082,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-082,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-083,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-084,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-085,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-086,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-086,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-087,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-088,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-089,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-090,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-090,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-091,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-092,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-093,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-094,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-094,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-095,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-096,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-097,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-098,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-098,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-099,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-100,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-101,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-102,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-102,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-103,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-104,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-105,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-106,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-106,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-107,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-108,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-109,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-110,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-110,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-111,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-112,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-113,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-114,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-114,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-115,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-116,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-117,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-118,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-118,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-119,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-120,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-121,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-122,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-122,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-123,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-124,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-125,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-126,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-126,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-127,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-128,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-129,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-130,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-130,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-131,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-132,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-133,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-134,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-134,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-135,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-136,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-137,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-138,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-138,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-139,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-140,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-141,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-142,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-142,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-143,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-144,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-145,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-146,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-146,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-147,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-148,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-149,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-150,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-150,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-151,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-152,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-153,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-154,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-154,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-155,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-156,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-157,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-158,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-158,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-159,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-160,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-161,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-162,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-162,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-163,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-164,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-165,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-166,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-166,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-167,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-168,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-169,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-170,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-170,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-171,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-172,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-173,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-174,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-174,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-175,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-176,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-177,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-178,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-178,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-179,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-180,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-181,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-182,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-182,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-183,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-184,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-185,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-186,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-186,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-187,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-188,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-189,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-190,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-190,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-191,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-192,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-193,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-194,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-194,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-195,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-196,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-197,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-198,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-198,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-199,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-200,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-201,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-202,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-202,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-203,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-204,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-205,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-206,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-206,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-207,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-208,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-209,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-210,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-210,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-211,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-212,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-213,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-214,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-214,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-215,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-216,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-217,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-218,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-218,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-219,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-220,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-221,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-222,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-222,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-223,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-224,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-225,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-226,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-226,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-227,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-228,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-229,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-230,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-230,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-231,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-232,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-233,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-234,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-234,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-235,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-236,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-237,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-238,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-238,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-239,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-240,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-241,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-242,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-242,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-243,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-244,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-245,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-246,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-246,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-247,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-248,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-249,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-250,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-250,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-251,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-252,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-253,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-254,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-254,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-255,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-256,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-257,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-258,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-258,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-259,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-260,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-261,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-262,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-262,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-263,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-264,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-265,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-266,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-266,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-267,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-268,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-269,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-270,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-270,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-271,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-272,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-273,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-274,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-274,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-275,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-276,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-277,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-278,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-278,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-279,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-280,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-281,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-282,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-282,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-283,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-284,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-285,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-286,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-286,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-287,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-288,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-289,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-290,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-290,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-291,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-292,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-293,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-294,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-294,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-295,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-296,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-297,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-298,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-298,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-299,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-300,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-301,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-302,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-302,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-303,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-304,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-305,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-306,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-306,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-307,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-308,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-309,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-310,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-310,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-311,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-312,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-313,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-314,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-314,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-315,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-316,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-317,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-318,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-318,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-319,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-320,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-321,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-322,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-322,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-323,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-324,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-325,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-326,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-326,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-327,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-328,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-329,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-330,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-330,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-331,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-332,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-333,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-334,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-334,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-335,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-336,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-337,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-338,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-338,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-339,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-340,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-341,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-342,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-342,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-343,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-344,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-345,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-346,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-346,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-347,Command Injection Attack,add; rm -rf / injection,C Contract Unknown Function Block,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
 SEC-350-348,Native Application Crash,Division by zero / bad arguments,Isolated Subprocess Exception Trapped,Survived,100.0,0,Spawns Command / Crashes Daemon,System Crashed (Bricked),0.0,1
 SEC-350-349,mTLS Handshake Attack,Client connects with invalid cert,TCP/TLS Connection Abort,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
-SEC-350-350,Pydantic Validation Fail,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
+SEC-350-350,Pydantic Schema Sanitization,Payload missing 'function' key,JSON Validation Rejection,Rejected,100.0,0,Spawns Command / Crashes Daemon,Accepted / Compromised,0.0,1
