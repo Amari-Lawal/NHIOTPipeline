@@ -18,11 +18,18 @@ class MQTTHandler:
                 self.logger.error(f"Invalid payload: {e}")
                 return
 
+            self.logger.info(f"Executing dynamic target binary: {cmd.function}({cmd.parameters})")
+
             stdout, stderr = self.executor.run(
                 file_path,
                 cmd.function,
                 cmd.parameters
             )
+
+            if stderr:
+                self.logger.error(f"Isolated process exited with crash standard error:\n{stderr.strip()}")
+            else:
+                self.logger.info(f"Isolated process execution completed successfully. stdout: {stdout.strip()}")
 
             response = CommandResponse.from_stdout(stdout=stdout, stderr=stderr)
 

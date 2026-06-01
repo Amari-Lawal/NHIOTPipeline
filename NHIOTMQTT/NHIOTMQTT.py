@@ -57,7 +57,17 @@ class NHIOTMQTT:
             self.logger.info(f"Subscribed to topic '{topic}'")
         return subscribe_result
  
-        
+    def unsubscribe(self,topic="test/topic",verbose=True) -> Any:
+        """Unsubscribe from a topic"""
+        if self.mqtt_connection is None:
+            raise RuntimeError("MQTT client not connected")
+        if verbose and self.logger:
+            self.logger.info(f"Unsubscribing from topic '{topic}'...")
+        unsubscribe_future, _ = self.mqtt_connection.unsubscribe(topic=topic)
+        unsubscribe_result = unsubscribe_future.result()
+        if verbose and self.logger:
+            self.logger.info(f"Unsubscribed from topic '{topic}'")
+        return unsubscribe_result
 
     def publish(self, message,topic="test/topic",verbose=True):
         """Publish a message to the topic"""

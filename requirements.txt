@@ -1,2 +1,5 @@
 awsiotsdk
 pydantic
+fastapi
+uvicorn
+pandas

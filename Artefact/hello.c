@@ -32,6 +32,14 @@ void multiply(int argc, char *argv[]) {
     printf("multiply:%d", count);
 }
 
+void crash(int argc, char *argv[]) {
+    // Real CPU floating point exception
+    volatile int a = 1;
+    volatile int b = 0;
+    volatile int c = a / b;
+    (void)c;
+}
+
 struct entry {
     const char *name;
     void (*fn)(int argc, char *argv[]);
@@ -41,6 +49,7 @@ struct entry table[] = {
     {"add", add},
     {"minus", minus},
     {"multiply",multiply},
+    {"crash", crash},
 };
 
 int main(int argc, char *argv[]) {

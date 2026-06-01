@@ -51,7 +51,11 @@ class NHIOTSubscriber:
                 artifact = self.artifacts.choose(artifacts, target)
 
                 if artifact:
-                    file_path = self.artifacts.download(artifact)
+                    try:
+                        file_path = self.artifacts.download(artifact)
+                    except Exception as download_error:
+                        self.logger.warning(f"Could not overwrite remote artifact: {download_error}. Falling back to existing executable cache.")
+                        file_path = f"./Executables/{target}/{target}"
 
                     self.client.subscribe(
                         self.mqtt.handle(file_path),

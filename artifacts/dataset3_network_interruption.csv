@@ -1,0 +1,351 @@
+Trial ID,Dropout Stage,Interruption Duration (sec),Reconnection Time (sec),Post-recovery Action,Update Success
+Trial 001,Mid-Download,42,0.105,Resume Cache Hash Sync,Yes
+Trial 002,During Polling,91,0.138,Resume GitHub API Poll,Yes
+Trial 003,Mid-Download,795,0.143,Resume Cache Hash Sync,Yes
+Trial 004,During Polling,32,0.127,Resume GitHub API Poll,Yes
+Trial 005,Mid-Download,79,0.126,Resume Cache Hash Sync,Yes
+Trial 006,During Polling,248,0.141,Resume GitHub API Poll,Yes
+Trial 007,Mid-Download,1113,0.107,Resume Cache Hash Sync,Yes
+Trial 008,During Polling,1189,0.122,Resume GitHub API Poll,Yes
+Trial 009,Mid-Download,66,0.105,Resume Cache Hash Sync,Yes
+Trial 010,During Polling,34,0.105,Resume GitHub API Poll,Yes
+Trial 011,Mid-Download,452,0.123,Resume Cache Hash Sync,Yes
+Trial 012,During Polling,417,0.105,Resume GitHub API Poll,Yes
+Trial 013,Mid-Download,49,0.105,Resume Cache Hash Sync,Yes
+Trial 014,During Polling,23,0.117,Resume GitHub API Poll,Yes
+Trial 015,Mid-Download,94,0.106,Resume Cache Hash Sync,Yes
+Trial 016,During Polling,13,0.105,Resume GitHub API Poll,Yes
+Trial 017,Mid-Download,91,0.135,Resume Cache Hash Sync,Yes
+Trial 018,During Polling,12,0.672,Resume GitHub API Poll,Yes
+Trial 019,Mid-Download,120,0.562,Resume Cache Hash Sync,Yes
+Trial 020,During Polling,381,0.122,Resume GitHub API Poll,Yes
+Trial 021,Mid-Download,56,0.134,Resume Cache Hash Sync,Yes
+Trial 022,During Polling,18,0.115,Resume GitHub API Poll,Yes
+Trial 023,Mid-Download,737,0.137,Resume Cache Hash Sync,Yes
+Trial 024,During Polling,1108,0.116,Resume GitHub API Poll,Yes
+Trial 025,Mid-Download,110,0.436,Resume Cache Hash Sync,Yes
+Trial 026,During Polling,336,0.122,Resume GitHub API Poll,Yes
+Trial 027,Mid-Download,184,0.112,Resume Cache Hash Sync,Yes
+Trial 028,During Polling,14,0.121,Resume GitHub API Poll,Yes
+Trial 029,Mid-Download,44,0.105,Resume Cache Hash Sync,Yes
+Trial 030,During Polling,54,0.135,Resume GitHub API Poll,Yes
+Trial 031,Mid-Download,671,0.137,Resume Cache Hash Sync,Yes
+Trial 032,During Polling,1143,0.649,Resume GitHub API Poll,Yes
+Trial 033,Mid-Download,14,0.107,Resume Cache Hash Sync,Yes
+Trial 034,During Polling,267,0.813,Resume GitHub API Poll,Yes
+Trial 035,Mid-Download,19,0.126,Resume Cache Hash Sync,Yes
+Trial 036,During Polling,13,0.121,Resume GitHub API Poll,Yes
+Trial 037,Mid-Download,58,0.106,Resume Cache Hash Sync,Yes
+Trial 038,During Polling,266,0.583,Resume GitHub API Poll,Yes
+Trial 039,Mid-Download,60,0.109,Resume Cache Hash Sync,Yes
+Trial 040,During Polling,68,0.117,Resume GitHub API Poll,Yes
+Trial 041,Mid-Download,33,0.123,Resume Cache Hash Sync,Yes
+Trial 042,During Polling,64,0.107,Resume GitHub API Poll,Yes
+Trial 043,Mid-Download,35,0.105,Resume Cache Hash Sync,Yes
+Trial 044,During Polling,39,0.783,Resume GitHub API Poll,Yes
+Trial 045,Mid-Download,107,0.135,Resume Cache Hash Sync,Yes
+Trial 046,During Polling,771,0.112,Resume GitHub API Poll,Yes
+Trial 047,Mid-Download,15,0.132,Resume Cache Hash Sync,Yes
+Trial 048,During Polling,53,0.114,Resume GitHub API Poll,Yes
+Trial 049,Mid-Download,137,0.139,Resume Cache Hash Sync,Yes
+Trial 050,During Polling,885,0.106,Resume GitHub API Poll,Yes
+Trial 051,Mid-Download,464,0.132,Resume Cache Hash Sync,Yes
+Trial 052,During Polling,19,0.132,Resume GitHub API Poll,Yes
+Trial 053,Mid-Download,11,0.107,Resume Cache Hash Sync,Yes
+Trial 054,During Polling,144,0.145,Resume GitHub API Poll,Yes
+Trial 055,Mid-Download,15,0.149,Resume Cache Hash Sync,Yes
+Trial 056,During Polling,127,0.125,Resume GitHub API Poll,Yes
+Trial 057,Mid-Download,535,0.146,Resume Cache Hash Sync,Yes
+Trial 058,During Polling,88,0.121,Resume GitHub API Poll,Yes
+Trial 059,Mid-Download,52,0.129,Resume Cache Hash Sync,Yes
+Trial 060,During Polling,24,0.482,Resume GitHub API Poll,Yes
+Trial 061,Mid-Download,81,0.708,Resume Cache Hash Sync,Yes
+Trial 062,During Polling,20,0.128,Resume GitHub API Poll,Yes
+Trial 063,Mid-Download,47,0.105,Resume Cache Hash Sync,Yes
+Trial 064,During Polling,757,0.154,Resume GitHub API Poll,Yes
+Trial 065,Mid-Download,33,0.118,Resume Cache Hash Sync,Yes
+Trial 066,During Polling,43,0.123,Resume GitHub API Poll,Yes
+Trial 067,Mid-Download,113,0.133,Resume Cache Hash Sync,Yes
+Trial 068,During Polling,241,0.122,Resume GitHub API Poll,Yes
+Trial 069,Mid-Download,186,0.105,Resume Cache Hash Sync,Yes
+Trial 070,During Polling,11,0.114,Resume GitHub API Poll,Yes
+Trial 071,Mid-Download,222,0.11,Resume Cache Hash Sync,Yes
+Trial 072,During Polling,74,0.105,Resume GitHub API Poll,Yes
+Trial 073,Mid-Download,111,0.116,Resume Cache Hash Sync,Yes
+Trial 074,During Polling,103,0.161,Resume GitHub API Poll,Yes
+Trial 075,Mid-Download,274,0.13,Resume Cache Hash Sync,Yes
+Trial 076,During Polling,83,0.127,Resume GitHub API Poll,Yes
+Trial 077,Mid-Download,26,0.116,Resume Cache Hash Sync,Yes
+Trial 078,During Polling,348,0.147,Resume GitHub API Poll,Yes
+Trial 079,Mid-Download,1117,0.112,Resume Cache Hash Sync,Yes
+Trial 080,During Polling,46,0.139,Resume GitHub API Poll,Yes
+Trial 081,Mid-Download,36,0.135,Resume Cache Hash Sync,Yes
+Trial 082,During Polling,64,0.132,Resume GitHub API Poll,Yes
+Trial 083,Mid-Download,33,0.132,Resume Cache Hash Sync,Yes
+Trial 084,During Polling,163,0.136,Resume GitHub API Poll,Yes
+Trial 085,Mid-Download,400,0.107,Resume Cache Hash Sync,Yes
+Trial 086,During Polling,44,0.123,Resume GitHub API Poll,Yes
+Trial 087,Mid-Download,966,0.135,Resume Cache Hash Sync,Yes
+Trial 088,During Polling,55,0.123,Resume GitHub API Poll,Yes
+Trial 089,Mid-Download,109,0.115,Resume Cache Hash Sync,Yes
+Trial 090,During Polling,133,0.111,Resume GitHub API Poll,Yes
+Trial 091,Mid-Download,80,0.121,Resume Cache Hash Sync,Yes
+Trial 092,During Polling,58,0.105,Resume GitHub API Poll,Yes
+Trial 093,Mid-Download,157,0.119,Resume Cache Hash Sync,Yes
+Trial 094,During Polling,114,0.123,Resume GitHub API Poll,Yes
+Trial 095,Mid-Download,38,0.624,Resume Cache Hash Sync,Yes
+Trial 096,During Polling,1116,0.118,Resume GitHub API Poll,Yes
+Trial 097,Mid-Download,466,0.148,Resume Cache Hash Sync,Yes
+Trial 098,During Polling,26,0.116,Resume GitHub API Poll,Yes
+Trial 099,Mid-Download,112,0.134,Resume Cache Hash Sync,Yes
+Trial 100,During Polling,98,0.135,Resume GitHub API Poll,Yes
+Trial 101,Mid-Download,187,0.115,Resume Cache Hash Sync,Yes
+Trial 102,During Polling,21,0.796,Resume GitHub API Poll,Yes
+Trial 103,Mid-Download,356,0.11,Resume Cache Hash Sync,Yes
+Trial 104,During Polling,131,0.149,Resume GitHub API Poll,Yes
+Trial 105,Mid-Download,42,0.11,Resume Cache Hash Sync,Yes
+Trial 106,During Polling,1142,0.142,Resume GitHub API Poll,Yes
+Trial 107,Mid-Download,471,0.124,Resume Cache Hash Sync,Yes
+Trial 108,During Polling,99,0.624,Resume GitHub API Poll,Yes
+Trial 109,Mid-Download,440,0.105,Resume Cache Hash Sync,Yes
+Trial 110,During Polling,168,0.114,Resume GitHub API Poll,Yes
+Trial 111,Mid-Download,209,0.13,Resume Cache Hash Sync,Yes
+Trial 112,During Polling,268,0.118,Resume GitHub API Poll,Yes
+Trial 113,Mid-Download,980,0.138,Resume Cache Hash Sync,Yes
+Trial 114,During Polling,20,0.127,Resume GitHub API Poll,Yes
+Trial 115,Mid-Download,72,0.152,Resume Cache Hash Sync,Yes
+Trial 116,During Polling,350,0.11,Resume GitHub API Poll,Yes
+Trial 117,Mid-Download,19,0.115,Resume Cache Hash Sync,Yes
+Trial 118,During Polling,126,0.145,Resume GitHub API Poll,Yes
+Trial 119,Mid-Download,23,0.588,Resume Cache Hash Sync,Yes
+Trial 120,During Polling,418,0.137,Resume GitHub API Poll,Yes
+Trial 121,Mid-Download,224,0.117,Resume Cache Hash Sync,Yes
+Trial 122,During Polling,32,0.119,Resume GitHub API Poll,Yes
+Trial 123,Mid-Download,29,0.621,Resume Cache Hash Sync,Yes
+Trial 124,During Polling,27,0.137,Resume GitHub API Poll,Yes
+Trial 125,Mid-Download,46,0.149,Resume Cache Hash Sync,Yes
+Trial 126,During Polling,37,0.114,Resume GitHub API Poll,Yes
+Trial 127,Mid-Download,263,0.152,Resume Cache Hash Sync,Yes
+Trial 128,During Polling,1010,0.122,Resume GitHub API Poll,Yes
+Trial 129,Mid-Download,40,0.122,Resume Cache Hash Sync,Yes
+Trial 130,During Polling,84,0.112,Resume GitHub API Poll,Yes
+Trial 131,Mid-Download,101,0.105,Resume Cache Hash Sync,Yes
+Trial 132,During Polling,289,0.117,Resume GitHub API Poll,Yes
+Trial 133,Mid-Download,196,0.126,Resume Cache Hash Sync,Yes
+Trial 134,During Polling,130,0.147,Resume GitHub API Poll,Yes
+Trial 135,Mid-Download,12,0.124,Resume Cache Hash Sync,Yes
+Trial 136,During Polling,415,0.118,Resume GitHub API Poll,Yes
+Trial 137,Mid-Download,143,0.416,Resume Cache Hash Sync,Yes
+Trial 138,During Polling,699,0.144,Resume GitHub API Poll,Yes
+Trial 139,Mid-Download,26,0.575,Resume Cache Hash Sync,Yes
+Trial 140,During Polling,806,0.144,Resume GitHub API Poll,Yes
+Trial 141,Mid-Download,160,0.119,Resume Cache Hash Sync,Yes
+Trial 142,During Polling,827,0.105,Resume GitHub API Poll,Yes
+Trial 143,Mid-Download,712,0.17,Resume Cache Hash Sync,Yes
+Trial 144,During Polling,68,0.105,Resume GitHub API Poll,Yes
+Trial 145,Mid-Download,926,0.87,Resume Cache Hash Sync,Yes
+Trial 146,During Polling,10,0.111,Resume GitHub API Poll,Yes
+Trial 147,Mid-Download,16,0.572,Resume Cache Hash Sync,Yes
+Trial 148,During Polling,138,0.169,Resume GitHub API Poll,Yes
+Trial 149,Mid-Download,935,0.115,Resume Cache Hash Sync,Yes
+Trial 150,During Polling,17,0.127,Resume GitHub API Poll,Yes
+Trial 151,Mid-Download,91,0.135,Resume Cache Hash Sync,Yes
+Trial 152,During Polling,457,0.148,Resume GitHub API Poll,Yes
+Trial 153,Mid-Download,389,0.145,Resume Cache Hash Sync,Yes
+Trial 154,During Polling,545,0.105,Resume GitHub API Poll,Yes
+Trial 155,Mid-Download,15,0.128,Resume Cache Hash Sync,Yes
+Trial 156,During Polling,47,0.133,Resume GitHub API Poll,Yes
+Trial 157,Mid-Download,35,0.126,Resume Cache Hash Sync,Yes
+Trial 158,During Polling,43,0.105,Resume GitHub API Poll,Yes
+Trial 159,Mid-Download,10,0.123,Resume Cache Hash Sync,Yes
+Trial 160,During Polling,17,0.12,Resume GitHub API Poll,Yes
+Trial 161,Mid-Download,71,0.143,Resume Cache Hash Sync,Yes
+Trial 162,During Polling,44,0.111,Resume GitHub API Poll,Yes
+Trial 163,Mid-Download,839,0.117,Resume Cache Hash Sync,Yes
+Trial 164,During Polling,19,0.118,Resume GitHub API Poll,Yes
+Trial 165,Mid-Download,371,0.109,Resume Cache Hash Sync,Yes
+Trial 166,During Polling,97,0.135,Resume GitHub API Poll,Yes
+Trial 167,Mid-Download,248,0.125,Resume Cache Hash Sync,Yes
+Trial 168,During Polling,681,0.15,Resume GitHub API Poll,Yes
+Trial 169,Mid-Download,86,0.142,Resume Cache Hash Sync,Yes
+Trial 170,During Polling,13,0.134,Resume GitHub API Poll,Yes
+Trial 171,Mid-Download,115,0.133,Resume Cache Hash Sync,Yes
+Trial 172,During Polling,123,0.136,Resume GitHub API Poll,Yes
+Trial 173,Mid-Download,26,0.14,Resume Cache Hash Sync,Yes
+Trial 174,During Polling,499,0.135,Resume GitHub API Poll,Yes
+Trial 175,Mid-Download,119,0.141,Resume Cache Hash Sync,Yes
+Trial 176,During Polling,494,0.131,Resume GitHub API Poll,Yes
+Trial 177,Mid-Download,67,0.124,Resume Cache Hash Sync,Yes
+Trial 178,During Polling,12,0.105,Resume GitHub API Poll,Yes
+Trial 179,Mid-Download,13,0.692,Resume Cache Hash Sync,Yes
+Trial 180,During Polling,913,0.123,Resume GitHub API Poll,Yes
+Trial 181,Mid-Download,72,0.129,Resume Cache Hash Sync,Yes
+Trial 182,During Polling,227,0.105,Resume GitHub API Poll,Yes
+Trial 183,Mid-Download,1216,0.147,Resume Cache Hash Sync,Yes
+Trial 184,During Polling,61,0.105,Resume GitHub API Poll,Yes
+Trial 185,Mid-Download,245,0.117,Resume Cache Hash Sync,Yes
+Trial 186,During Polling,23,0.114,Resume GitHub API Poll,Yes
+Trial 187,Mid-Download,128,0.125,Resume Cache Hash Sync,Yes
+Trial 188,During Polling,11,0.126,Resume GitHub API Poll,Yes
+Trial 189,Mid-Download,259,0.105,Resume Cache Hash Sync,Yes
+Trial 190,During Polling,33,0.119,Resume GitHub API Poll,Yes
+Trial 191,Mid-Download,37,0.641,Resume Cache Hash Sync,Yes
+Trial 192,During Polling,501,0.118,Resume GitHub API Poll,Yes
+Trial 193,Mid-Download,406,0.135,Resume Cache Hash Sync,Yes
+Trial 194,During Polling,16,0.126,Resume GitHub API Poll,Yes
+Trial 195,Mid-Download,180,0.148,Resume Cache Hash Sync,Yes
+Trial 196,During Polling,69,0.132,Resume GitHub API Poll,Yes
+Trial 197,Mid-Download,28,0.142,Resume Cache Hash Sync,Yes
+Trial 198,During Polling,40,0.131,Resume GitHub API Poll,Yes
+Trial 199,Mid-Download,343,0.107,Resume Cache Hash Sync,Yes
+Trial 200,During Polling,47,0.112,Resume GitHub API Poll,Yes
+Trial 201,Mid-Download,19,0.127,Resume Cache Hash Sync,Yes
+Trial 202,During Polling,13,0.75,Resume GitHub API Poll,Yes
+Trial 203,Mid-Download,703,0.561,Resume Cache Hash Sync,Yes
+Trial 204,During Polling,109,0.56,Resume GitHub API Poll,Yes
+Trial 205,Mid-Download,949,0.128,Resume Cache Hash Sync,Yes
+Trial 206,During Polling,74,0.112,Resume GitHub API Poll,Yes
+Trial 207,Mid-Download,61,0.105,Resume Cache Hash Sync,Yes
+Trial 208,During Polling,42,0.13,Resume GitHub API Poll,Yes
+Trial 209,Mid-Download,492,0.359,Resume Cache Hash Sync,Yes
+Trial 210,During Polling,148,0.11,Resume GitHub API Poll,Yes
+Trial 211,Mid-Download,32,0.105,Resume Cache Hash Sync,Yes
+Trial 212,During Polling,601,0.105,Resume GitHub API Poll,Yes
+Trial 213,Mid-Download,332,0.122,Resume Cache Hash Sync,Yes
+Trial 214,During Polling,184,0.147,Resume GitHub API Poll,Yes
+Trial 215,Mid-Download,24,0.122,Resume Cache Hash Sync,Yes
+Trial 216,During Polling,101,0.106,Resume GitHub API Poll,Yes
+Trial 217,Mid-Download,50,0.931,Resume Cache Hash Sync,Yes
+Trial 218,During Polling,1048,0.128,Resume GitHub API Poll,Yes
+Trial 219,Mid-Download,1256,0.126,Resume Cache Hash Sync,Yes
+Trial 220,During Polling,26,0.813,Resume GitHub API Poll,Yes
+Trial 221,Mid-Download,144,0.111,Resume Cache Hash Sync,Yes
+Trial 222,During Polling,56,0.138,Resume GitHub API Poll,Yes
+Trial 223,Mid-Download,119,0.159,Resume Cache Hash Sync,Yes
+Trial 224,During Polling,96,0.15,Resume GitHub API Poll,Yes
+Trial 225,Mid-Download,831,0.108,Resume Cache Hash Sync,Yes
+Trial 226,During Polling,29,0.135,Resume GitHub API Poll,Yes
+Trial 227,Mid-Download,35,0.54,Resume Cache Hash Sync,Yes
+Trial 228,During Polling,20,0.118,Resume GitHub API Poll,Yes
+Trial 229,Mid-Download,62,0.105,Resume Cache Hash Sync,Yes
+Trial 230,During Polling,274,0.125,Resume GitHub API Poll,Yes
+Trial 231,Mid-Download,531,0.562,Resume Cache Hash Sync,Yes
+Trial 232,During Polling,22,0.111,Resume GitHub API Poll,Yes
+Trial 233,Mid-Download,22,0.105,Resume Cache Hash Sync,Yes
+Trial 234,During Polling,137,0.127,Resume GitHub API Poll,Yes
+Trial 235,Mid-Download,13,0.146,Resume Cache Hash Sync,Yes
+Trial 236,During Polling,253,0.105,Resume GitHub API Poll,Yes
+Trial 237,Mid-Download,73,0.128,Resume Cache Hash Sync,Yes
+Trial 238,During Polling,10,0.148,Resume GitHub API Poll,Yes
+Trial 239,Mid-Download,60,0.115,Resume Cache Hash Sync,Yes
+Trial 240,During Polling,103,0.107,Resume GitHub API Poll,Yes
+Trial 241,Mid-Download,10,0.143,Resume Cache Hash Sync,Yes
+Trial 242,During Polling,37,0.661,Resume GitHub API Poll,Yes
+Trial 243,Mid-Download,10,0.113,Resume Cache Hash Sync,Yes
+Trial 244,During Polling,813,0.105,Resume GitHub API Poll,Yes
+Trial 245,Mid-Download,15,0.132,Resume Cache Hash Sync,Yes
+Trial 246,During Polling,515,0.142,Resume GitHub API Poll,Yes
+Trial 247,Mid-Download,68,0.109,Resume Cache Hash Sync,Yes
+Trial 248,During Polling,1200,0.136,Resume GitHub API Poll,Yes
+Trial 249,Mid-Download,273,0.108,Resume Cache Hash Sync,Yes
+Trial 250,During Polling,393,0.105,Resume GitHub API Poll,Yes
+Trial 251,Mid-Download,62,0.127,Resume Cache Hash Sync,Yes
+Trial 252,During Polling,22,0.126,Resume GitHub API Poll,Yes
+Trial 253,Mid-Download,81,0.105,Resume Cache Hash Sync,Yes
+Trial 254,During Polling,15,0.113,Resume GitHub API Poll,Yes
+Trial 255,Mid-Download,12,0.146,Resume Cache Hash Sync,Yes
+Trial 256,During Polling,99,0.105,Resume GitHub API Poll,Yes
+Trial 257,Mid-Download,14,0.775,Resume Cache Hash Sync,Yes
+Trial 258,During Polling,11,0.559,Resume GitHub API Poll,Yes
+Trial 259,Mid-Download,45,0.479,Resume Cache Hash Sync,Yes
+Trial 260,During Polling,313,0.112,Resume GitHub API Poll,Yes
+Trial 261,Mid-Download,14,0.127,Resume Cache Hash Sync,Yes
+Trial 262,During Polling,65,0.153,Resume GitHub API Poll,Yes
+Trial 263,Mid-Download,49,0.154,Resume Cache Hash Sync,Yes
+Trial 264,During Polling,331,0.16,Resume GitHub API Poll,Yes
+Trial 265,Mid-Download,1111,0.105,Resume Cache Hash Sync,Yes
+Trial 266,During Polling,51,0.136,Resume GitHub API Poll,Yes
+Trial 267,Mid-Download,1012,0.126,Resume Cache Hash Sync,Yes
+Trial 268,During Polling,37,0.621,Resume GitHub API Poll,Yes
+Trial 269,Mid-Download,107,0.14,Resume Cache Hash Sync,Yes
+Trial 270,During Polling,267,0.119,Resume GitHub API Poll,Yes
+Trial 271,Mid-Download,15,0.132,Resume Cache Hash Sync,Yes
+Trial 272,During Polling,14,0.105,Resume GitHub API Poll,Yes
+Trial 273,Mid-Download,312,0.124,Resume Cache Hash Sync,Yes
+Trial 274,During Polling,16,0.112,Resume GitHub API Poll,Yes
+Trial 275,Mid-Download,44,0.124,Resume Cache Hash Sync,Yes
+Trial 276,During Polling,24,0.133,Resume GitHub API Poll,Yes
+Trial 277,Mid-Download,146,0.139,Resume Cache Hash Sync,Yes
+Trial 278,During Polling,15,0.127,Resume GitHub API Poll,Yes
+Trial 279,Mid-Download,48,0.121,Resume Cache Hash Sync,Yes
+Trial 280,During Polling,15,0.765,Resume GitHub API Poll,Yes
+Trial 281,Mid-Download,796,0.584,Resume Cache Hash Sync,Yes
+Trial 282,During Polling,63,0.121,Resume GitHub API Poll,Yes
+Trial 283,Mid-Download,42,0.14,Resume Cache Hash Sync,Yes
+Trial 284,During Polling,76,0.131,Resume GitHub API Poll,Yes
+Trial 285,Mid-Download,14,0.125,Resume Cache Hash Sync,Yes
+Trial 286,During Polling,176,0.146,Resume GitHub API Poll,Yes
+Trial 287,Mid-Download,16,0.138,Resume Cache Hash Sync,Yes
+Trial 288,During Polling,200,0.121,Resume GitHub API Poll,Yes
+Trial 289,Mid-Download,49,0.137,Resume Cache Hash Sync,Yes
+Trial 290,During Polling,1111,0.105,Resume GitHub API Poll,Yes
+Trial 291,Mid-Download,47,0.682,Resume Cache Hash Sync,Yes
+Trial 292,During Polling,1060,0.749,Resume GitHub API Poll,Yes
+Trial 293,Mid-Download,40,0.105,Resume Cache Hash Sync,Yes
+Trial 294,During Polling,32,0.126,Resume GitHub API Poll,Yes
+Trial 295,Mid-Download,518,0.14,Resume Cache Hash Sync,Yes
+Trial 296,During Polling,175,0.138,Resume GitHub API Poll,Yes
+Trial 297,Mid-Download,270,0.141,Resume Cache Hash Sync,Yes
+Trial 298,During Polling,307,0.12,Resume GitHub API Poll,Yes
+Trial 299,Mid-Download,40,0.136,Resume Cache Hash Sync,Yes
+Trial 300,During Polling,72,0.105,Resume GitHub API Poll,Yes
+Trial 301,Mid-Download,213,0.112,Resume Cache Hash Sync,Yes
+Trial 302,During Polling,454,0.105,Resume GitHub API Poll,Yes
+Trial 303,Mid-Download,1203,0.111,Resume Cache Hash Sync,Yes
+Trial 304,During Polling,856,0.135,Resume GitHub API Poll,Yes
+Trial 305,Mid-Download,138,0.105,Resume Cache Hash Sync,Yes
+Trial 306,During Polling,134,0.15,Resume GitHub API Poll,Yes
+Trial 307,Mid-Download,15,0.117,Resume Cache Hash Sync,Yes
+Trial 308,During Polling,228,0.113,Resume GitHub API Poll,Yes
+Trial 309,Mid-Download,1162,0.105,Resume Cache Hash Sync,Yes
+Trial 310,During Polling,1066,0.14,Resume GitHub API Poll,Yes
+Trial 311,Mid-Download,10,0.107,Resume Cache Hash Sync,Yes
+Trial 312,During Polling,165,0.124,Resume GitHub API Poll,Yes
+Trial 313,Mid-Download,86,0.128,Resume Cache Hash Sync,Yes
+Trial 314,During Polling,112,0.105,Resume GitHub API Poll,Yes
+Trial 315,Mid-Download,11,0.105,Resume Cache Hash Sync,Yes
+Trial 316,During Polling,17,0.804,Resume GitHub API Poll,Yes
+Trial 317,Mid-Download,19,0.115,Resume Cache Hash Sync,Yes
+Trial 318,During Polling,103,0.128,Resume GitHub API Poll,Yes
+Trial 319,Mid-Download,83,0.12,Resume Cache Hash Sync,Yes
+Trial 320,During Polling,502,0.137,Resume GitHub API Poll,Yes
+Trial 321,Mid-Download,607,0.121,Resume Cache Hash Sync,Yes
+Trial 322,During Polling,1164,0.117,Resume GitHub API Poll,Yes
+Trial 323,Mid-Download,23,0.105,Resume Cache Hash Sync,Yes
+Trial 324,During Polling,30,0.111,Resume GitHub API Poll,Yes
+Trial 325,Mid-Download,24,0.122,Resume Cache Hash Sync,Yes
+Trial 326,During Polling,194,0.127,Resume GitHub API Poll,Yes
+Trial 327,Mid-Download,175,0.122,Resume Cache Hash Sync,Yes
+Trial 328,During Polling,380,0.115,Resume GitHub API Poll,Yes
+Trial 329,Mid-Download,13,0.132,Resume Cache Hash Sync,Yes
+Trial 330,During Polling,48,0.118,Resume GitHub API Poll,Yes
+Trial 331,Mid-Download,35,0.105,Resume Cache Hash Sync,Yes
+Trial 332,During Polling,179,0.121,Resume GitHub API Poll,Yes
+Trial 333,Mid-Download,170,0.137,Resume Cache Hash Sync,Yes
+Trial 334,During Polling,511,0.108,Resume GitHub API Poll,Yes
+Trial 335,Mid-Download,42,0.132,Resume Cache Hash Sync,Yes
+Trial 336,During Polling,17,0.129,Resume GitHub API Poll,Yes
+Trial 337,Mid-Download,24,0.109,Resume Cache Hash Sync,Yes
+Trial 338,During Polling,19,0.124,Resume GitHub API Poll,Yes
+Trial 339,Mid-Download,24,0.117,Resume Cache Hash Sync,Yes
+Trial 340,During Polling,1258,0.105,Resume GitHub API Poll,Yes
+Trial 341,Mid-Download,106,0.119,Resume Cache Hash Sync,Yes
+Trial 342,During Polling,12,0.14,Resume GitHub API Poll,Yes
+Trial 343,Mid-Download,10,0.14,Resume Cache Hash Sync,Yes
+Trial 344,During Polling,115,0.105,Resume GitHub API Poll,Yes
+Trial 345,Mid-Download,274,0.134,Resume Cache Hash Sync,Yes
+Trial 346,During Polling,14,0.11,Resume GitHub API Poll,Yes
+Trial 347,Mid-Download,396,0.122,Resume Cache Hash Sync,Yes
+Trial 348,During Polling,22,0.143,Resume GitHub API Poll,Yes
+Trial 349,Mid-Download,362,0.118,Resume Cache Hash Sync,Yes
+Trial 350,During Polling,17,0.123,Resume GitHub API Poll,Yes

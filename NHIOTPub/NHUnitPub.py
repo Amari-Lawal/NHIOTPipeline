@@ -21,28 +21,35 @@ class BaseMQTTTest(unittest.TestCase):
 
     def _make_callback(self, event, expected_result, parameters, expected_function):
         def callback(topic, payload):
-            result_json = json.loads(payload.decode("utf-8"))
-            error = result_json.get("error", "")
-            device_function = result_json.get("function", "unknown")
+            try:
+                result_json = json.loads(payload.decode("utf-8"))
+                error = result_json.get("error", "")
+                device_function = result_json.get("function", "unknown")
 
-            if device_function != expected_function:
+                if device_function != expected_function:
+                    # Ignore duplicate/stray messages from previous runs or tests
+                    return
+
+                if error:
+                    raise AssertionError(f"[{device_function}({parameters})] FAILED — {error}")
+
+                result = result_json.get("result", "")
+                if str(result) != str(expected_result):
+                    raise AssertionError(f"[{device_function}({parameters})] FAILED — expected '{expected_result}' got '{result}'")
+                
+                print(f"[{device_function}({parameters})] PASSED — result: {result}")
+                self._callback_exception = None
                 event.set()
-                self.fail(f"[FUNCTION MISMATCH] expected '{expected_function}' got '{device_function}'")
-
-            if error:
+            except Exception as e:
+                self._callback_exception = e
                 event.set()
-                self.fail(f"[{device_function}({parameters})] FAILED — {error}")
-
-            result = result_json.get("result", "")
-            self.assertEqual(result, expected_result, f"[{device_function}({parameters})] FAILED — expected '{expected_result}' got '{result}'")
-            print(f"[{device_function}({parameters})] PASSED — result: {result}")
-            event.set()
         return callback
 
     def run_mqtt_test(self, function_name, parameters, expected_result):
         event = threading.Event()
+        self._callback_exception = None
 
-        callback = self._make_callback(event, expected_result,parameters, function_name)
+        callback = self._make_callback(event, expected_result, parameters, function_name)
 
         self.client.subscribe(
             callback,
@@ -50,19 +57,30 @@ class BaseMQTTTest(unittest.TestCase):
             verbose=False
         )
 
-        self.client.publish(
-            json.dumps({
-                "function": function_name,
-                "parameters": parameters
-            }),
-            topic=self.publish_topic,
-            verbose=False
-        )
+        try:
+            self.client.publish(
+                json.dumps({
+                    "function": function_name,
+                    "parameters": parameters
+                }),
+                topic=self.publish_topic,
+                verbose=False
+            )
 
-        self.assertTrue(
-            event.wait(self.timeout),
-            f"No MQTT response within {self.timeout} seconds"
-        )
+            # Wait for the event to be set
+            self.assertTrue(
+                event.wait(self.timeout),
+                f"No MQTT response within {self.timeout} seconds"
+            )
+
+            # Propagate background callback exceptions if they occurred
+            if self._callback_exception is not None:
+                raise self._callback_exception
+        finally:
+            try:
+                self.client.unsubscribe(self.subscribe_topic, verbose=False)
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":
