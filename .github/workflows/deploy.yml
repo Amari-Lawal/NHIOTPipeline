@@ -21,6 +21,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Recreate Configs and Credentials
+        run: |
+          mkdir -p NHIOTMQTT NHIOTSub AWSMqtt/keys
+          echo "${{ secrets.NHIOT_MQTT_ENV }}" > NHIOTMQTT/.env
+          echo "${{ secrets.NHIOT_SUB_ENV }}" > NHIOTSub/.env
+          echo "${{ secrets.AWS_CA_PEM }}" > AWSMqtt/keys/AmazonRootCA1.pem
+          echo "${{ secrets.AWS_CERT_CRT }}" > AWSMqtt/keys/device-certificate.pem.crt
+          echo "${{ secrets.AWS_PRIVATE_KEY }}" > AWSMqtt/keys/private.pem.key
+
       - name: Google Auth
         id: auth
         uses: google-github-actions/auth@v2

@@ -321,7 +321,18 @@ async def trigger_ota_git_push():
             c_err = c_stderr.decode("utf-8").strip()
             logger.warning(f"Git commit process returned code {c_rc}: {c_err}")
         
-        # 3. Push commit to remote branch
+        # 3. Configure git remote dynamically with the token for secure write auth
+        token = Envs.GITHUB_TOKEN or os.getenv("GITHUB_TOKEN")
+        if token:
+            remote_url = f"https://{token}@github.com/{Envs.OWNER}/{Envs.REPO}.git"
+            remote_proc = await asyncio.create_subprocess_exec(
+                "git", "remote", "set-url", "origin", remote_url,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await remote_proc.communicate()
+
+        # 4. Push commit to remote branch
         branch = Envs.BRANCH or "main"
         push_proc = await asyncio.create_subprocess_exec(
             "git", "push", "origin", branch,
