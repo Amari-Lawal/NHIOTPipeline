@@ -324,6 +324,24 @@ async def trigger_ota_git_push():
         # 3. Configure git remote dynamically with the token for secure write auth
         token = Envs.GITHUB_TOKEN or os.getenv("GITHUB_TOKEN")
         if token:
+            # Unset any extraheaders left by actions/checkout that override our write token
+            unset_proc = await asyncio.create_subprocess_exec(
+                "git", "config", "--local", "--unset", "http.https://github.com/.extraheader",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await unset_proc.communicate()
+
+            # Configure git user identity
+            await (await asyncio.create_subprocess_exec(
+                "git", "config", "--local", "user.name", "Amari Lawal",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )).communicate()
+            await (await asyncio.create_subprocess_exec(
+                "git", "config", "--local", "user.email", "amari.lawal@gmail.com",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )).communicate()
+
             remote_url = f"https://{token}@github.com/{Envs.OWNER}/{Envs.REPO}.git"
             remote_proc = await asyncio.create_subprocess_exec(
                 "git", "remote", "set-url", "origin", remote_url,
