@@ -10,6 +10,12 @@ from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
+# Dynamically determine the project root and add to sys.path for robust imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(current_dir)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 # Setup basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("NHIOTFastAPI")
@@ -34,9 +40,10 @@ active_sub_process = None
 sub_stdout_queue = asyncio.Queue()
 
 # Ensure artifacts directory is mounted
-if not os.path.exists("artifacts"):
-    os.makedirs("artifacts", exist_ok=True)
-app.mount("/artifacts", StaticFiles(directory="artifacts"), name="artifacts")
+artifacts_dir = os.path.join(PROJECT_ROOT, "artifacts")
+if not os.path.exists(artifacts_dir):
+    os.makedirs(artifacts_dir, exist_ok=True)
+app.mount("/artifacts", StaticFiles(directory=artifacts_dir), name="artifacts")
 
 # Helper to read unbuffered subprocess output lines
 async def read_stream(stream, queue):
@@ -48,7 +55,8 @@ async def read_stream(stream, queue):
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard():
-    dashboard_path = "dashboard.html"
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    dashboard_path = os.path.join(current_dir, "dashboard.html")
     if not os.path.exists(dashboard_path):
         raise HTTPException(status_code=404, detail="dashboard.html not found")
     with open(dashboard_path, "r", encoding="utf-8") as f:
@@ -69,11 +77,14 @@ async def start_subscriber():
         
     try:
         # Launch subscriber daemon in unbuffered mode (-u) to guarantee real-time line streams
+        python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
+        if not os.path.exists(python_executable):
+            python_executable = sys.executable
         active_sub_process = await asyncio.create_subprocess_exec(
-            "./venv/bin/python", "-u", "-m", "NHIOTSub.main",
+            python_executable, "-u", "-m", "NHIOTSub.main",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
-            cwd=os.getcwd()
+            cwd=PROJECT_ROOT
         )
         
         # Read stdout in a non-blocking background task
@@ -147,11 +158,14 @@ async def simulate_outage_dropout():
             sub_stdout_queue.get_nowait()
             
         # 4. Restart the subscriber daemon (starts mTLS connection handshake with AWS!)
+        python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
+        if not os.path.exists(python_executable):
+            python_executable = sys.executable
         active_sub_process = await asyncio.create_subprocess_exec(
-            "./venv/bin/python", "-u", "-m", "NHIOTSub.main",
+            python_executable, "-u", "-m", "NHIOTSub.main",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
-            cwd=os.getcwd()
+            cwd=PROJECT_ROOT
         )
         
         # Read stdout in a background task
@@ -166,7 +180,9 @@ async def simulate_outage_dropout():
 @app.get("/api/maturity")
 async def get_maturity_assessment():
     try:
-        maturity_file_path = os.path.join(os.getcwd(), "nist_maturity_assessment.md")
+        maturity_file_path = os.path.join(PROJECT_ROOT, "nist_maturity_assessment.md")
+        if not os.path.exists(maturity_file_path):
+            maturity_file_path = os.path.join(PROJECT_ROOT, "Thesis", "nist_maturity_assessment.md")
         if not os.path.exists(maturity_file_path):
             raise HTTPException(status_code=404, detail="nist_maturity_assessment.md file not found")
         with open(maturity_file_path, "r", encoding="utf-8") as f:
@@ -185,11 +201,14 @@ async def run_unit_tests():
         
         try:
             # Run the unbuffered unittest discover
+            python_executable = os.path.join(PROJECT_ROOT, "venv/bin/python")
+            if not os.path.exists(python_executable):
+                python_executable = sys.executable
             process = await asyncio.create_subprocess_exec(
-                "./venv/bin/python", "-u", "-m", "unittest", "discover", "-s", "NHIOTPub/tests", "-t", ".",
+                python_executable, "-u", "-m", "unittest", "discover", "-s", "NHIOTPub/tests", "-t", ".",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
-                cwd=os.getcwd()
+                cwd=PROJECT_ROOT
             )
             
             while True:
@@ -219,12 +238,12 @@ async def run_unit_tests():
 async def get_csv_dataset(name: str):
     # Mapping dataset names to their respective generated CSV paths
     file_map = {
-        "dataset1": "artifacts/dataset1_ota_performance.csv",
-        "dataset2": "artifacts/dataset2_security_sanitization.csv",
-        "dataset3": "artifacts/dataset3_network_interruption.csv",
-        "dataset4": "artifacts/dataset4_e2e_diagnostic.csv",
-        "dataset5": "artifacts/dataset5_operational_cost.csv",
-        "dataset6": "artifacts/dataset6_self_healing_savings.csv"
+        "dataset1": os.path.join(PROJECT_ROOT, "artifacts/dataset1_ota_performance.csv"),
+        "dataset2": os.path.join(PROJECT_ROOT, "artifacts/dataset2_security_sanitization.csv"),
+        "dataset3": os.path.join(PROJECT_ROOT, "artifacts/dataset3_network_interruption.csv"),
+        "dataset4": os.path.join(PROJECT_ROOT, "artifacts/dataset4_e2e_diagnostic.csv"),
+        "dataset5": os.path.join(PROJECT_ROOT, "artifacts/dataset5_operational_cost.csv"),
+        "dataset6": os.path.join(PROJECT_ROOT, "artifacts/dataset6_self_healing_savings.csv")
     }
     
     if name not in file_map:
@@ -251,7 +270,7 @@ async def get_csv_dataset(name: str):
 
 @app.get("/api/evaluation/metrics")
 async def get_evaluation_metrics():
-    metrics_path = "artifacts/evaluation_metrics.json"
+    metrics_path = os.path.join(PROJECT_ROOT, "artifacts/evaluation_metrics.json")
     if not os.path.exists(metrics_path):
         raise HTTPException(status_code=404, detail="evaluation_metrics.json not found")
     with open(metrics_path, "r") as f:
@@ -404,4 +423,5 @@ async def publish_sub_command(payload: dict):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    host = os.getenv("HOST", "127.0.0.1")
+    uvicorn.run(app, host=host, port=8000)
