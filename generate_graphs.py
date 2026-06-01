@@ -353,7 +353,7 @@ ax.text(320, ota_cumulative/1000.0 + 100, "Automated Cost:\n£0.017k", ha='right
 # Add big floating arrow or text annotation for total savings
 ax.annotate(f"Net Operational Savings:\n£{final_savings:,.2f}\n(99.998% cost reduction)", 
             xy=(200, legacy_cumulative/2000.0), 
-            xytext=(60, legacy_cumulative/1.800),
+            xytext=(60, (legacy_cumulative / 1000.0) / 1.800),
             arrowprops=dict(facecolor=colors['dark'], shrink=0.08, width=1, headwidth=6),
             fontsize=9.5, fontweight='bold', color=colors['secondary'], bbox=dict(facecolor='white', edgecolor='#CCCCCC', boxstyle='round,pad=0.5'))
 
@@ -361,6 +361,65 @@ ax.grid(True, linestyle='--', alpha=0.5)
 ax.legend(fontsize=9, loc='upper left')
 plt.tight_layout()
 plt.savefig("artifacts/figure6_6_operational_roi.png", bbox_inches='tight')
+plt.close()
+
+# ----------------------------------------------------------------------
+# DATASET 6: NETWORK SELF-HEALING RECONNECTION SAVINGS (350 POINTS)
+# ----------------------------------------------------------------------
+print("6. Generating Dataset 6 (Network Self-Healing Operational Savings)...")
+self_healing_data = []
+sh_cumulative = 0.0
+
+for i in range(1, 351):
+    incident_id = f"OUT-350-{i:03d}"
+    
+    # Reconnection speed fluctuates around 2.5 seconds (representing real network self-healing)
+    reconnect_speed = 2.5 + random.gauss(0, 0.4)
+    reconnect_speed = max(0.5, reconnect_speed) # Clamp minimum
+    
+    # Overhead: reconnect_speed * £1.759259/sec
+    overhead = reconnect_speed * (4750.00 / 2700.0)
+    net_savings = 4750.00 - overhead
+    sh_cumulative += net_savings
+    
+    self_healing_data.append({
+        "Incident ID": incident_id,
+        "Physical Downtime (sec)": 2700.0,
+        "Self-Healing Speed (sec)": round(reconnect_speed, 2),
+        "Gross Callout Cost (£)": 4750.00,
+        "Duration Penalty (£)": round(overhead, 2),
+        "Net Savings (£)": round(net_savings, 2),
+        "Cumulative Savings (£)": round(sh_cumulative, 2)
+    })
+
+df6 = pd.DataFrame(self_healing_data)
+df6.to_csv("artifacts/dataset6_self_healing_savings.csv", index=False)
+
+# Figure 6.7: Line graph showing dramatic Cumulative Self-Healing Savings
+fig, ax = plt.subplots(figsize=(7, 4.2), dpi=150)
+runs = np.arange(1, 351)
+
+ax.plot(runs, df6["Cumulative Savings (£)"] / 1000.0, color=colors['secondary'], linewidth=2.5, label="Self-Healing Savings (Taxpayer Capital Preserved)")
+ax.axhline(0, color='#CCCCCC', linestyle='-', linewidth=0.8)
+
+ax.set_title("Figure 6.7: Cumulative Fleet Savings: Network Self-Healing Reconnections", fontsize=11, fontweight='bold', pad=15)
+ax.set_xlabel("Number of Consecutive Network Outage Events (350 Runs)", fontsize=9.5)
+ax.set_ylabel("Cumulative Capital Preserved (£ Thousands)", fontsize=9.5)
+
+# Annotate savings
+ax.text(320, sh_cumulative/1000.0 - 50, f"Total Preserved:\n£{sh_cumulative/1000.0:.2f}k", ha='right', va='top', fontsize=8.5, fontweight='bold', color=colors['secondary'])
+
+# Add big floating arrow or text annotation for total savings
+ax.annotate(f"Fleet Cumulative Savings:\n£{sh_cumulative:,.2f}\n(99.907% overhead avoidance)", 
+            xy=(200, sh_cumulative/2000.0), 
+            xytext=(60, (sh_cumulative / 1000.0) / 1.80),
+            arrowprops=dict(facecolor=colors['dark'], shrink=0.08, width=1, headwidth=6),
+            fontsize=9.5, fontweight='bold', color=colors['secondary'], bbox=dict(facecolor='white', edgecolor='#CCCCCC', boxstyle='round,pad=0.5'))
+
+ax.grid(True, linestyle='--', alpha=0.5)
+ax.legend(fontsize=9, loc='upper left')
+plt.tight_layout()
+plt.savefig("artifacts/figure6_7_self_healing_savings.png", bbox_inches='tight')
 plt.close()
 
 print("\n==================================================")

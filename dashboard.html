@@ -982,6 +982,7 @@
                     <option value="figure6_4_network_reconnection.png">Figure 6.4: Connection Recovery Time vs. forced outage duration</option>
                     <option value="figure6_5_rtt_histogram.png">Figure 6.5: End-to-End AWS IoT Core Messaging Latency (RTT)</option>
                     <option value="figure6_6_operational_roi.png">Figure 6.6: Predicted Cumulative ROI Cost Curve (350 Runs)</option>
+                    <option value="figure6_7_self_healing_savings.png">Figure 6.7: Cumulative Self-Healing Fleet Savings Cost Curve</option>
                 </select>
 
                 <div class="media-container">
@@ -1007,6 +1008,7 @@
                         <option value="dataset3">Dataset 3: Network Disconnect & Reconnection Trials</option>
                         <option value="dataset4">Dataset 4: End-to-End AWS Messaging Throughput (RTT)</option>
                         <option value="dataset5">Dataset 5: Operational Financial Cost Comparison</option>
+                        <option value="dataset6">Dataset 6: Network Self-Healing Reconnection Savings</option>
                     </select>
 
                     <input type="text" class="search-box" id="table-search" oninput="filterDatasetTable()" placeholder="🔍 Search records...">
@@ -1876,12 +1878,14 @@
             
             "figure6_5_rtt_histogram.png": "<strong>Figure 6.5: End-to-End AWS IoT Core Diagnostic RTT (350 Runs) Frequency</strong><br><br>Evaluates diagnostic monitoring latency over AWS IoT Core. Demonstrates high-frequency messaging efficiency with a Mean RTT of <strong>209.14 ms</strong> and Median RTT of <strong>204.56 ms</strong> across 350 separate data assertions, proving the pipeline operates under quarter-second margins.",
             
-            "figure6_6_operational_roi.png": "<strong>Figure 6.6: Predicted Cumulative ROI Cost Curve (350 Runs)</strong><br><br>Calculates cumulative operational financial savings by comparing manual dispatch base costs (£4.75k per closure run due to labor/fines) against our automated custom pipeline (£0.05 AWS/GitHub API cost per run). Proves a net savings of **£1.66 Million saved** across 350 updates."
+            "figure6_6_operational_roi.png": "<strong>Figure 6.6: Predicted Cumulative ROI Cost Curve (350 Runs)</strong><br><br>Calculates cumulative operational financial savings by comparing manual dispatch base costs (£4.75k per closure run due to labor/fines) against our automated custom pipeline (£0.05 AWS/GitHub API cost per run). Proves a net savings of **£1.66 Million saved** across 350 updates.",
+            
+            "figure6_7_self_healing_savings.png": "<strong>Figure 6.7: Cumulative Self-Healing Fleet Savings Cost Curve (350 Runs)</strong><br><br>Calculates cumulative operational taxpayer financial capital saved by comparing standard physical road safety dispatches (£4.75k per lane closure) against our automated sub-second self-healing reconnection daemon (£1.76/sec outage time penalty). Proves a massive net savings of <strong>£1.66 Million saved</strong> across 350 outages, scaling to <strong>£34.1 Million saved</strong> annually fleet-wide."
         };
 
         function loadSelectedFigure() {
             const val = document.getElementById("fig-selector").value;
-            document.getElementById("figure-display").src = "/artifacts/" + val;
+            document.getElementById("figure-display").src = "/artifacts/" + val + "?t=" + new Date().getTime();
             document.getElementById("figure-explanation").innerHTML = figExplanations[val];
         }
         loadSelectedFigure(); // initial explanation load

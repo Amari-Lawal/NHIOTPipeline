@@ -223,7 +223,8 @@ async def get_csv_dataset(name: str):
         "dataset2": "artifacts/dataset2_security_sanitization.csv",
         "dataset3": "artifacts/dataset3_network_interruption.csv",
         "dataset4": "artifacts/dataset4_e2e_diagnostic.csv",
-        "dataset5": "artifacts/dataset5_operational_cost.csv"
+        "dataset5": "artifacts/dataset5_operational_cost.csv",
+        "dataset6": "artifacts/dataset6_self_healing_savings.csv"
     }
     
     if name not in file_map:
