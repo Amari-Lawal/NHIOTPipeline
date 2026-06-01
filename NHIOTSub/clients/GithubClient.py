@@ -51,4 +51,4 @@ class GitHubClient:
         response = self._safe_get(artifact_url)
         if response is None:
             return []
-        return ArtifactsResponse(**response.json()).artifactspyt
+        return ArtifactsResponse(**response.json()).artifacts
