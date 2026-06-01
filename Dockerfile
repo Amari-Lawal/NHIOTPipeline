@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port FastAPI runs on
-EXPOSE 8000
+EXPOSE 8080
 
 # Set environment variable to run python unbuffered (for real-time logging)
 ENV PYTHONUNBUFFERED=1
