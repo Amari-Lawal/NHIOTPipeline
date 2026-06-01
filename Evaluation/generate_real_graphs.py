@@ -14,7 +14,21 @@ class AcademicTelemetryEngine:
     anchoring 350-point datasets to live baseline measurements harvested over SSH.
     """
     
-    def __init__(self, metrics_json_path="artifacts/evaluation_metrics.json", output_dir="artifacts_real"):
+    def __init__(self, metrics_json_path=None, output_dir=None):
+        # Dynamically locate metrics JSON relative to the script location
+        if metrics_json_path is None:
+            if os.path.exists("artifacts/evaluation_metrics.json"):
+                metrics_json_path = "artifacts/evaluation_metrics.json"
+            else:
+                metrics_json_path = "../artifacts/evaluation_metrics.json"
+                
+        # Dynamically locate output directory
+        if output_dir is None:
+            if os.path.exists("artifacts_real") or os.path.exists("artifacts"):
+                output_dir = "artifacts_real"
+            else:
+                output_dir = "../artifacts_real"
+                
         self.metrics_json_path = metrics_json_path
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)

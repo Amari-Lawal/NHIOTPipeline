@@ -13,7 +13,14 @@ class DistributedEdgeOrchestrator:
     evaluation, downloads physical trials, and merges metrics into system telemetry.
     """
     
-    def __init__(self, env_path="/home/amari/Desktop/NHIOTPipeline/NHIOTSub/.env"):
+    def __init__(self, env_path=None):
+        if env_path is None:
+            # Dynamically resolve relative path to .env
+            if os.path.exists("NHIOTSub/.env"):
+                env_path = "NHIOTSub/.env"
+            else:
+                env_path = "../NHIOTSub/.env"
+                
         self.env_path = env_path
         load_dotenv(self.env_path)
         
@@ -166,10 +173,13 @@ except Exception as e:
             for line in stdout:
                 print(f"      [RPi4] {line.strip()}")
                 
+            # Resolve relative paths for storing results
+            dest_rpi_json = "artifacts/rpi_metrics.json" if os.path.exists("artifacts") else "../artifacts/rpi_metrics.json"
+            
             # Download results
             print("\nRetrieving physical edge telemetry...")
             with SCPClient(ssh.get_transport()) as scp:
-                scp.get(f"/home/{username}/rpi_metrics.json", "/home/amari/Desktop/NHIOTPipeline/artifacts/rpi_metrics.json")
+                scp.get(f"/home/{username}/rpi_metrics.json", dest_rpi_json)
             print("      Physical metrics downloaded.")
             
             # Remote Cleanup
@@ -184,8 +194,13 @@ except Exception as e:
             if os.path.exists(local_script_path):
                 os.remove(local_script_path)
 
-    def merge_telemetry_metrics(self, rpi_json="artifacts/rpi_metrics.json", system_json="artifacts/evaluation_metrics.json"):
+    def merge_telemetry_metrics(self, rpi_json=None, system_json=None):
         """Merges downloaded physical telemetry metrics into the global evaluation database."""
+        if rpi_json is None:
+            rpi_json = "artifacts/rpi_metrics.json" if os.path.exists("artifacts") else "../artifacts/rpi_metrics.json"
+        if system_json is None:
+            system_json = "artifacts/evaluation_metrics.json" if os.path.exists("artifacts") else "../artifacts/evaluation_metrics.json"
+            
         print("\n==================================================")
         print("MERGING REMOTE TELEMETRY INTO GLOBAL SYSTEM DB")
         print("==================================================")
