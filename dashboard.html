@@ -2260,13 +2260,13 @@
 
         function showOtaModal(otaDuration, cutoverDowntime, netSavings) {
             const standardPhysicalDowntimeSeconds = 45 * 60; // 2700s
-            const downtimeSavedSeconds = standardPhysicalDowntimeSeconds - parseFloat(cutoverDowntime);
             
-            // Rate based on 45 minutes baseline = £4,750 -> £105.555 per unit
-            const ratePerUnit = 105.55555555555556;
+            // Rate based on 45 minutes baseline = £4,750 -> £105.555 per minute -> £1.759259 per second
+            const ratePerMinute = 4750.00 / 45; 
+            const ratePerSecond = 4750.00 / standardPhysicalDowntimeSeconds; 
             
             const otaDurationVal = parseFloat(otaDuration);
-            const appOverhead = otaDurationVal * ratePerUnit;
+            const appOverhead = otaDurationVal * ratePerSecond;
             const netOtaSavings = 4750.00 - appOverhead;
             
             document.getElementById("modal-ota-duration").innerText = otaDurationVal.toFixed(1) + "s";
@@ -2275,8 +2275,8 @@
             
             document.getElementById("modal-ota-savings").innerText = "£" + netOtaSavings.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
-            document.getElementById("modal-ota-sec-rate").innerText = "£" + (4750.00 / downtimeSavedSeconds).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / sec";
-            document.getElementById("modal-ota-min-rate").innerText = "£" + ratePerUnit.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / min";
+            document.getElementById("modal-ota-sec-rate").innerText = "£" + ratePerSecond.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / sec";
+            document.getElementById("modal-ota-min-rate").innerText = "£" + ratePerMinute.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " / min";
             
             document.getElementById("modal-ota-overhead").innerText = "-£" + appOverhead.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
@@ -2371,7 +2371,7 @@
                     <span style="color: white; font-weight: 600;">£4,750.00</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888888; margin-top: 5px;">
-                    <span>App Update Overhead (<span id="modal-ota-duration-label">3.5</span>s × £105.56):</span>
+                    <span>App Update Overhead (<span id="modal-ota-duration-label">3.5</span>s × £1.76):</span>
                     <span id="modal-ota-overhead" style="color: #ef4444; font-weight: 600;">-£369.46</span>
                 </div>
                 
