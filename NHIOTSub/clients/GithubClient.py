@@ -36,7 +36,10 @@ class GitHubClient:
         return response
 
     def get_latest_run(self) -> Optional[WorkflowRun]:
-        response = self._safe_get(self.workflow_url, params={"per_page": 1})
+        params = {"per_page": 1}
+        if Envs.BRANCH:
+            params["branch"] = Envs.BRANCH
+        response = self._safe_get(self.workflow_url, params=params)
         if response is None:
             return None
         data = WorkflowRunsResponse(**response.json())

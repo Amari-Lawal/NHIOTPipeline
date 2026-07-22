@@ -1,4 +1,4 @@
-1. Eliminating Field Engineer Dispatch (Aims & Objectives)
+1. Eliminating Field Engineer Dispatch (Aims & Objectives) $
 The Problem: Motorway closures and physical worker exposure to high-speed roadside environments are dangerous and financially inefficient. Updates must happen remotely.
 Outline Alignment (Section 5.1.1 & 5.3.2):
 5.1.1 (Pull-Based OTA) details how the system is designed to bypass private roadside firewalls without needing public IP addresses (NAT-traversal) by having the device check for updates itself.

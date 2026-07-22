@@ -83,6 +83,15 @@ class BaseMQTTTest(unittest.TestCase):
             except Exception:
                 pass
 
+    def set_subscriber_branch(self, branch_name: str):
+        """Sends an MQTT payload to instruct the remote subscriber to switch target branch (e.g. 'dev', 'staging', 'main')."""
+        payload = json.dumps({
+            "command": "SET_BRANCH",
+            "branch": branch_name
+        })
+        self.client.publish(payload, topic=self.publish_topic, verbose=True)
+        print(f"Published remote branch switch command -> '{branch_name}' to topic '{self.publish_topic}'")
+
 
 if __name__ == "__main__":
     unittest.main()
