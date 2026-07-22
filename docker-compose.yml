@@ -14,7 +14,7 @@ services:
     build: .
     container_name: nhiot-server-audit
     env_file:
-      - .env.example
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -28,7 +28,7 @@ services:
     build: .
     container_name: nhiot-iot-subscriber
     env_file:
-      - .env.example
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -42,7 +42,7 @@ services:
     build: .
     container_name: nhiot-publisher
     env_file:
-      - .env.example
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883

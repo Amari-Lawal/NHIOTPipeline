@@ -1,4 +1,4 @@
-from NHIOTSub.config import Envs
+from NHIOTSub.config.Envs import Envs
 
 
 class Config:
