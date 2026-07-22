@@ -1,5 +1,18 @@
 import os
 
+from dotenv import load_dotenv
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+candidates = [
+    os.path.abspath(os.path.join(current_dir, "..", ".env")),
+    os.path.abspath(os.path.join(current_dir, "..", "..", ".env")),
+    ".env",
+    "NHIOTSub/.env",
+]
+for path in candidates:
+    if os.path.exists(path):
+        load_dotenv(path)
+
 
 class _ConfigMeta(type):
     @property
