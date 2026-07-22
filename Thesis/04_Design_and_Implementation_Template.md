@@ -61,12 +61,12 @@ Below is the precise structure, including the exact academic angles, code files 
 *Provide the exact implementation details of the software delivery pipeline, highlighting how compiler tasks are automated.*
 
 #### H3: 5.2.1 Multi-Architecture Build Matrix Configuration
-- **File Reference**: [main.yml](file:///home/amari/Desktop/NHIOTPipeline/.github/workflows/main.yml)
+- **File Reference**: [deploy.yml](file:///home/amari/Desktop/NHIOTPipeline/.github/workflows/deploy.yml)
 - **Concept**: Discuss how the GitHub Actions runner automatically coordinates concurrent builds for heterogeneous hardware targets.
 - **Key Evidence**: Highlight the YAML configuration using a build matrix to target both standard servers/desktops (`x86_64`) and low-power SBCs like Raspberry Pi (`aarch64`).
 
 #### H3: 5.2.2 Cross-Compilation Toolchains (`x86_64` vs `aarch64`)
-- **File Reference**: [main.yml:L20-37](file:///home/amari/Desktop/NHIOTPipeline/.github/workflows/main.yml#L20-L37)
+- **File Reference**: [deploy.yml:L56-79](file:///home/amari/Desktop/NHIOTPipeline/.github/workflows/deploy.yml#L56-L79)
 - **Concept**: Explain the difference between native compilation and cross-compilation.
 - **Implementation**: Describe how `gcc-aarch64-linux-gnu` is used within an Ubuntu-latest runner to build stand-alone binary files without requiring native ARM64 hardware for compilation.
 

@@ -1,21 +1,98 @@
-name: Build and Deploy to Cloud Run
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, master, staging, test, dev, develop ]
+  pull_request:
+    branches: [ main, master, staging, dev ]
+  workflow_dispatch:
 
 env:
   PROJECT_ID: caesaraiapis
   REGION: us-central1
-  SERVICE_NAME: nhiot
   GAR_LOCATION: us-central1-docker.pkg.dev/caesaraiapis/caesaraiapis/nhiot
 
 jobs:
+  set-environment:
+    name: Resolve Target Environment
+    runs-on: ubuntu-latest
+    outputs:
+      target_env: ${{ steps.env-spec.outputs.target_env }}
+      service_name: ${{ steps.env-spec.outputs.service_name }}
+      image_tag: ${{ steps.env-spec.outputs.image_tag }}
+      is_deployable: ${{ steps.env-spec.outputs.is_deployable }}
+    steps:
+      - id: env-spec
+        run: |
+          REF="${{ github.ref_name }}"
+          EVENT="${{ github.event_name }}"
+
+          if [ "$REF" = "main" ] || [ "$REF" = "master" ]; then
+            echo "target_env=prod" >> $GITHUB_OUTPUT
+            echo "service_name=nhiot" >> $GITHUB_OUTPUT
+            echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+          elif [ "$REF" = "staging" ]; then
+            echo "target_env=staging" >> $GITHUB_OUTPUT
+            echo "service_name=nhiot-staging" >> $GITHUB_OUTPUT
+            echo "image_tag=staging-${{ github.sha }}" >> $GITHUB_OUTPUT
+          elif [ "$REF" = "test" ]; then
+            echo "target_env=test" >> $GITHUB_OUTPUT
+            echo "service_name=nhiot-test" >> $GITHUB_OUTPUT
+            echo "image_tag=test-${{ github.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "target_env=dev" >> $GITHUB_OUTPUT
+            echo "service_name=nhiot-dev" >> $GITHUB_OUTPUT
+            echo "image_tag=dev-${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$EVENT" = "pull_request" ]; then
+            echo "is_deployable=false" >> $GITHUB_OUTPUT
+          else
+            echo "is_deployable=true" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    name: Build C Executable
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cross-compilation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          if [ "${{ matrix.arch }}" = "aarch64" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu
+          else
+            sudo apt-get install -y gcc-x86-64-linux-gnu
+          fi
+
+      - name: Compile C program
+        run: |
+          if [ "${{ matrix.arch }}" = "aarch64" ]; then
+            aarch64-linux-gnu-gcc -o hello_aarch64 Artefact/*.c
+          else
+            x86_64-linux-gnu-gcc -o hello_x86_64 Artefact/*.c
+          fi
+
+      - name: Upload executable as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello_${{ matrix.arch }}
+          path: hello_${{ matrix.arch }}
+
   deploy:
     name: Deploy to Cloud Run
+    needs: [set-environment, build]
+    if: needs.set-environment.outputs.is_deployable == 'true'
     runs-on: ubuntu-latest
-    environment: main
+    environment: ${{ needs.set-environment.outputs.target_env }}
 
     steps:
       - name: Checkout Code
@@ -45,20 +122,24 @@ jobs:
 
       - name: Build and Tag Container
         run: |
+          IMAGE_TAG="${{ needs.set-environment.outputs.image_tag }}"
+          GAR_LOC="${{ env.GAR_LOCATION }}"
           docker build \
-            -t ${{ env.GAR_LOCATION }}:${{ github.sha }} \
-            -t ${{ env.GAR_LOCATION }}:latest \
+            -t ${GAR_LOC}:${IMAGE_TAG} \
+            -t ${GAR_LOC}:latest \
             -f Dockerfile .
 
       - name: Push Container to Artifact Registry
         run: |
-          docker push ${{ env.GAR_LOCATION }}:${{ github.sha }}
-          docker push ${{ env.GAR_LOCATION }}:latest
+          IMAGE_TAG="${{ needs.set-environment.outputs.image_tag }}"
+          GAR_LOC="${{ env.GAR_LOCATION }}"
+          docker push ${GAR_LOC}:${IMAGE_TAG}
+          docker push ${GAR_LOC}:latest
 
       - name: Deploy to Google Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: ${{ env.SERVICE_NAME }}
+          service: ${{ needs.set-environment.outputs.service_name }}
           region: ${{ env.REGION }}
-          image: ${{ env.GAR_LOCATION }}:${{ github.sha }}
+          image: ${{ env.GAR_LOCATION }}:${{ needs.set-environment.outputs.image_tag }}
           flags: '--allow-unauthenticated'
