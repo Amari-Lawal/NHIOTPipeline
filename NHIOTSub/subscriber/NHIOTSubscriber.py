@@ -32,7 +32,9 @@ class NHIOTSubscriber:
         self.mqtt = mqtt_handler
         self.logger = logger
         
-        self.current_file_path = None
+        target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
+        local_exec = f"./Executables/{target}/{target}"
+        self.current_file_path = local_exec if os.path.exists(local_exec) else None
         self.last_processed_run_id = None
         self.branch_changed = False
         self.device_id = f"{socket.gethostname()}-{Envs.SUBSCRIBER_ARCHITECTURE}"
@@ -41,9 +43,10 @@ class NHIOTSubscriber:
         self.client.connect()
         self.mqtt.set_branch_change_callback(self._on_branch_changed)
         
-        # Subscribe exclusively to enterprise command topic
+        # Subscribe to command topics (both enterprise and legacy for full compatibility)
         handler_cb = self.mqtt.handle(lambda: self.current_file_path)
         self.client.subscribe(handler_cb, topic=Topics.COMMAND_TOPIC)
+        self.client.subscribe(handler_cb, topic="machineB/recv")
 
         # Start periodic background heartbeat daemon
         self._start_heartbeat_loop()
@@ -170,6 +173,11 @@ class NHIOTSubscriber:
         return self.fetch_artifact_for_branch(new_branch)
 
     def monitor_workflow(self) -> None:
+        # Check and download initial artifact on startup if not already loaded
+        if not self.current_file_path:
+            self.logger.info(f"No local binary found on startup. Attempting initial artifact pull for branch '{Envs.BRANCH}'...")
+            self.fetch_artifact_for_branch(Envs.BRANCH)
+
         while True:
             # Check if a remote branch change command was received via MQTT
             if self.branch_changed:
