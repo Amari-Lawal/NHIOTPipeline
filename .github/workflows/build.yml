@@ -41,5 +41,5 @@ jobs:
       - name: Upload executable as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hello_${{ github.ref_name }}_${{ matrix.arch }}
+          name: hello_${{ matrix.arch }}
           path: hello_${{ matrix.arch }}
