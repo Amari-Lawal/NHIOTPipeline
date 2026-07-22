@@ -13,5 +13,10 @@ class Executor:
             text=True
         )
 
-        return result.stdout, result.stderr
-    
+        stdout = result.stdout
+        stderr = result.stderr
+
+        if result.returncode != 0 and not stderr:
+            stderr = f"Process terminated abnormally with exit code {result.returncode} (Signal/Crash trapped by isolation boundary)."
+
+        return stdout, stderr

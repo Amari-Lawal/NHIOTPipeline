@@ -23,7 +23,6 @@ class GitHubClient:
         """Make a GET request, returning None gracefully on rate-limit or auth errors."""
         response = requests.get(url, headers=Config.GITHUB_HEADERS, params=params or {})
         if response.status_code in (403, 429):
-            # Check if this is a rate limit (not a permissions issue)
             body = response.json()
             msg = body.get("message", "")
             if "rate limit" in msg.lower():
@@ -44,6 +43,21 @@ class GitHubClient:
             return None
         data = WorkflowRunsResponse(**response.json())
         return data.workflow_runs[0] if data.workflow_runs else None
+
+    def get_recent_successful_runs(self, limit: int = 5) -> List[WorkflowRun]:
+        """Fetches past completed successful workflow runs from GitHub Actions history."""
+        params = {
+            "per_page": limit,
+            "status": "completed",
+            "conclusion": "success"
+        }
+        if Envs.BRANCH:
+            params["branch"] = Envs.BRANCH
+        response = self._safe_get(self.workflow_url, params=params)
+        if response is None:
+            return []
+        data = WorkflowRunsResponse(**response.json())
+        return data.workflow_runs
 
     def get_artifacts(self, run: WorkflowRun) -> List[Artifact]:
         artifact_url = (

@@ -4,16 +4,15 @@ from typing import Dict
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.config import Topics
 from NHIOTSub.dependencies.create_logger import create_logger
-from NHIOTSub.models.payloads import OTAStatusPayload, HeartbeatPayload
+from NHIOTSub.models.payloads import OTAStatusPayload, HeartbeatPayload, IsolationProtectionPayload
 
 logger = create_logger("SERVER_FLEET_AUDIT")
 
-# Fleet Registry: device_id -> {last_seen, branch, arch, binary, status}
 fleet_registry: Dict[str, dict] = {}
 
 
 def main():
-    logger.info("Initializing Enterprise Server Fleet Audit Daemon...")
+    logger.info("Initializing Server Fleet Audit Daemon...")
     client = NHIOTMQTT()
     client.connect()
 
@@ -29,34 +28,59 @@ def main():
                 "status": hb.status
             }
             logger.info(
-                f"💓 [HEARTBEAT] Device '{hb.device_id}' | Status: {hb.status} | "
-                f"Branch: '{hb.active_branch}' | Arch: '{hb.architecture}' | Active: '{hb.active_binary}' | "
-                f"Active Devices in Fleet: {len(fleet_registry)}"
+                f"[HEARTBEAT] Device: {hb.device_id} | Status: {hb.status} | "
+                f"Branch: {hb.active_branch} | Arch: {hb.architecture} | Active: {hb.active_binary} | "
+                f"Fleet Count: {len(fleet_registry)}"
             )
         except Exception as e:
-            logger.error(f"Failed to parse Heartbeat on '{topic}': {e}")
+            logger.error(f"Failed to parse Heartbeat on topic '{topic}': {e}")
 
     def on_ota_status(topic, payload, **kwargs):
         try:
             raw_str = payload.decode("utf-8")
             ota_event = OTAStatusPayload.model_validate_json(raw_str)
-            status_symbol = "✅" if ota_event.status == "SUCCESS" else "⚠️" if ota_event.status == "ROLLBACK" else "❌"
             
             logger.info(
-                f"\n{status_symbol} [OTA EVENT] Device '{ota_event.device_id}' | "
-                f"Status: {ota_event.status} | Branch: '{ota_event.branch}' | "
-                f"SHA: {ota_event.commit_sha[:7]} | Detail: {ota_event.detail}\n"
+                f"\n[OTA EVENT: {topic}]\n"
+                f"   Device ID:  {ota_event.device_id}\n"
+                f"   Status:     {ota_event.status}\n"
+                f"   Branch:     {ota_event.branch}\n"
+                f"   Artifact:   {ota_event.artifact_name}\n"
+                f"   Commit SHA: {ota_event.commit_sha[:7]}\n"
+                f"   Detail:     {ota_event.detail}\n"
+                f"   Timestamp:  {ota_event.timestamp}\n"
             )
         except Exception as e:
-            logger.error(f"Failed to parse OTA Status on '{topic}': {e}")
+            logger.error(f"Failed to parse OTA Status on topic '{topic}': {e}")
+
+    def on_isolation_status(topic, payload, **kwargs):
+        try:
+            raw_str = payload.decode("utf-8")
+            iso_evt = IsolationProtectionPayload.model_validate_json(raw_str)
+            
+            logger.info(
+                f"\n[ISOLATION EVENT: {topic}]\n"
+                f"   Device ID:        {iso_evt.device_id}\n"
+                f"   Protection Status: {iso_evt.status}\n"
+                f"   Function Called:  {iso_evt.function_called}({iso_evt.parameters})\n"
+                f"   Active Binary:    {iso_evt.active_binary}\n"
+                f"   Branch:           {iso_evt.branch}\n"
+                f"   Trapped Error:    {iso_evt.error_message}\n"
+                f"   Timestamp:        {iso_evt.timestamp}\n"
+            )
+        except Exception as e:
+            logger.error(f"Failed to parse Isolation Event on topic '{topic}': {e}")
 
     logger.info(f"Subscribing to Heartbeat topic '{Topics.HEARTBEAT_TOPIC}'...")
     client.subscribe(on_heartbeat, topic=Topics.HEARTBEAT_TOPIC)
 
-    logger.info(f"Subscribing to OTA Telemetry topic '{Topics.OTA_STATUS_TOPIC}'...")
+    logger.info(f"Subscribing to OTA Status topic '{Topics.OTA_STATUS_TOPIC}'...")
     client.subscribe(on_ota_status, topic=Topics.OTA_STATUS_TOPIC)
 
-    logger.info("Server Fleet Audit Daemon is running and tracking IoT fleet devices...")
+    logger.info(f"Subscribing to Isolation Status topic '{Topics.ISOLATION_STATUS_TOPIC}'...")
+    client.subscribe(on_isolation_status, topic=Topics.ISOLATION_STATUS_TOPIC)
+
+    logger.info("Server Fleet Audit Daemon active.")
     try:
         while True:
             time.sleep(1)

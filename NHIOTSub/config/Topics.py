@@ -3,3 +3,4 @@ class Topics:
     RESPONSE_TOPIC = "nhiot/fleet/response"
     OTA_STATUS_TOPIC = "nhiot/ota/status"
     HEARTBEAT_TOPIC = "nhiot/heartbeat"
+    ISOLATION_STATUS_TOPIC = "nhiot/isolation/status"

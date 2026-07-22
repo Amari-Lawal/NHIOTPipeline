@@ -1,6 +1,5 @@
 from logging import Logger
 import os
-import shutil
 import socket
 import threading
 import time
@@ -39,9 +38,10 @@ class NHIOTSubscriber:
         self.branch_changed = False
         self.device_id = f"{socket.gethostname()}-{Envs.SUBSCRIBER_ARCHITECTURE}"
 
-        # Connect MQTT client & register branch change callback
+        # Connect MQTT client & register branch change & revert callbacks
         self.client.connect()
         self.mqtt.set_branch_change_callback(self._on_branch_changed)
+        self.mqtt.set_revert_callback(self.trigger_revert_from_mqtt)
         
         # Subscribe exclusively to enterprise command topic
         handler_cb = self.mqtt.handle(lambda: self.current_file_path)
@@ -87,49 +87,72 @@ class NHIOTSubscriber:
         except Exception as e:
             self.logger.error(f"Failed to send OTA notification: {e}")
 
-    def test_and_swap_binary(self, new_binary_path: str, target: str, commit_sha: str) -> str:
-        """Runs a post-pull operational unit test suite on the newly downloaded binary and auto-rolls back if any test fails."""
-        backup_path = f"{new_binary_path}.bak"
-
-        # 1. Create backup copy if current binary exists
-        if os.path.exists(new_binary_path):
-            try:
-                shutil.copy2(new_binary_path, backup_path)
-            except Exception as e:
-                self.logger.warning(f"Could not create backup file '{backup_path}': {e}")
-
-        # 2. Run Post-Pull Operational Unit Test Suite
+    def run_unit_tests(self, binary_path: str, target: str) -> bool:
+        """Executes post-pull operational unit tests on the downloaded binary. Returns True if all pass."""
         test_cases = [
             ("add", ["10", "20"], "30"),
             ("minus", ["50", "20"], "30"),
             ("multiply", ["6", "7"], "42"),
         ]
 
-        try:
-            os.chmod(new_binary_path, 0o755)
-            self.logger.info(f"Running post-pull operational unit tests for binary '{target}'...")
-            
-            passed_count = 0
-            for fn, args, expected in test_cases:
-                stdout, stderr = self.executor.run(new_binary_path, fn, args)
-                out_clean = stdout.strip().replace(" ", "")
-                if stderr or expected not in out_clean:
-                    raise RuntimeError(f"Unit test '{fn}({args})' FAILED! Output: '{stdout.strip()}', Error: '{stderr.strip()}' (Expected: '{expected}')")
-                passed_count += 1
-                self.logger.info(f"  [PASS] Unit Test {fn}({args}) -> Output: '{stdout.strip()}'")
+        os.chmod(binary_path, 0o755)
+        self.logger.info(f"Running post-pull operational unit tests for binary '{target}'...")
+        
+        passed_count = 0
+        for fn, args, expected in test_cases:
+            stdout, stderr = self.executor.run(binary_path, fn, args)
+            out_clean = stdout.strip().replace(" ", "")
+            if stderr or expected not in out_clean:
+                self.logger.warning(f"  [FAIL] Unit Test {fn}({args}) failed! Output: '{stdout.strip()}', Error: '{stderr.strip()}' (Expected: '{expected}')")
+                return False
+            passed_count += 1
+            self.logger.info(f"  [PASS] Unit Test {fn}({args}) -> Output: '{stdout.strip()}'")
 
-            self.logger.info(f"ALL OPERATIONAL UNIT TESTS PASSED ({passed_count}/{len(test_cases)})! Binary '{target}' verified functional.")
-            self.send_ota_notification("SUCCESS", f"All unit tests passed ({passed_count}/{len(test_cases)}). Binary operational.", commit_sha)
-            return new_binary_path
-        except Exception as crash_err:
-            self.logger.error(f"CRITICAL OPERATIONAL UNIT TEST FAILURE for '{target}': {crash_err}")
-            if os.path.exists(backup_path):
-                shutil.copy2(backup_path, new_binary_path)
-                self.logger.warning(f"AUTOMATED ROLLBACK SUCCESSFUL: Restored working backup '{backup_path}' -> '{new_binary_path}'")
-                self.send_ota_notification("ROLLBACK", f"Unit test failed: {crash_err}. Automatically rolled back to backup binary.", commit_sha)
-            else:
-                self.send_ota_notification("FAILURE", f"Unit test failed: {crash_err}. No backup available.", commit_sha)
-            return new_binary_path
+        self.logger.info(f"ALL OPERATIONAL UNIT TESTS PASSED ({passed_count}/{len(test_cases)})! Binary '{target}' verified functional.")
+        return True
+
+    def trigger_revert_from_mqtt(self) -> Optional[str]:
+        """Callback invoked when publisher sends TRIGGER_REVERT MQTT command."""
+        self.logger.info("Publisher requested manual GitHub Actions version rollback over MQTT...")
+        return self.revert_to_previous_github_build(self.last_processed_run_id or 0, Envs.BRANCH)
+
+    def revert_to_previous_github_build(self, failed_run_id: int, branch: str) -> Optional[str]:
+        """Queries GitHub Actions API for previous successful build runs and reverts to the latest working one."""
+        self.logger.warning(f"Searching GitHub Actions build history for previous successful build run on branch '{branch}'...")
+        recent_runs = self.github.get_recent_successful_runs(limit=5)
+        
+        target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
+
+        for prev_run in recent_runs:
+            if prev_run.id == failed_run_id:
+                continue
+
+            prev_sha = prev_run.head_sha or ""
+            self.logger.info(f"Attempting GitHub Version Revert -> Build Run #{prev_run.id} (SHA: {prev_sha[:7] if prev_sha else 'unknown'})...")
+            
+            artifacts = self.github.get_artifacts(prev_run)
+            artifact = self.artifacts.choose(artifacts, target)
+
+            if not artifact:
+                continue
+
+            try:
+                downloaded_path = self.artifacts.download(artifact)
+                if self.run_unit_tests(downloaded_path, target):
+                    self.current_file_path = downloaded_path
+                    self.last_processed_run_id = prev_run.id
+                    self.logger.info(f"AUTOMATED GITHUB REVERT SUCCESSFUL: Reverted to verified GitHub build run #{prev_run.id} (SHA: {prev_sha[:7]})!")
+                    self.send_ota_notification(
+                        "ROLLBACK",
+                        f"Manual/Post-pull revert triggered. Reverted via GitHub Actions build history to previous working build #{prev_run.id} (SHA: {prev_sha[:7]}).",
+                        prev_sha
+                    )
+                    return self.current_file_path
+            except Exception as e:
+                self.logger.warning(f"Revert attempt on run #{prev_run.id} failed: {e}. Trying next historical build...")
+
+        self.logger.error("CRITICAL: No operational historical build run found in GitHub Actions history.")
+        return None
 
     def fetch_artifact_for_branch(self, branch: str) -> Optional[str]:
         """Synchronously pull, integrity-verify, unit-test, and hot-swap the latest build artifact."""
@@ -148,17 +171,33 @@ class NHIOTSubscriber:
             self.logger.info(f"Artifact '{target}' found for branch '{branch}' (run #{run.id}) — downloading...")
             try:
                 downloaded_path = self.artifacts.download(artifact)
-                # Run post-pull operational unit tests with automated rollback protection
-                self.current_file_path = self.test_and_swap_binary(downloaded_path, target, commit_sha)
+                
+                # 1. Run post-pull operational unit tests on new binary
+                if self.run_unit_tests(downloaded_path, target):
+                    self.current_file_path = downloaded_path
+                    self.last_processed_run_id = run.id
+                    self.send_ota_notification("SUCCESS", f"All unit tests passed for build #{run.id}. Binary operational.", commit_sha)
+                    self.logger.info(f"SUCCESS: Subscriber loaded operational artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
+                    self.logger.info(f"Subscriber active with run #{run.id} on branch '{branch}'. Monitoring GitHub for next build...")
+                    return self.current_file_path
+                else:
+                    # 2. Unit tests failed -> Revert using GitHub Actions Build History!
+                    self.logger.warning(f"Build run #{run.id} failed post-pull unit tests! Triggering GitHub version revert...")
+                    reverted_path = self.revert_to_previous_github_build(run.id, branch)
+                    if reverted_path:
+                        return reverted_path
+                    else:
+                        self.send_ota_notification("FAILURE", f"Unit tests failed on run #{run.id} and no historical build could be restored.", commit_sha)
+                        return self.current_file_path
+
             except Exception as download_error:
-                self.logger.warning(f"Download/Verification failed: {download_error}. Falling back to cached executable.")
-                self.current_file_path = f"./Executables/{target}/{target}"
-                self.send_ota_notification("FAILURE", f"Artifact download/verification failed: {download_error}", commit_sha)
-            
-            self.last_processed_run_id = run.id
-            self.logger.info(f"SUCCESS: Subscriber loaded operational artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
-            self.logger.info(f"Subscriber active with run #{run.id} on branch '{branch}'. Monitoring GitHub for next build...")
-            return self.current_file_path
+                self.logger.warning(f"Download/Verification failed: {download_error}. Triggering GitHub version revert...")
+                reverted_path = self.revert_to_previous_github_build(run.id, branch)
+                if reverted_path:
+                    return reverted_path
+                else:
+                    self.send_ota_notification("FAILURE", f"Artifact download/verification failed: {download_error}", commit_sha)
+                    return self.current_file_path
         else:
             self.logger.warning(f"No matching artifact '{target}' found in run #{run.id} for branch '{branch}'.")
             self.send_ota_notification("FAILURE", f"No matching artifact '{target}' found in run #{run.id}", commit_sha)
