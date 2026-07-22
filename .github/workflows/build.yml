@@ -8,9 +8,31 @@ on:
   workflow_dispatch:
 
 jobs:
+  security-scan:
+    name: C Security Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Cppcheck and Flawfinder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck flawfinder
+
+      - name: Run Cppcheck Memory & Static Analysis
+        run: |
+          cppcheck --enable=all --suppress=missingIncludeSystem Artefact/*.c
+
+      - name: Run Flawfinder Vulnerability Risk Analysis
+        run: |
+          flawfinder --minlevel=1 Artefact/
+
   build:
     name: Build C Executable
     runs-on: ubuntu-latest
+    needs: security-scan
 
     strategy:
       matrix:
@@ -30,12 +52,13 @@ jobs:
             sudo apt-get install -y gcc-x86-64-linux-gnu
           fi
 
-      - name: Compile C program
+      - name: Compile C program with Security Hardening Flags
         run: |
+          SEC_FLAGS="-O2 -Wall -Wextra -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security"
           if [ "${{ matrix.arch }}" = "aarch64" ]; then
-            aarch64-linux-gnu-gcc -o hello_aarch64 Artefact/*.c
+            aarch64-linux-gnu-gcc $SEC_FLAGS -o hello_aarch64 Artefact/*.c
           else
-            x86_64-linux-gnu-gcc -o hello_x86_64 Artefact/*.c
+            x86_64-linux-gnu-gcc $SEC_FLAGS -o hello_x86_64 Artefact/*.c
           fi
 
       - name: Upload executable as artifact
