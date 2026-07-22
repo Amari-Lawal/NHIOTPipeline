@@ -443,7 +443,7 @@ async def publish_sub_command(payload: dict):
         
         client = NHIOTMQTT()
         client.connect(verbose=False)
-        client.publish(json.dumps(payload), topic="machineB/recv", verbose=False)
+        client.publish(json.dumps(payload), topic="nhiot/fleet/command", verbose=False)
         await asyncio.sleep(0.5)
         client.disconnect(verbose=False)
         return {"status": "published"}

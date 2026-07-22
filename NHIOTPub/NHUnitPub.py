@@ -35,11 +35,9 @@ class BaseMQTTTest(unittest.TestCase):
                 pass
 
         self.client.subscribe(on_ready_callback, topic=self.subscribe_topic, verbose=False)
-        self.client.subscribe(on_ready_callback, topic=Topics.LEGACY_RESPONSE_TOPIC, verbose=False)
         
         switch_payload = json.dumps({"command": "SET_BRANCH", "branch": target_branch})
         self.client.publish(switch_payload, topic=self.publish_topic, verbose=False)
-        self.client.publish(switch_payload, topic=Topics.LEGACY_COMMAND_TOPIC, verbose=False)
 
         received = event.wait(timeout=15)
         return received and result_holder["ready"]
@@ -82,7 +80,6 @@ class BaseMQTTTest(unittest.TestCase):
         cb = self._make_callback(event, expected_result, parameters, expected_function=function)
         
         self.client.subscribe(cb, topic=self.subscribe_topic, verbose=False)
-        self.client.subscribe(cb, topic=Topics.LEGACY_RESPONSE_TOPIC, verbose=False)
 
         payload = json.dumps({"function": function, "parameters": parameters})
         self.client.publish(payload, topic=self.publish_topic, verbose=False)

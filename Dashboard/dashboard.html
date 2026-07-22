@@ -1728,7 +1728,7 @@
                 
                 if (!response.ok) throw new Error("Failed to publish crash command over AWS");
                 
-                log("INFO", "AWS", "MQTT crash payload published successfully on topic 'machineB/recv'.");
+                log("INFO", "AWS", "MQTT crash payload published successfully on topic 'nhiot/fleet/command'.");
                 
                 // Wait for the background daemon to capture, execute, crash, and log to the console
                 setTimeout(() => {

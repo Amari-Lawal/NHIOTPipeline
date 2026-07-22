@@ -259,7 +259,7 @@ class SimulationEvaluationSuite:
             rtts.append(rtt)
             event.set()
             
-        client.subscribe(callback, topic="machineA/recv", verbose=False)
+        client.subscribe(callback, topic="nhiot/fleet/response", verbose=False)
         
         # Run 100 successive assertions
         for i in range(1, 101):
@@ -286,7 +286,7 @@ class SimulationEvaluationSuite:
             t_start = time.perf_counter()
             client.publish(
                 json.dumps({"function": op, "parameters": params}),
-                topic="machineB/recv",
+                topic="nhiot/fleet/command",
                 verbose=False
             )
             

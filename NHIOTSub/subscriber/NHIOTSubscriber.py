@@ -40,10 +40,9 @@ class NHIOTSubscriber:
         self.client.connect()
         self.mqtt.set_branch_change_callback(self._on_branch_changed)
         
-        # Subscribe to clean enterprise command topic & legacy topic
+        # Subscribe exclusively to enterprise command topic
         handler_cb = self.mqtt.handle(lambda: self.current_file_path)
         self.client.subscribe(handler_cb, topic=Topics.COMMAND_TOPIC)
-        self.client.subscribe(handler_cb, topic=Topics.LEGACY_COMMAND_TOPIC)
 
     def send_ota_notification(self, status: str, detail: str, commit_sha: str) -> None:
         """Publishes a Pydantic-validated OTA status payload to enterprise topic 'nhiot/ota/status'."""

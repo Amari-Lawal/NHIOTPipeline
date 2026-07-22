@@ -20,9 +20,8 @@ class MQTTHandler:
         self.branch_change_callback = callback
 
     def _publish_response(self, payload_str: str) -> None:
-        """Publishes response to clean enterprise topic and legacy topic for compatibility."""
+        """Publishes response to enterprise response topic."""
         self.client.publish(payload_str, topic=Topics.RESPONSE_TOPIC)
-        self.client.publish(payload_str, topic=Topics.LEGACY_RESPONSE_TOPIC)
 
     def handle(self, get_file_path: Union[str, Callable[[], str]]) -> Callable:
         def on_message(topic, payload, **kwargs):
