@@ -10,6 +10,6 @@ class Envs:
     REPO = os.getenv("REPO")
     WORKFLOW_ID = os.getenv("WORKFLOW_ID")
     BRANCH = os.getenv("BRANCH")
-    POLL_INTERVAL=os.getenv("POLL_INTERVAL")
+    POLL_INTERVAL = os.getenv("POLL_INTERVAL", "10")
     SUBSCRIBER_ARCHITECTURE=os.getenv("SUBSCRIBER_ARCHITECTURE")
     ARTIFACT_NAME=os.getenv("ARTIFACT_NAME")
