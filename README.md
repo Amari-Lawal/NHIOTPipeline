@@ -1,395 +1,176 @@
-# NHIOT Pipeline
-To start in on terminal run the subscriber which would be the Raspberry Pi or IOT. Make sure that in Github actions the correct aarch/x86_64 compiler is installed.
-```
-./run_sub.py
-```
-Then first build the artifact with this will build the artifact, in the NHSub window it should say "Downloading artifact 'hello_x86'...":
-```
-./build_artifact.sh
-```
+# NHIOT Pipeline: Autonomous Enterprise IoT DevSecOps & Zero-Downtime OTA Pipeline
 
-Then run the publisher which will be the main device. This would be the admin that wants to test the executable from a distance with unittests.
-```
-./run_pub.sh
-```
+An enterprise-grade, Over-The-Air (OTA) software delivery and process-isolated execution pipeline designed for IoT edge devices (such as Raspberry Pi `aarch64` and Linux `x86_64` smart gateways).
 
-When creating a function to test in the C artefact ensure that it prints out to the stdout using:
-```
-printf("add:%d", count);
-```
-For error handling to send an error to the publisher use:
-```
-fprintf(stderr, "add: no arguments provided\n");
-```
-Ensure that  the string is in the format of:
-```
-printf("<function_name>:<result>", count);
+The pipeline combines automated multi-architecture cross-compilation, DevSecOps security analysis, cryptographic integrity verification, non-zero exit code process isolation protection, Pydantic-validated telemetry, and automated GitHub Actions build history rollback.
 
-```
-and
-```
-fprintf(stderr, "<function_name>:<error_message>");
+---
 
-```
-## Limitations 
-So far two out of three architectures have been developed for:
-1. Desktop x86_64 
-2. Embedded Linux - Raspbery Pi and ARM devices.
-3. MicroControllers - Can be done but requires refactor from python to C.
-Libraries Needed for Microcontrollers
-1. awscrt Python -> AWS CRT (C Libraries)
-2. awsiot (Python SDK v2) -> AWS IoT Embedded C SDK
-3. requests (Python) -> C Equivalent.
-
-
-## System Architecture
-An end-to-end, Over-the-Air (OTA) update and execution system designed for IoT edge nodes. It integrates automated cross-compilation pipelines, secure cloud messaging via AWS IoT Core, and distributed executable unit testing on target hardware architectures (e.g., Raspberry Pi, ARM, and Desktop Linux).
-
-### Architecture Diagram
+## Architecture Overview
 
 ```mermaid
 flowchart TD
-    %% Node Styling Definitions
-    classDef devStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef gitStyle fill:#F3F4F6,stroke:#4B5563,stroke-width:2px;
-    classDef awsStyle fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px;
-    classDef edge1 fill:#ECFDF5,stroke:#10B981,stroke-width:2px;
-    classDef edge2 fill:#F0FDFA,stroke:#0D9488,stroke-width:2px;
-    classDef edge3 fill:#F0FDF4,stroke:#16A34A,stroke-width:2px;
-    classDef pubStyle fill:#FDF2F8,stroke:#EC4899,stroke-width:2px;
-
-    %% Subgraphs
-    subgraph CI_CD ["CI/CD Pipeline & GitHub Automation"]
-        Developer["Developer Workstation<br>(hello.c update)"]:::devStyle
-        GH_Actions["GitHub Actions CI Workflow"]:::gitStyle
-        GH_Artifacts["GitHub Build Artifacts<br>(hello_x86_64 / hello_aarch64)"]:::gitStyle
+    subgraph CI_CD ["CI/CD Pipeline (GitHub Actions)"]
+        A[Git Push / PR] --> B[DevSecOps Security Scan<br>SAST: Cppcheck & Flawfinder<br>SCA: Trivy FS Scan<br>Secrets: Gitleaks]
+        A --> C[Python Quality Gate<br>Ruff Format & Linter Check]
+        B --> D[Multi-Arch Cross-Compilation<br>x86_64 & aarch64 with GCC Hardening]
+        C --> D
+        D --> E[Generate Cryptographic SHA-256 Checksums<br>& Upload Workflow Build Artifacts]
     end
 
-    subgraph AWS_Core ["Cloud Messaging (AWS IoT Core)"]
-        AWS_IoT["AWS IoT Core Broker<br>(Secure mTLS Connect)"]:::awsStyle
-        Topic_B["Topic: machineB/recv<br>(Function Commands)"]:::awsStyle
-        Topic_A["Topic: machineA/recv<br>(Execution Results)"]:::awsStyle
+    subgraph MQTT_Broker ["MQTT Telemetry & Control Plane"]
+        Broker[MQTT Message Broker]
+        CmdTopic["nhiot/fleet/command<br>(Branch Switch & Execution Requests)"]
+        ResTopic["nhiot/fleet/response<br>(Execution Output & Diagnostics)"]
+        OTATopic["nhiot/ota/status<br>(Pydantic OTA Deployment Events)"]
+        HBTopic["nhiot/heartbeat<br>(Pydantic 15s Fleet Heartbeat)"]
+        IsoTopic["nhiot/isolation/status<br>(Pydantic Isolation Protection Events)"]
     end
 
-    subgraph Control_Center ["Control & Verification (Publisher)"]
-        Pub_Client["NHUnitPub Unit Tester<br>(Admin/Testing Suite)"]:::pubStyle
+    subgraph IoT_Edge ["IoT Edge Device Daemon"]
+        SubDaemon[NHIOTSubscriber Daemon]
+        GHClient[GitHub API Client]
+        ArtifactSvc[Artifact Integrity Service<br>SHA-256 Hash & 64-bit ELF Header Check]
+        UnitTestSuite[Post-Pull Operational Unit Tests<br>add, minus, multiply]
+        IsoExecutor[Process Isolation Boundary]
     end
 
-    %% Device 1 Subgraph
-    subgraph Edge_Device_1 ["IoT Edge Device 1 (Raspberry Pi - aarch64)"]
-        Sub_Daemon_1["NHIOTSubscriber Daemon 1"]:::edge1
-        Artifact_Service_1["Artifact Service 1"]:::edge1
-        Local_Binary_1["Local C Binary<br>(hello_aarch64)"]:::edge1
-        MQTT_Handler_1["MQTT Message Handler 1"]:::edge1
-        Executor_1["Executor Service 1"]:::edge1
+    subgraph Server_Audit ["Server Audit & Management"]
+        ServerDaemon[Server Fleet Audit Daemon]
+        PubController[Publisher Command Suite]
     end
 
-    %% Device 2 Subgraph
-    subgraph Edge_Device_2 ["IoT Edge Device 2 (Smart Gateway - x86_64)"]
-        Sub_Daemon_2["NHIOTSubscriber Daemon 2"]:::edge2
-        Artifact_Service_2["Artifact Service 2"]:::edge2
-        Local_Binary_2["Local C Binary<br>(hello_x86_64)"]:::edge2
-        MQTT_Handler_2["MQTT Message Handler 2"]:::edge2
-        Executor_2["Executor Service 2"]:::edge2
-    end
+    GHClient -->|Poll / Download Artifact| E
+    ArtifactSvc -->|Verify SHA-256 & ELF| SubDaemon
+    SubDaemon -->|Execute Unit Tests| UnitTestSuite
+    UnitTestSuite -->|If Failed| GHClient
+    SubDaemon --> IsoExecutor
 
-    %% Device 3 Subgraph
-    subgraph Edge_Device_3 ["IoT Edge Device 3 (Industrial PC - aarch64)"]
-        Sub_Daemon_3["NHIOTSubscriber Daemon 3"]:::edge3
-        Artifact_Service_3["Artifact Service 3"]:::edge3
-        Local_Binary_3["Local C Binary<br>(hello_aarch64)"]:::edge3
-        MQTT_Handler_3["MQTT Message Handler 3"]:::edge3
-        Executor_3["Executor Service 3"]:::edge3
-    end
+    PubController -->|Publish Command| CmdTopic
+    CmdTopic -->|Deliver Command| SubDaemon
+    IsoExecutor -->|Execution Result| ResTopic
+    ResTopic -->|Deliver Response| PubController
 
-    %% CI/CD Flow
-    Developer -->|1. Git Push Code| GH_Actions
-    GH_Actions -->|2. Multi-Arch Compile| GH_Artifacts
-    
-    %% OTA Update Flow
-    Sub_Daemon_1 -->|3a. Polls Workflow| GH_Actions
-    Sub_Daemon_2 -->|3b. Polls Workflow| GH_Actions
-    Sub_Daemon_3 -->|3c. Polls Workflow| GH_Actions
+    SubDaemon -->|Publish Heartbeat| HBTopic
+    SubDaemon -->|Publish OTA Status| OTATopic
+    SubDaemon -->|Publish Isolation Event| IsoTopic
 
-    GH_Artifacts -->|4a. Downloads aarch64| Artifact_Service_1
-    GH_Artifacts -->|4b. Downloads x86_64| Artifact_Service_2
-    GH_Artifacts -->|4c. Downloads aarch64| Artifact_Service_3
-
-    Artifact_Service_1 -->|5a. Installs| Local_Binary_1
-    Artifact_Service_2 -->|5b. Installs| Local_Binary_2
-    Artifact_Service_3 -->|5c. Installs| Local_Binary_3
-
-    %% Message Flow - Execution Request
-    Pub_Client -->|6. Publishes Request| Topic_B
-    
-    Topic_B -->|7a. Delivers Command| MQTT_Handler_1
-    Topic_B -->|7b. Delivers Command| MQTT_Handler_2
-    Topic_B -->|7c. Delivers Command| MQTT_Handler_3
-    
-    %% Execution Flow on Edge 1
-    MQTT_Handler_1 -->|8a. Invokes| Executor_1
-    Executor_1 -->|9a. Runs| Local_Binary_1
-    Local_Binary_1 -->|10a. Returns| Executor_1
-    Executor_1 -->|11a. Parses| MQTT_Handler_1
-
-    %% Execution Flow on Edge 2
-    MQTT_Handler_2 -->|8b. Invokes| Executor_2
-    Executor_2 -->|9b. Runs| Local_Binary_2
-    Local_Binary_2 -->|10b. Returns| Executor_2
-    Executor_2 -->|11b. Parses| MQTT_Handler_2
-
-    %% Execution Flow on Edge 3
-    MQTT_Handler_3 -->|8c. Invokes| Executor_3
-    Executor_3 -->|9c. Runs| Local_Binary_3
-    Local_Binary_3 -->|10c. Returns| Executor_3
-    Executor_3 -->|11c. Parses| MQTT_Handler_3
-    
-    %% Message Flow - Execution Response
-    MQTT_Handler_1 -->|12a. Publishes Response| Topic_A
-    MQTT_Handler_2 -->|12b. Publishes Response| Topic_A
-    MQTT_Handler_3 -->|12c. Publishes Response| Topic_A
-
-    Topic_A -->|13. Delivers Result| Pub_Client
-    
-    %% Association connections
-    AWS_IoT -.-> Topic_B
-    AWS_IoT -.-> Topic_A
+    HBTopic --> ServerDaemon
+    OTATopic --> ServerDaemon
+    IsoTopic --> ServerDaemon
 ```
 
-### Component Details
+---
 
-1. **CI/CD Pipeline (GitHub Actions)**:
-   - Compiles C executable code targeting multiple architectures (`x86_64` and `aarch64`) dynamically on commit to the `main` branch.
-   - Uploads compiled platform-specific executables as workflow build artifacts.
-2. **OTA Update Subscriber (Edge Daemon)**:
-   - Polling daemon running locally on the edge device that tracks GitHub workflow statuses.
-   - Automatically downloads, verifies, and launches newly compiled binaries dynamically upon successful completion of a remote build.
-3. **AWS IoT Core Message Broker**:
-   - Manages secure, bidirectional communication between the central controller and the edge devices using MQTT over mutual TLS (mTLS) authentication.
-4. **Edge Execution Subprocess**:
-   - Spawns the native C binary securely, executing request-driven business logic (`add`, `minus`, `multiply`) and formatting results (`stdout` and `stderr`) into a unified JSON format validated by **Pydantic**.
-5. **Publisher Controller**:
-   - Remote client triggering test execution, injecting payloads containing targeting functions and variables, and asserting the output from the edge device.
+## Enterprise MQTT Topic Mapping
 
+| Topic | Direction | Payload Schema | Purpose |
+| :--- | :--- | :--- | :--- |
+| `nhiot/fleet/command` | Publisher $\rightarrow$ IoT Devices | `CommandPayload` | Admin commands (`add`, `minus`, `SET_BRANCH`, `TRIGGER_REVERT`) |
+| `nhiot/fleet/response` | IoT Devices $\rightarrow$ Publisher | `CommandResponse` | Dynamic binary execution output (`stdout`, `stderr`) |
+| `nhiot/ota/status` | IoT Devices $\rightarrow$ Server Audit | `OTAStatusPayload` | OTA Deployment status telemetry (`SUCCESS`, `ROLLBACK`, `FAILURE`) |
+| `nhiot/heartbeat` | IoT Devices $\rightarrow$ Server Audit | `HeartbeatPayload` | Background 15-second fleet health pulse (`HEALTHY`) |
+| `nhiot/isolation/status` | IoT Devices $\rightarrow$ Server Audit | `IsolationProtectionPayload` | Trapped non-zero returncode crash protection events (`PROTECTED`) |
 
-# TODO 
-1. Determine testing metrics like *Mean Time To Repair (MTTR)* and Mean Time Between Failures (MTBF).
-2. Make automated tests and analytics data points for metric making sure it aligns with the brief specifcation.
-3. Make or choose a more complex functions in the artifact and parameters and use them for metrics and datapoints
-#  TODO Meh
-1. Automate AWSMqtt Authentication and Policy creation process.
-Here you go, Amari — clear, concrete, numerically measurable testing, analysis, and evaluation methods you can use in your Results & Analysis and Critical Evaluation chapters. These will map cleanly to your OTA-update IoT pipeline project and help you produce strong, evidence‑based results.
+---
 
-I’ll give you:
+## Step-by-Step Examiner Quick-Start Guide
 
-SMART metrics you can measure
-Testing and analysis methods you can apply
-How to present numeric results
-Critical evaluation angles
-✅ 1. SMART Numerical Metrics You Can Use
-System Performance Metrics
-Goal
-SMART Version
-Example Measurement
-Reduce manual update time
-Reduce average manual update time from X minutes to under Y minutes per update by May 2025
-Time benchmarks before & after solution
-Increase update success rate
-Achieve ≥ 98% OTA update success rate across N test runs by final demo week
-Pass/fail logs
-Reduce device downtime
-Reduce device downtime during update from legacy average (e.g., 2 min) to ≤ 10 seconds by project completion
-Measured via device heartbeat logs
-Quality & Reliability Metrics
-Goal
-SMART Version
-Measurement Method
-Improve software reliability
-Ensure ≥ 90% unit test coverage of update-related functions using automated GitHub Actions before submission
-Coverage report
-Detect update-related defects earlier
-Achieve 100% automated test execution for every commit by integrating CI pipeline
-GitHub Actions logs
-Reduce update-caused failures
-Target 0 critical failures and ≤ 2 minor fails across 30 OTA update test cycles
-Error logs and device telemetry
-Network & Deployment Metrics
-Goal
-SMART Version
-Measurement Method
-Measure dead-zone resilience
-Ensure device reconnects and resumes update within ≤ 5 seconds after a forced signal drop
-Network simulation tests
-Measure update package size efficiency
-Compress update bundles to ≤ X MB to meet bandwidth constraints
-File size logs
-✅ 2. Methods You Can Use to Analyse Your Results
-Below are specific, academically acceptable methods tied to your project.
+Follow these simple instructions to run the entire pipeline end-to-end on your local machine.
 
-A. Quantitative System Testing (Core for Your Project)
-1. Automated CI/CD Test Results (Unit Test Analytics)
-You already automated unit tests — now analyse:
+### Prerequisites
 
-Number of test cases run
-Number of tests passed/failed
-Coverage percentage
-Trends across commits (e.g., decreasing failures)
-How to display:
-Line charts, bar charts, coverage heatmaps, failure rate percentages.
+- **Python**: 3.11 or higher
+- **Operating System**: Linux (x86_64 or aarch64) or macOS / WSL
 
-2. OTA Update Time Benchmarks
-Run repeated update cycles (e.g., 30 runs) and record:
+### 1. Environment Setup
 
-Start → finish time
-Verification time
-Device reboot time
-Downtime intervals
-How to analyse:
+Clone the repository and set up the Python virtual environment:
 
-Mean, median, standard deviation
-Box-plot to show variation
-Compare with manual update baseline
-3. Failure Rate & Reliability Testing
-For each OTA update iteration:
+```bash
+# 1. Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-Did it succeed?
-If failed, what stage?
-Error type classification
-Compute:
+# 2. Install required dependencies
+pip install -r requirements.txt
+```
 
-MTBF — Mean Time Between Failures
-Failure Rate %
-Recovery time
-This is gold for an engineering-style report.
+---
 
-4. Network Interruption Testing
-Simulate:
+### 2. Running the System (3 Terminal Setup)
 
-Weak signal
-Total drop
-Packet loss
-Partial update failure
-Measure:
+Open **3 separate terminal windows** inside the project directory (`/path/to/NHIOTPipeline`).
 
-Recovery time
-Partial update handling
-Package integrity checks success
-Use bar graphs to show % recoveries under different conditions.
+#### Terminal 1: Launch Server Fleet Audit Daemon
+The Server Audit Daemon listens for incoming fleet heartbeats, OTA deployment notifications, and process isolation protection events.
 
-B. Comparative Evaluation
-Compare:
+```bash
+source venv/bin/activate
+./run_sub_server.sh
+```
+*Output*: Displays active fleet count, 15-second heartbeat telemetry, OTA updates, and protection events in real-time.
 
-Legacy Manual Process vs Your Automated Pipeline
-Criterion
-Manual
-Automated
-Improvement
-Time to update
-e.g., 20 mins
-2 mins
-90% faster
-Human resource cost
-1 contractor
-0
-100% reduction
-Device downtime
-2 mins
-10 sec
-92% reduction
-Success rate
-85%
-98%
-+13%
-Error detection
-None
-Unit tests + CI
-Major benefit
-Graphs + tables = strong marks.
+#### Terminal 2: Launch IoT Device Subscriber Daemon
+The IoT Subscriber daemon runs on the target edge device. It maintains a 15s background heartbeat, polls GitHub Actions for compiled artifacts, verifies SHA-256 checksums and 64-bit ELF headers, runs post-pull operational unit tests, and isolates binary execution.
 
-C. Risk Analysis (Quantitative)
-Measure risk severity before and after automation.
-Use a Risk Matrix with numerical scoring:
+```bash
+source venv/bin/activate
+./run_sub_iot.sh
+```
+*Output*: Loads the current operational binary, starts background heartbeat thread, and listens on `nhiot/fleet/command`.
 
-Likelihood (1–5)
-Impact (1–5)
-Risk = L × I
-Example:
+#### Terminal 3: Publisher Control Suite & Test Verification
+Use the publisher tool to issue commands, switch target environment branches, trigger failure isolation protection, and test automated GitHub Actions version history rollbacks.
 
-Risk
-Before
-After
-Update failure
-20
-5
-Downtime
-15
-3
-Contractor dependency
-25
-0
-This gives compelling numerical evidence.
+---
 
-D. Ethical & Data Protection Considerations
-Focus on:
+### 3. Verification Commands for the Examiner
 
-No live ANPR or personal data used
-Only synthetic or stubbed telemetry
-GDPR compliance
-Secure handling of device logs
-Controlled test environment
-This is required for marks.
+Run the following commands in **Terminal 3** while Terminals 1 and 2 are running:
 
-✅ 3. How to Display Your Analysis in Your Report
-Use clean, measurable displays:
+#### A. Test Dynamic Branch Switch (`main`, `dev`, `staging`, `test`)
+Request the IoT device to target a different branch environment, fetch its compiled GitHub artifact, run post-pull unit tests, and hot-swap binaries:
 
-Graphs
-OTA update time comparison (bar chart)
-Test coverage increase over time (line graph)
-Failure rate under different network conditions (bar or pie chart)
-Tables
-SMART objective progress
-Comparison of manual vs automated processes
-Error type frequency distribution
-Diagrams
-Workflow of OTA pipeline
-Sequence diagram of update process
-Statistical Methods
-Averages
-Standard deviation
-Confidence intervals
-Boxplots for variability
-✅ 4. Critical Evaluation of Results (What You Can Say)
-This answers the “So what?” part of your brief.
+```bash
+./run_pub.sh dev
+```
+*Result*: Terminal 2 downloads the `dev` branch artifact, verifies SHA-256 and ELF headers, runs post-pull unit tests (`add`, `minus`, `multiply`), and Terminal 1 receives an `OTAStatusPayload` with `status: SUCCESS`.
 
-Discuss:
+#### B. Trigger Process Isolation Protection & Trapped Crash Telemetry
+Send a division-by-zero crash request to test process isolation protection:
 
-What worked well
-Significant reduction in time and human labour
-CI/CD enforcing higher code quality
-Reliable automated recovery mechanisms
-Near-zero downtime prototype performance
-What didn’t work or needs improvement
-Limited real-world device diversity
-Only tested under controlled network simulations
-Hardware constraints of the legacy IoT device
-No integration with National Highways real backend systems
-Impact on operational area
-Removes need for field engineer dispatch
-Cuts maintenance cost per camera
-Reduces road network downtime
-Scales across thousands of devices
-Supports safer, more reliable roadside systems
-Remaining Questions (your brief requires this!)
-How would this scale to millions of deployed devices?
-Can the OTA system handle security updates for critical systems?
-How does this integrate with National Highways’ central platform?
-What regulatory approvals would be required?
-These questions show "room for future research," which the brief expects.
+```bash
+./run_pub.sh crash
+```
+*Result*: 
+1. The IoT device traps the non-zero exit code (`exit code -8` SIGFPE) within its isolated boundary without crashing the subscriber daemon.
+2. Terminal 3 displays the trapped stderr error.
+3. Terminal 1 logs an `IsolationProtectionPayload` event on `nhiot/isolation/status` showing `status: PROTECTED`.
 
-✅ Want me to create your Results & Analysis chapter or Critical Evaluation chapter?
-I can write them in academic style, properly structured, and tailored to your exact project.
-Just say “write my Results & Analysis chapter” or “write my Critical Evaluation section”.
+#### C. Trigger Automated GitHub Actions Build History Rollback
+Trigger a remote GitHub Actions version rollback:
 
+```bash
+./run_pub.sh revert
+```
+*Result*:
+1. The IoT subscriber queries the GitHub Actions API for past completed successful workflow runs (`get_recent_successful_runs`).
+2. It downloads the previous working build artifact (`run #N-1`), verifies checksums and ELF headers, and runs post-pull operational unit tests.
+3. Once verified, it hot-swaps to the historical binary and sends an `OTAStatusPayload` with `status: ROLLBACK` to Terminal 1.
 
+---
 
-Test
+## Security Gates & Quality Controls
+
+### 1. DevSecOps Security Pipeline (`.github/workflows/build.yml`)
+- **SAST (Static Application Security Testing)**: `Cppcheck` detects memory leaks and uninitialized variables; `Flawfinder` scores risk levels for C source files.
+- **SCA (Software Composition Analysis)**: `Trivy` scans repository dependencies and compiled executable binaries for known CVE vulnerabilities.
+- **Secret Leak Prevention**: `Gitleaks` scans commits for exposed API keys and credentials.
+- **GCC Security Hardening Flags**: Executables are compiled using `-O2 -Wall -Wextra -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security`.
+- **Python Quality Gate**: `Ruff` enforces code formatting (`line-length = 120`) and linting (`select = ["E", "F", "W", "I"]`).
+
+### 2. Edge Device Integrity & Verification
+- **SHA-256 Checksum Verification**: Downloaded binaries are compared against `.sha256` files generated during compilation.
+- **ELF Header Architecture Check**: Reads the 64-byte ELF header using Python `struct` to verify magic bytes (`\x7fELF`), 64-bit class (`2`), and target architecture (`0x3E` for `x86_64`, `0xB7` for `aarch64`).
+- **Post-Pull Operational Unit Test Suite**: Executes standard arithmetic tests (`add 10 20`, `minus 50 20`, `multiply 6 7`). If tests fail, the system automatically triggers a GitHub Actions version history revert.
