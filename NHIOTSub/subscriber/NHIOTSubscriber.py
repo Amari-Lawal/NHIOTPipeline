@@ -63,6 +63,7 @@ class NHIOTSubscriber:
             
             self.last_processed_run_id = run.id
             self.logger.info(f"SUCCESS: Subscriber loaded artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
+            self.logger.info(f"Subscriber active with run #{run.id} on branch '{branch}'. Monitoring GitHub for next build...")
             return self.current_file_path
         else:
             self.logger.warning(f"No matching artifact '{target}' found in run #{run.id} for branch '{branch}'.")
@@ -100,18 +101,17 @@ class NHIOTSubscriber:
                 time.sleep(5)
                 continue
 
-            self.logger.info(f"Latest run #{run.id} on branch '{Envs.BRANCH}' | status={run.status} | SHA={run.head_sha[:7] if run.head_sha else 'unknown'}")
+            sha_str = run.head_sha[:7] if run.head_sha else 'unknown'
+            target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
 
-            # Check if this run ID has not been downloaded yet
+            # Check if this run ID has not been processed yet
             if self.last_processed_run_id != run.id:
                 if run.status == "completed":
-                    self.logger.info(f"New completed run #{run.id} detected on branch '{Envs.BRANCH}' — fetching artifact...")
+                    self.logger.info(f"New completed build run #{run.id} (SHA: {sha_str}) detected on branch '{Envs.BRANCH}' — fetching artifact...")
                     self.fetch_artifact_for_branch(Envs.BRANCH)
                 elif run.status in ("in_progress", "queued", "requested", "waiting"):
-                    self.logger.info(f"New run #{run.id} on branch '{Envs.BRANCH}' is currently '{run.status}' — waiting for CI build to finish...")
+                    self.logger.info(f"New build run #{run.id} (SHA: {sha_str}) on branch '{Envs.BRANCH}' is '{run.status}' — waiting for build to complete...")
             else:
-                sha_str = run.head_sha[:7] if run.head_sha else 'unknown'
-                target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
-                self.logger.info(f"Run #{run.id} (SHA: {sha_str}) on branch '{Envs.BRANCH}' is active with artifact '{target}'. Monitoring for new builds... (Next poll in {Envs.POLL_INTERVAL}s)")
+                self.logger.info(f"Waiting for next GitHub build on branch '{Envs.BRANCH}'... (Active: run #{run.id} [{sha_str}] | Target: '{target}' | Next check in {Envs.POLL_INTERVAL}s)")
 
             time.sleep(int(Envs.POLL_INTERVAL))
