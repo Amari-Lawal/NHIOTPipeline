@@ -1,6 +1,7 @@
 from logging import Logger
 import os
 import shutil
+import socket
 import time
 import subprocess
 from typing import Optional
@@ -10,6 +11,7 @@ from NHIOTSub.config import Envs
 from NHIOTSub.executors.Executor import Executor
 from NHIOTSub.handlers.MQTTHandler import MQTTHandler
 from NHIOTSub.services.ArtifactService import ArtifactService
+from NHIOTSub.models.payloads import OTAStatusPayload
 
 
 class NHIOTSubscriber:
@@ -32,6 +34,7 @@ class NHIOTSubscriber:
         self.current_file_path = None
         self.last_processed_run_id = None
         self.branch_changed = False
+        self.device_id = f"{socket.gethostname()}-{Envs.SUBSCRIBER_ARCHITECTURE}"
 
         # Connect MQTT client & register branch change callback
         self.client.connect()
@@ -43,7 +46,23 @@ class NHIOTSubscriber:
             topic="machineB/recv"
         )
 
-    def test_and_swap_binary(self, new_binary_path: str, target: str) -> str:
+    def send_ota_notification(self, status: str, detail: str, commit_sha: str) -> None:
+        """Publishes a Pydantic-validated OTA status payload to topic 'nhiot/ota/status'."""
+        try:
+            payload = OTAStatusPayload(
+                device_id=self.device_id,
+                branch=Envs.BRANCH or "unknown",
+                artifact_name=f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}",
+                commit_sha=commit_sha or "unknown",
+                status=status,
+                detail=detail
+            )
+            self.client.publish(payload.model_dump_json(), topic="nhiot/ota/status")
+            self.logger.info(f"Published OTA Notification to 'nhiot/ota/status': Status={status} | SHA={commit_sha[:7] if commit_sha else 'unknown'}")
+        except Exception as e:
+            self.logger.error(f"Failed to send OTA notification: {e}")
+
+    def test_and_swap_binary(self, new_binary_path: str, target: str, commit_sha: str) -> str:
         """Runs a post-pull operational unit test suite on the newly downloaded binary and auto-rolls back if any test fails."""
         backup_path = f"{new_binary_path}.bak"
 
@@ -75,12 +94,16 @@ class NHIOTSubscriber:
                 self.logger.info(f"  [PASS] Unit Test {fn}({args}) -> Output: '{stdout.strip()}'")
 
             self.logger.info(f"ALL OPERATIONAL UNIT TESTS PASSED ({passed_count}/{len(test_cases)})! Binary '{target}' verified functional.")
+            self.send_ota_notification("SUCCESS", f"All unit tests passed ({passed_count}/{len(test_cases)}). Binary operational.", commit_sha)
             return new_binary_path
         except Exception as crash_err:
             self.logger.error(f"CRITICAL OPERATIONAL UNIT TEST FAILURE for '{target}': {crash_err}")
             if os.path.exists(backup_path):
                 shutil.copy2(backup_path, new_binary_path)
                 self.logger.warning(f"AUTOMATED ROLLBACK SUCCESSFUL: Restored working backup '{backup_path}' -> '{new_binary_path}'")
+                self.send_ota_notification("ROLLBACK", f"Unit test failed: {crash_err}. Automatically rolled back to backup binary.", commit_sha)
+            else:
+                self.send_ota_notification("FAILURE", f"Unit test failed: {crash_err}. No backup available.", commit_sha)
             return new_binary_path
 
     def fetch_artifact_for_branch(self, branch: str) -> Optional[str]:
@@ -91,6 +114,7 @@ class NHIOTSubscriber:
             self.logger.warning(f"No workflow run found for branch '{branch}'.")
             return None
 
+        commit_sha = run.head_sha or ""
         artifacts = self.github.get_artifacts(run)
         target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
         artifact = self.artifacts.choose(artifacts, target)
@@ -100,10 +124,11 @@ class NHIOTSubscriber:
             try:
                 downloaded_path = self.artifacts.download(artifact)
                 # Run post-pull operational unit tests with automated rollback protection
-                self.current_file_path = self.test_and_swap_binary(downloaded_path, target)
+                self.current_file_path = self.test_and_swap_binary(downloaded_path, target, commit_sha)
             except Exception as download_error:
                 self.logger.warning(f"Download/Verification failed: {download_error}. Falling back to cached executable.")
                 self.current_file_path = f"./Executables/{target}/{target}"
+                self.send_ota_notification("FAILURE", f"Artifact download/verification failed: {download_error}", commit_sha)
             
             self.last_processed_run_id = run.id
             self.logger.info(f"SUCCESS: Subscriber loaded operational artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
@@ -111,6 +136,7 @@ class NHIOTSubscriber:
             return self.current_file_path
         else:
             self.logger.warning(f"No matching artifact '{target}' found in run #{run.id} for branch '{branch}'.")
+            self.send_ota_notification("FAILURE", f"No matching artifact '{target}' found in run #{run.id}", commit_sha)
             return None
 
     def _on_branch_changed(self, new_branch: str) -> Optional[str]:
