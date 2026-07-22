@@ -110,6 +110,8 @@ class NHIOTSubscriber:
                 elif run.status in ("in_progress", "queued", "requested", "waiting"):
                     self.logger.info(f"New run #{run.id} on branch '{Envs.BRANCH}' is currently '{run.status}' — waiting for CI build to finish...")
             else:
-                self.logger.info(f"Run #{run.id} on branch '{Envs.BRANCH}' already processed. Polling again in {Envs.POLL_INTERVAL}s...")
+                sha_str = run.head_sha[:7] if run.head_sha else 'unknown'
+                target = f"{Envs.ARTIFACT_NAME}_{Envs.SUBSCRIBER_ARCHITECTURE}"
+                self.logger.info(f"Run #{run.id} (SHA: {sha_str}) on branch '{Envs.BRANCH}' is active with artifact '{target}'. Monitoring for new builds... (Next poll in {Envs.POLL_INTERVAL}s)")
 
             time.sleep(int(Envs.POLL_INTERVAL))
