@@ -43,10 +43,9 @@ class NHIOTSubscriber:
         self.client.connect()
         self.mqtt.set_branch_change_callback(self._on_branch_changed)
         
-        # Subscribe to command topics (both enterprise and legacy for full compatibility)
+        # Subscribe exclusively to enterprise command topic
         handler_cb = self.mqtt.handle(lambda: self.current_file_path)
         self.client.subscribe(handler_cb, topic=Topics.COMMAND_TOPIC)
-        self.client.subscribe(handler_cb, topic="machineB/recv")
 
         # Start periodic background heartbeat daemon
         self._start_heartbeat_loop()
