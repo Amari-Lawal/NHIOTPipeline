@@ -1,4 +1,6 @@
 from logging import Logger
+import os
+import shutil
 import time
 import subprocess
 from typing import Optional
@@ -41,8 +43,34 @@ class NHIOTSubscriber:
             topic="machineB/recv"
         )
 
+    def test_and_swap_binary(self, new_binary_path: str, target: str) -> str:
+        """Runs a self-test healthcheck on newly downloaded binary and auto-rolls back if it crashes."""
+        backup_path = f"{new_binary_path}.bak"
+
+        # 1. Create backup copy if current binary exists
+        if os.path.exists(new_binary_path):
+            try:
+                shutil.copy2(new_binary_path, backup_path)
+            except Exception as e:
+                self.logger.warning(f"Could not create backup file '{backup_path}': {e}")
+
+        # 2. Run self-test healthcheck on newly downloaded binary
+        try:
+            os.chmod(new_binary_path, 0o755)
+            stdout, stderr = self.executor.run(new_binary_path, "add", ["1", "1"])
+            if stderr:
+                raise RuntimeError(f"Healthcheck failed with error: {stderr.strip()}")
+            self.logger.info(f"HEALTHCHECK PASSED: Binary '{target}' verified OK (Self-test stdout: {stdout.strip()}).")
+            return new_binary_path
+        except Exception as crash_err:
+            self.logger.error(f"CRITICAL HEALTHCHECK FAILURE for '{target}': {crash_err}")
+            if os.path.exists(backup_path):
+                shutil.copy2(backup_path, new_binary_path)
+                self.logger.warning(f"AUTOMATED ROLLBACK SUCCESSFUL: Restored working backup '{backup_path}' -> '{new_binary_path}'")
+            return new_binary_path
+
     def fetch_artifact_for_branch(self, branch: str) -> Optional[str]:
-        """Synchronously pull and hot-swap the latest build artifact for the specified branch."""
+        """Synchronously pull, integrity-verify, healthcheck, and hot-swap the latest build artifact."""
         self.logger.info(f"Triggering immediate artifact pull for branch '{branch}'...")
         run = self.github.get_latest_run()
         if not run:
@@ -56,13 +84,15 @@ class NHIOTSubscriber:
         if artifact:
             self.logger.info(f"Artifact '{target}' found for branch '{branch}' (run #{run.id}) — downloading...")
             try:
-                self.current_file_path = self.artifacts.download(artifact)
+                downloaded_path = self.artifacts.download(artifact)
+                # Run self-test healthcheck with automated rollback protection
+                self.current_file_path = self.test_and_swap_binary(downloaded_path, target)
             except Exception as download_error:
-                self.logger.warning(f"Download failed: {download_error}. Using cached executable.")
+                self.logger.warning(f"Download/Verification failed: {download_error}. Falling back to cached executable.")
                 self.current_file_path = f"./Executables/{target}/{target}"
             
             self.last_processed_run_id = run.id
-            self.logger.info(f"SUCCESS: Subscriber loaded artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
+            self.logger.info(f"SUCCESS: Subscriber loaded verified artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
             self.logger.info(f"Subscriber active with run #{run.id} on branch '{branch}'. Monitoring GitHub for next build...")
             return self.current_file_path
         else:

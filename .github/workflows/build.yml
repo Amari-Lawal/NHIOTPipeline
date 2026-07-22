@@ -9,33 +9,41 @@ on:
 
 jobs:
   security-scan:
-    name: C Security Static Analysis
+    name: DevSecOps & Security Analysis
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Cppcheck and Flawfinder
         run: |
           sudo apt-get update
           sudo apt-get install -y cppcheck flawfinder
 
-      - name: Run Cppcheck Memory & Static Analysis
+      - name: Run Cppcheck Memory & Static Analysis (SAST)
         run: |
           cppcheck --enable=all --suppress=missingIncludeSystem Artefact/*.c
 
-      - name: Run Flawfinder Vulnerability Risk Analysis
+      - name: Run Flawfinder Vulnerability Risk Analysis (SAST)
         run: |
           flawfinder --minlevel=1 Artefact/
 
-      - name: Run Trivy C Dependency & Repository SCA Scan
+      - name: Run Trivy C Dependency & Repository Scan (SCA)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
+
+      - name: Secret Leak Prevention (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
   build:
     name: Build C Executable
@@ -69,6 +77,12 @@ jobs:
             x86_64-linux-gnu-gcc $SEC_FLAGS -o hello_x86_64 Artefact/*.c
           fi
 
+      - name: Generate Cryptographic SHA-256 Checksum
+        run: |
+          sha256sum hello_${{ matrix.arch }} > hello_${{ matrix.arch }}.sha256
+          echo "SHA256 Checksum:"
+          cat hello_${{ matrix.arch }}.sha256
+
       - name: Run Trivy C Binary Artifact Vulnerability Scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -77,8 +91,10 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '0'
 
-      - name: Upload executable as artifact
+      - name: Upload executable and checksum artifacts
         uses: actions/upload-artifact@v4
         with:
           name: hello_${{ matrix.arch }}
-          path: hello_${{ matrix.arch }}
+          path: |
+            hello_${{ matrix.arch }}
+            hello_${{ matrix.arch }}.sha256
