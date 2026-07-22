@@ -28,8 +28,8 @@ class NHIOTSubscriber:
         self.logger = logger
         
         self.current_file_path = None
+        self.last_processed_run_id = None
         self.branch_changed = False
-        self.downloaded = False
 
         # Connect MQTT client & register branch change callback
         self.client.connect()
@@ -60,7 +60,8 @@ class NHIOTSubscriber:
             except Exception as download_error:
                 self.logger.warning(f"Download failed: {download_error}. Using cached executable.")
                 self.current_file_path = f"./Executables/{target}/{target}"
-            self.downloaded = True
+            
+            self.last_processed_run_id = run.id
             self.logger.info(f"SUCCESS: Subscriber loaded artifact '{target}' for branch '{branch}' -> {self.current_file_path}")
             return self.current_file_path
         else:
@@ -69,12 +70,20 @@ class NHIOTSubscriber:
 
     def _on_branch_changed(self, new_branch: str) -> Optional[str]:
         """Callback invoked when publisher sends a branch change payload over MQTT."""
-        self.logger.info(f"Subscriber notified of branch change to '{new_branch}' — clearing cache & pulling artifact.")
+        self.logger.info(f"Subscriber notified of branch change to '{new_branch}' — resetting run tracker & pulling artifact.")
+        self.last_processed_run_id = None
         self.branch_changed = False
         return self.fetch_artifact_for_branch(new_branch)
 
     def monitor_workflow(self) -> None:
         while True:
+            # Check if a remote branch change command was received via MQTT
+            if self.branch_changed:
+                self.logger.info(f"Switched active target branch to '{Envs.BRANCH}'. Re-polling GitHub Actions...")
+                self.last_processed_run_id = None
+                self.current_file_path = None
+                self.branch_changed = False
+
             # 1. Get the local HEAD commit SHA
             try:
                 local_sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
@@ -93,22 +102,14 @@ class NHIOTSubscriber:
 
             self.logger.info(f"Latest run #{run.id} on branch '{Envs.BRANCH}' | status={run.status} | SHA={run.head_sha[:7] if run.head_sha else 'unknown'}")
 
-            # 2. Check if the run matches the local SHA, or if this is initial boot setup
-            is_matching_sha = local_sha and (run.head_sha == local_sha or run.head_sha.startswith(local_sha) or local_sha.startswith(run.head_sha))
-            is_initial_boot = (self.current_file_path is None)
-
-            if run.status == "completed" and not self.downloaded:
-                if is_matching_sha or is_initial_boot:
+            # Check if this run ID has not been downloaded yet
+            if self.last_processed_run_id != run.id:
+                if run.status == "completed":
+                    self.logger.info(f"New completed run #{run.id} detected on branch '{Envs.BRANCH}' — fetching artifact...")
                     self.fetch_artifact_for_branch(Envs.BRANCH)
-                else:
-                    self.logger.info(f"Run #{run.id} on branch '{Envs.BRANCH}' completed but SHA mismatch — skipping download.")
-
-            elif run.status == "in_progress":
-                self.logger.info(f"Run #{run.id} on branch '{Envs.BRANCH}' is in_progress — waiting for CI build...")
-                if is_matching_sha:
-                    self.downloaded = False
-
-            elif run.status == "completed" and self.downloaded:
+                elif run.status in ("in_progress", "queued", "requested", "waiting"):
+                    self.logger.info(f"New run #{run.id} on branch '{Envs.BRANCH}' is currently '{run.status}' — waiting for CI build to finish...")
+            else:
                 self.logger.info(f"Run #{run.id} on branch '{Envs.BRANCH}' already processed. Polling again in {Envs.POLL_INTERVAL}s...")
 
             time.sleep(int(Envs.POLL_INTERVAL))
