@@ -2,6 +2,7 @@ from logging import Logger
 import os
 import shutil
 import socket
+import threading
 import time
 import subprocess
 from typing import Optional
@@ -11,7 +12,7 @@ from NHIOTSub.config import Envs, Topics
 from NHIOTSub.executors.Executor import Executor
 from NHIOTSub.handlers.MQTTHandler import MQTTHandler
 from NHIOTSub.services.ArtifactService import ArtifactService
-from NHIOTSub.models.payloads import OTAStatusPayload
+from NHIOTSub.models.payloads import OTAStatusPayload, HeartbeatPayload
 
 
 class NHIOTSubscriber:
@@ -43,6 +44,30 @@ class NHIOTSubscriber:
         # Subscribe exclusively to enterprise command topic
         handler_cb = self.mqtt.handle(lambda: self.current_file_path)
         self.client.subscribe(handler_cb, topic=Topics.COMMAND_TOPIC)
+
+        # Start periodic background heartbeat daemon
+        self._start_heartbeat_loop()
+
+    def _start_heartbeat_loop(self) -> None:
+        """Launches a background thread publishing Pydantic HeartbeatPayload every 15 seconds."""
+        def heartbeat_worker():
+            while True:
+                try:
+                    payload = HeartbeatPayload(
+                        device_id=self.device_id,
+                        architecture=Envs.SUBSCRIBER_ARCHITECTURE or "unknown",
+                        active_branch=Envs.BRANCH or "unknown",
+                        active_binary=os.path.basename(self.current_file_path) if self.current_file_path else "none",
+                        status="HEALTHY"
+                    )
+                    self.client.publish(payload.model_dump_json(), topic=Topics.HEARTBEAT_TOPIC)
+                except Exception as e:
+                    self.logger.debug(f"Heartbeat emission failed: {e}")
+                time.sleep(15)
+
+        thread = threading.Thread(target=heartbeat_worker, daemon=True, name="IoT-Heartbeat")
+        thread.start()
+        self.logger.info(f"Started IoT Device Heartbeat thread (Device: '{self.device_id}', Topic: '{Topics.HEARTBEAT_TOPIC}', Interval: 15s)")
 
     def send_ota_notification(self, status: str, detail: str, commit_sha: str) -> None:
         """Publishes a Pydantic-validated OTA status payload to enterprise topic 'nhiot/ota/status'."""
