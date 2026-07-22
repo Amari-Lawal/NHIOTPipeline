@@ -78,6 +78,9 @@ flowchart TD
 
 You can evaluate the system using **Method A (Docker Compose - Recommended)** or **Method B (Local Shell Setup)**.
 
+> [!TIP]
+> **Recommended Method**: Use **Method A (Docker Compose)** for a zero-friction evaluation. It isolates all ports and dependencies, preventing any collisions with your local machine setup.
+
 ---
 
 ### Method A: Docker Compose Sandbox (RECOMMENDED — Zero Port/OS Collisions)
