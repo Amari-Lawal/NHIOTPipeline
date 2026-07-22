@@ -7,7 +7,7 @@ import subprocess
 from typing import Optional
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.clients.GithubClient import GitHubClient
-from NHIOTSub.config import Envs
+from NHIOTSub.config import Envs, Topics
 from NHIOTSub.executors.Executor import Executor
 from NHIOTSub.handlers.MQTTHandler import MQTTHandler
 from NHIOTSub.services.ArtifactService import ArtifactService
@@ -40,14 +40,13 @@ class NHIOTSubscriber:
         self.client.connect()
         self.mqtt.set_branch_change_callback(self._on_branch_changed)
         
-        # Subscribe to MQTT commands immediately on startup
-        self.client.subscribe(
-            self.mqtt.handle(lambda: self.current_file_path),
-            topic="machineB/recv"
-        )
+        # Subscribe to clean enterprise command topic & legacy topic
+        handler_cb = self.mqtt.handle(lambda: self.current_file_path)
+        self.client.subscribe(handler_cb, topic=Topics.COMMAND_TOPIC)
+        self.client.subscribe(handler_cb, topic=Topics.LEGACY_COMMAND_TOPIC)
 
     def send_ota_notification(self, status: str, detail: str, commit_sha: str) -> None:
-        """Publishes a Pydantic-validated OTA status payload to topic 'nhiot/ota/status'."""
+        """Publishes a Pydantic-validated OTA status payload to enterprise topic 'nhiot/ota/status'."""
         try:
             payload = OTAStatusPayload(
                 device_id=self.device_id,
@@ -57,8 +56,8 @@ class NHIOTSubscriber:
                 status=status,
                 detail=detail
             )
-            self.client.publish(payload.model_dump_json(), topic="nhiot/ota/status")
-            self.logger.info(f"Published OTA Notification to 'nhiot/ota/status': Status={status} | SHA={commit_sha[:7] if commit_sha else 'unknown'}")
+            self.client.publish(payload.model_dump_json(), topic=Topics.OTA_STATUS_TOPIC)
+            self.logger.info(f"Published OTA Notification to '{Topics.OTA_STATUS_TOPIC}': Status={status} | SHA={commit_sha[:7] if commit_sha else 'unknown'}")
         except Exception as e:
             self.logger.error(f"Failed to send OTA notification: {e}")
 

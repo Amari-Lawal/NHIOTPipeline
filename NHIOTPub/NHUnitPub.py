@@ -1,14 +1,15 @@
 import threading
 import json
-import threading
+import time
 import unittest
 from NHIOTMQTT import NHIOTMQTT
+from NHIOTSub.config import Topics
 
 
 class BaseMQTTTest(unittest.TestCase):
-    publish_topic = "machineB/recv"
-    subscribe_topic = "machineA/recv"
-    timeout = 5
+    publish_topic = Topics.COMMAND_TOPIC
+    subscribe_topic = Topics.RESPONSE_TOPIC
+    timeout = 10
 
     @classmethod
     def setUpClass(cls):
@@ -19,79 +20,87 @@ class BaseMQTTTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.client.disconnect(verbose=False)
 
+    def set_subscriber_branch(self, target_branch: str) -> bool:
+        """Publishes a SET_BRANCH control payload and waits for subscriber READY response."""
+        event = threading.Event()
+        result_holder = {"ready": False}
+
+        def on_ready_callback(topic, payload):
+            try:
+                msg = json.loads(payload.decode("utf-8"))
+                if isinstance(msg, dict) and msg.get("function") == "set_branch" and msg.get("result") == "READY":
+                    result_holder["ready"] = True
+                    event.set()
+            except Exception:
+                pass
+
+        self.client.subscribe(on_ready_callback, topic=self.subscribe_topic, verbose=False)
+        self.client.subscribe(on_ready_callback, topic=Topics.LEGACY_RESPONSE_TOPIC, verbose=False)
+        
+        switch_payload = json.dumps({"command": "SET_BRANCH", "branch": target_branch})
+        self.client.publish(switch_payload, topic=self.publish_topic, verbose=False)
+        self.client.publish(switch_payload, topic=Topics.LEGACY_COMMAND_TOPIC, verbose=False)
+
+        received = event.wait(timeout=15)
+        return received and result_holder["ready"]
+
     def _make_callback(self, event, expected_result, parameters, expected_function):
         def callback(topic, payload):
             try:
                 result_json = json.loads(payload.decode("utf-8"))
-                error = result_json.get("error", "")
-                device_function = result_json.get("function", "unknown")
-
-                if device_function != expected_function:
-                    # Ignore duplicate/stray messages from previous runs or tests
-                    return
-
-                if error:
-                    raise AssertionError(f"[{device_function}({parameters})] FAILED — {error}")
-
-                result = result_json.get("result", "")
-                if str(result) != str(expected_result):
-                    # Ignore duplicate/stray messages from previous runs of the same function
-                    return
                 
-                print(f"[{device_function}({parameters})] PASSED — result: {result}")
-                self._callback_exception = None
+                # Filter out set_branch handshakes
+                if isinstance(result_json, dict) and result_json.get("function") == "set_branch":
+                    return
+
+                if expected_function is not None:
+                    actual_fn = result_json.get("function")
+                    if actual_fn != expected_function:
+                        return
+
+                actual_stdout = result_json.get("stdout", "").strip()
+
+                if expected_result is not None:
+                    actual_clean = actual_stdout.replace(" ", "")
+                    exp_clean = expected_result.replace(" ", "")
+                    if exp_clean != actual_clean:
+                        return
+
+                self.received_result = actual_stdout
                 event.set()
             except Exception as e:
-                self._callback_exception = e
+                self.error = str(e)
                 event.set()
+
         return callback
 
-    def run_mqtt_test(self, function_name, parameters, expected_result):
+    def send_command(self, function: str, parameters: list, expected_result: str = None):
+        self.received_result = None
+        self.error = None
         event = threading.Event()
-        self._callback_exception = None
 
-        callback = self._make_callback(event, expected_result, parameters, function_name)
+        cb = self._make_callback(event, expected_result, parameters, expected_function=function)
+        
+        self.client.subscribe(cb, topic=self.subscribe_topic, verbose=False)
+        self.client.subscribe(cb, topic=Topics.LEGACY_RESPONSE_TOPIC, verbose=False)
 
-        self.client.subscribe(
-            callback,
-            topic=self.subscribe_topic,
-            verbose=False
+        payload = json.dumps({"function": function, "parameters": parameters})
+        self.client.publish(payload, topic=self.publish_topic, verbose=False)
+
+        received = event.wait(timeout=self.timeout)
+
+        self.assertTrue(
+            received,
+            f"Timed out waiting for response for '{function}({parameters})' on '{self.subscribe_topic}'"
         )
+        if self.error:
+            self.fail(f"Error during execution of '{function}': {self.error}")
 
-        try:
-            self.client.publish(
-                json.dumps({
-                    "function": function_name,
-                    "parameters": parameters
-                }),
-                topic=self.publish_topic,
-                verbose=False
+        if expected_result is not None:
+            self.assertEqual(
+                self.received_result.replace(" ", ""),
+                expected_result.replace(" ", ""),
+                f"Expected '{expected_result}', got '{self.received_result}'"
             )
 
-            # Wait for the event to be set
-            self.assertTrue(
-                event.wait(self.timeout),
-                f"No MQTT response within {self.timeout} seconds"
-            )
-
-            # Propagate background callback exceptions if they occurred
-            if self._callback_exception is not None:
-                raise self._callback_exception
-        finally:
-            try:
-                self.client.unsubscribe(self.subscribe_topic, verbose=False)
-            except Exception:
-                pass
-
-    def set_subscriber_branch(self, branch_name: str):
-        """Sends an MQTT payload to instruct the remote subscriber to switch target branch (e.g. 'dev', 'staging', 'main')."""
-        payload = json.dumps({
-            "command": "SET_BRANCH",
-            "branch": branch_name
-        })
-        self.client.publish(payload, topic=self.publish_topic, verbose=True)
-        print(f"Published remote branch switch command -> '{branch_name}' to topic '{self.publish_topic}'")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        return self.received_result

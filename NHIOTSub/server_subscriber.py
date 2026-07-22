@@ -1,6 +1,7 @@
 import time
 import json
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
+from NHIOTSub.config import Topics
 from NHIOTSub.dependencies.create_logger import create_logger
 from NHIOTSub.models.payloads import OTAStatusPayload
 
@@ -8,7 +9,7 @@ logger = create_logger("SERVER_AUDIT")
 
 
 def main():
-    logger.info("Initializing Server OTA Audit Subscriber...")
+    logger.info("Initializing Server OTA Audit Subscriber Daemon...")
     client = NHIOTMQTT()
     client.connect()
 
@@ -20,7 +21,7 @@ def main():
             status_symbol = "✅" if ota_event.status == "SUCCESS" else "⚠️" if ota_event.status == "ROLLBACK" else "❌"
             
             logger.info(
-                f"\n{status_symbol} [OTA STATUS AUDIT EVENT]\n"
+                f"\n{status_symbol} [OTA STATUS AUDIT EVENT on '{topic}']\n"
                 f"   Device ID:  {ota_event.device_id}\n"
                 f"   Status:     {ota_event.status}\n"
                 f"   Branch:     {ota_event.branch}\n"
@@ -32,8 +33,8 @@ def main():
         except Exception as e:
             logger.error(f"Failed to parse incoming OTA status payload on '{topic}': {e}")
 
-    logger.info("Subscribing to telemetry topic 'nhiot/ota/status'...")
-    client.subscribe(on_ota_status, topic="nhiot/ota/status")
+    logger.info(f"Subscribing to telemetry topic '{Topics.OTA_STATUS_TOPIC}'...")
+    client.subscribe(on_ota_status, topic=Topics.OTA_STATUS_TOPIC)
 
     logger.info("Server OTA Audit Subscriber is running and listening for device events...")
     try:
