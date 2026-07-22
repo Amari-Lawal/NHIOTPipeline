@@ -13,6 +13,8 @@ services:
   server-audit:
     build: .
     container_name: nhiot-server-audit
+    env_file:
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -25,12 +27,12 @@ services:
   iot-subscriber:
     build: .
     container_name: nhiot-iot-subscriber
+    env_file:
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
       - USE_LOCAL_BROKER=true
-      - SUBSCRIBER_ARCHITECTURE=x86_64
-      - BRANCH=main
     command: ./run_sub_iot.sh
     depends_on:
       - mqtt-broker
@@ -39,6 +41,8 @@ services:
   publisher:
     build: .
     container_name: nhiot-publisher
+    env_file:
+      - ./NHIOTSub/.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
