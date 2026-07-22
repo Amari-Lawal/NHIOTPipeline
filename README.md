@@ -76,88 +76,85 @@ flowchart TD
 
 ## Step-by-Step Examiner Quick-Start Guide
 
-Follow these simple instructions to run the entire pipeline end-to-end on your local machine.
+You can evaluate the system using **Method A (Docker Compose - Recommended)** or **Method B (Local Shell Setup)**.
 
-### Prerequisites
+---
 
-- **Python**: 3.11 or higher
-- **Operating System**: Linux (x86_64 or aarch64) or macOS / WSL
+### Method A: Docker Compose Sandbox (RECOMMENDED — Zero Port/OS Collisions)
 
-### 1. Environment Setup
+To ensure zero port collisions, dependency conflicts, or local system pollution, Docker Compose launches a self-contained MQTT broker, Server Audit daemon, IoT Subscriber daemon, and Publisher suite.
 
-Clone the repository and set up the Python virtual environment:
+#### 1. Launch the System
+```bash
+docker compose up -d
+```
+
+#### 2. View Live Audit Telemetry Logs
+```bash
+# Watch live fleet heartbeats, OTA updates, and protection events:
+docker compose logs -f server-audit
+```
+
+#### 3. Run Examiner Verification Commands
+In another terminal, execute commands via the containerized publisher suite:
 
 ```bash
-# 1. Create and activate virtual environment
+# A. Test Dynamic Branch Switch (dev, main)
+docker compose exec publisher ./run_pub.sh dev
+
+# B. Trigger Process Isolation Protection & Trapped Crash Telemetry
+docker compose exec publisher ./run_pub.sh crash
+
+# C. Trigger Automated GitHub Actions Version History Rollback
+docker compose exec publisher ./run_pub.sh revert
+```
+
+#### 4. Tear Down
+```bash
+docker compose down
+```
+
+---
+
+### Method B: Local Shell Setup
+
+If you prefer running directly on your host operating system:
+
+#### 1. Environment Setup
+```bash
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# 2. Install required dependencies
+# Install required dependencies
 pip install -r requirements.txt
 ```
 
----
+#### 2. Launch Services (3 Terminal Setup)
 
-### 2. Running the System (3 Terminal Setup)
+- **Terminal 1 (Server Audit Daemon)**:
+  ```bash
+  source venv/bin/activate
+  ./run_sub_server.sh
+  ```
+- **Terminal 2 (IoT Device Subscriber Daemon)**:
+  ```bash
+  source venv/bin/activate
+  ./run_sub_iot.sh
+  ```
+- **Terminal 3 (Publisher Verification Commands)**:
+  ```bash
+  source venv/bin/activate
 
-Open **3 separate terminal windows** inside the project directory (`/path/to/NHIOTPipeline`).
+  # A. Dynamic Branch Switch
+  ./run_pub.sh dev
 
-#### Terminal 1: Launch Server Fleet Audit Daemon
-The Server Audit Daemon listens for incoming fleet heartbeats, OTA deployment notifications, and process isolation protection events.
+  # B. Trigger Crash Protection
+  ./run_pub.sh crash
 
-```bash
-source venv/bin/activate
-./run_sub_server.sh
-```
-*Output*: Displays active fleet count, 15-second heartbeat telemetry, OTA updates, and protection events in real-time.
-
-#### Terminal 2: Launch IoT Device Subscriber Daemon
-The IoT Subscriber daemon runs on the target edge device. It maintains a 15s background heartbeat, polls GitHub Actions for compiled artifacts, verifies SHA-256 checksums and 64-bit ELF headers, runs post-pull operational unit tests, and isolates binary execution.
-
-```bash
-source venv/bin/activate
-./run_sub_iot.sh
-```
-*Output*: Loads the current operational binary, starts background heartbeat thread, and listens on `nhiot/fleet/command`.
-
-#### Terminal 3: Publisher Control Suite & Test Verification
-Use the publisher tool to issue commands, switch target environment branches, trigger failure isolation protection, and test automated GitHub Actions version history rollbacks.
-
----
-
-### 3. Verification Commands for the Examiner
-
-Run the following commands in **Terminal 3** while Terminals 1 and 2 are running:
-
-#### A. Test Dynamic Branch Switch (`main`, `dev`, `staging`, `test`)
-Request the IoT device to target a different branch environment, fetch its compiled GitHub artifact, run post-pull unit tests, and hot-swap binaries:
-
-```bash
-./run_pub.sh dev
-```
-*Result*: Terminal 2 downloads the `dev` branch artifact, verifies SHA-256 and ELF headers, runs post-pull unit tests (`add`, `minus`, `multiply`), and Terminal 1 receives an `OTAStatusPayload` with `status: SUCCESS`.
-
-#### B. Trigger Process Isolation Protection & Trapped Crash Telemetry
-Send a division-by-zero crash request to test process isolation protection:
-
-```bash
-./run_pub.sh crash
-```
-*Result*: 
-1. The IoT device traps the non-zero exit code (`exit code -8` SIGFPE) within its isolated boundary without crashing the subscriber daemon.
-2. Terminal 3 displays the trapped stderr error.
-3. Terminal 1 logs an `IsolationProtectionPayload` event on `nhiot/isolation/status` showing `status: PROTECTED`.
-
-#### C. Trigger Automated GitHub Actions Build History Rollback
-Trigger a remote GitHub Actions version rollback:
-
-```bash
-./run_pub.sh revert
-```
-*Result*:
-1. The IoT subscriber queries the GitHub Actions API for past completed successful workflow runs (`get_recent_successful_runs`).
-2. It downloads the previous working build artifact (`run #N-1`), verifies checksums and ELF headers, and runs post-pull operational unit tests.
-3. Once verified, it hot-swaps to the historical binary and sends an `OTAStatusPayload` with `status: ROLLBACK` to Terminal 1.
+  # C. Trigger GitHub Actions History Rollback
+  ./run_pub.sh revert
+  ```
 
 ---
 

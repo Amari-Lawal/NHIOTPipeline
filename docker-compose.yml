@@ -1,16 +1,48 @@
 version: '3.8'
 
 services:
-  dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nhiot_dashboard
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: nhiot-mqtt-broker
     ports:
-      - "8080:8080"
+      - "18883:1883"
     volumes:
-      - .:/app
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+
+  server-audit:
+    build: .
+    container_name: nhiot-server-audit
     environment:
-      - HOST=0.0.0.0
-      - PYTHONUNBUFFERED=1
-    restart: always
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - USE_LOCAL_BROKER=true
+    command: ./run_sub_server.sh
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+  iot-subscriber:
+    build: .
+    container_name: nhiot-iot-subscriber
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - USE_LOCAL_BROKER=true
+      - SUBSCRIBER_ARCHITECTURE=x86_64
+      - BRANCH=main
+    command: ./run_sub_iot.sh
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+  publisher:
+    build: .
+    container_name: nhiot-publisher
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - USE_LOCAL_BROKER=true
+    command: tail -f /dev/null
+    depends_on:
+      - mqtt-broker
