@@ -7,6 +7,3 @@ from NHIOTSub.models.dtos import Artifact
 
 class ArtifactsResponse(BaseModel):
     artifacts: List[Artifact]
-
-
-

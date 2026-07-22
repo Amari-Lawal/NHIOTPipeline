@@ -29,7 +29,13 @@ class MQTTHandler:
         """Publishes response exclusively to enterprise response topic."""
         self.client.publish(payload_str, topic=Topics.RESPONSE_TOPIC)
 
-    def _publish_isolation_event(self, current_file_path: str, function_name: str, parameters: list, error_msg: str) -> None:
+    def _publish_isolation_event(
+        self,
+        current_file_path: str,
+        function_name: str,
+        parameters: list,
+        error_msg: str,
+    ) -> None:
         """Publishes a Pydantic-validated isolation protection payload to 'nhiot/isolation/status'."""
         try:
             device_id = f"{socket.gethostname()}-{Envs.SUBSCRIBER_ARCHITECTURE}"
@@ -40,10 +46,12 @@ class MQTTHandler:
                 function_called=function_name,
                 parameters=parameters,
                 error_message=error_msg.strip(),
-                status="PROTECTED"
+                status="PROTECTED",
             )
             self.client.publish(event.model_dump_json(), topic=Topics.ISOLATION_STATUS_TOPIC)
-            self.logger.info(f"Published Isolation Protection Event to '{Topics.ISOLATION_STATUS_TOPIC}': Device protected from '{function_name}' crash.")
+            self.logger.info(
+                f"Published Isolation Protection Event to '{Topics.ISOLATION_STATUS_TOPIC}': Device protected from '{function_name}' crash."
+            )
         except Exception as e:
             self.logger.error(f"Failed to publish isolation protection event: {e}")
 
@@ -71,7 +79,7 @@ class MQTTHandler:
                         "result": "READY",
                         "branch": Envs.BRANCH,
                         "file_path": fetched_path or "",
-                        "error": ""
+                        "error": "",
                     }
                     self._publish_response(json.dumps(res_data))
                     return
@@ -88,7 +96,7 @@ class MQTTHandler:
                     "result": "REVERTED" if reverted_path else "FAILED",
                     "branch": Envs.BRANCH,
                     "file_path": reverted_path or "",
-                    "error": "" if reverted_path else "No historical build could be reverted."
+                    "error": "" if reverted_path else "No historical build could be reverted.",
                 }
                 self._publish_response(json.dumps(res_data))
                 return
@@ -103,18 +111,19 @@ class MQTTHandler:
             current_file_path = get_file_path() if callable(get_file_path) else get_file_path
 
             if not current_file_path:
-                self.logger.warning(f"Received function command '{cmd.function}', but no target binary has been downloaded yet for branch '{Envs.BRANCH}'.")
-                response = CommandResponse.from_stdout(stdout="", stderr=f"No binary available yet for branch '{Envs.BRANCH}'")
+                self.logger.warning(
+                    f"Received function command '{cmd.function}', but no target binary has been downloaded yet for branch '{Envs.BRANCH}'."
+                )
+                response = CommandResponse.from_stdout(
+                    stdout="",
+                    stderr=f"No binary available yet for branch '{Envs.BRANCH}'",
+                )
                 self._publish_response(response.model_dump_json())
                 return
 
             self.logger.info(f"Executing dynamic target binary: {cmd.function}({cmd.parameters})")
 
-            stdout, stderr = self.executor.run(
-                current_file_path,
-                cmd.function,
-                cmd.parameters
-            )
+            stdout, stderr = self.executor.run(current_file_path, cmd.function, cmd.parameters)
 
             if stderr:
                 self.logger.error(f"Isolated process exited with crash standard error:\n{stderr.strip()}")

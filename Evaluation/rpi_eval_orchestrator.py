@@ -1,18 +1,20 @@
-import paramiko
-import os
 import json
+import os
+
+import paramiko
 from dotenv import load_dotenv
 from scp import SCPClient
+
 
 class DistributedEdgeOrchestrator:
     """
     DistributedEdgeOrchestrator manages secure remote orchestration of OTA metrics collection
     across distributed mixed-architecture hardware (e.g. Raspberry Pi 4 nodes).
-    
-    It coordinates SSH tunnels, manages SCP code distribution, executes on-device CPU 
+
+    It coordinates SSH tunnels, manages SCP code distribution, executes on-device CPU
     evaluation, downloads physical trials, and merges metrics into system telemetry.
     """
-    
+
     def __init__(self, env_path=None):
         if env_path is None:
             # Dynamically resolve relative path to .env
@@ -20,33 +22,33 @@ class DistributedEdgeOrchestrator:
                 env_path = "NHIOTSub/.env"
             else:
                 env_path = "../NHIOTSub/.env"
-                
+
         self.env_path = env_path
         load_dotenv(self.env_path)
-        
+
         self.github_token = os.getenv("GITHUB_TOKEN")
         self.owner = os.getenv("OWNER")
         self.repo = os.getenv("REPO")
         self.workflow_id = os.getenv("WORKFLOW_ID")
-        
+
         # Load secure Raspberry Pi credentials
         self.rpi_ip = os.getenv("RPI_IP")
         self.rpi_username = os.getenv("RPI_USERNAME")
         self.rpi_password = os.getenv("RPI_PASSWORD")
-        
+
         self._validate_config()
 
     def _validate_config(self):
         """Validates that all necessary environmental variables are populated."""
         if not all([self.github_token, self.owner, self.repo, self.workflow_id]):
             raise ValueError("Configuration Error: One or more environment variables missing from .env!")
-        
+
         print("=== DISTRIBUTED EDGE ORCHESTRATION ENGINE INITIALIZED ===")
         print(f"Target Repository: {self.owner}/{self.repo} | Workflow: {self.workflow_id}")
 
     def generate_client_script(self) -> str:
         """
-        Dynamically constructs the client-side Python execution script 
+        Dynamically constructs the client-side Python execution script
         injected with necessary GitHub API credentials and direct redirect-handling logic.
         """
         return f"""import urllib.request
@@ -146,51 +148,59 @@ except Exception as e:
 
     def execute_remote_eval(self, ip, username, password, local_script_path="rpi_run_eval.py"):
         """
-        Deploys and executes the benchmark suite on the remote hardware unit 
+        Deploys and executes the benchmark suite on the remote hardware unit
         over secure SSH, fetching raw data back upon completion.
         """
         # Write client-side script locally first
         script_content = self.generate_client_script()
         with open(local_script_path, "w") as f:
             f.write(script_content)
-            
+
         print(f"\n[1/4] Writing local client wrapper: {local_script_path}")
-        
+
         # Configure SSH client
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        
+
         try:
             print(f"[2/4] Connecting SSH to {username}@{ip}...")
-            ssh.connect(ip, username=username, password=password, look_for_keys=False, allow_agent=False)
+            ssh.connect(
+                ip,
+                username=username,
+                password=password,
+                look_for_keys=False,
+                allow_agent=False,
+            )
             print("      Secure SSH connection established!")
-            
+
             # SCP upload
             print("[3/4] Uploading execution code to edge node...")
             with SCPClient(ssh.get_transport()) as scp:
                 scp.put(local_script_path, f"/home/{username}/rpi_run_eval.py")
             print("      Upload completed successfully.")
-            
+
             # Execution
             print("[4/4] Executing benchmark suite on remote edge architecture...")
             stdin, stdout, stderr = ssh.exec_command(f"python3 /home/{username}/rpi_run_eval.py")
-            
+
             for line in stdout:
                 print(f"      [RPi4] {line.strip()}")
-                
+
             # Resolve relative paths for storing results
-            dest_rpi_json = "artifacts/rpi_metrics.json" if os.path.exists("artifacts") else "../artifacts/rpi_metrics.json"
-            
+            dest_rpi_json = (
+                "artifacts/rpi_metrics.json" if os.path.exists("artifacts") else "../artifacts/rpi_metrics.json"
+            )
+
             # Download results
             print("\nRetrieving physical edge telemetry...")
             with SCPClient(ssh.get_transport()) as scp:
                 scp.get(f"/home/{username}/rpi_metrics.json", dest_rpi_json)
             print("      Physical metrics downloaded.")
-            
+
             # Remote Cleanup
             ssh.exec_command(f"rm /home/{username}/rpi_run_eval.py")
             print("      Remote cleanup complete.")
-            
+
         except Exception as e:
             print(f"Orchestration Error: {e}")
             raise
@@ -204,28 +214,33 @@ except Exception as e:
         if rpi_json is None:
             rpi_json = "artifacts/rpi_metrics.json" if os.path.exists("artifacts") else "../artifacts/rpi_metrics.json"
         if system_json is None:
-            system_json = "artifacts/evaluation_metrics.json" if os.path.exists("artifacts") else "../artifacts/evaluation_metrics.json"
-            
+            system_json = (
+                "artifacts/evaluation_metrics.json"
+                if os.path.exists("artifacts")
+                else "../artifacts/evaluation_metrics.json"
+            )
+
         print("\n==================================================")
         print("MERGING REMOTE TELEMETRY INTO GLOBAL SYSTEM DB")
         print("==================================================")
-        
+
         with open(rpi_json, "r") as f:
             rpi_metrics = json.load(f)
-            
+
         with open(system_json, "r") as f:
             metrics = json.load(f)
-            
+
         metrics["rpi_dataset_1"] = {
             "size": rpi_metrics["size"],
             "dl": rpi_metrics["dl"],
-            "ext": rpi_metrics["ext"]
+            "ext": rpi_metrics["ext"],
         }
-        
+
         with open(system_json, "w") as f:
             json.dump(metrics, f, indent=4)
-            
+
         print("Telemetry merge complete! System metrics populated successfully.")
+
 
 if __name__ == "__main__":
     # Demonstration of programmatic API usage loading securely from .env

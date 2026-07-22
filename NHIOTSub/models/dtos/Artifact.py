@@ -6,4 +6,3 @@ class Artifact(BaseModel):
     name: str
     archive_download_url: str
     expired: bool
-

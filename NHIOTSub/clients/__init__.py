@@ -1,1 +1,3 @@
-from .GithubClient import GitHubClient
+from .GithubClient import GitHubClient as GitHubClient
+
+__all__ = ["GitHubClient"]

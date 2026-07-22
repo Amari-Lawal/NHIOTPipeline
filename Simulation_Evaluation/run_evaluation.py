@@ -1,29 +1,31 @@
-import time
-import json
-import threading
-import statistics
-import random
-import os
-import requests
-import zipfile
 import io
+import json
+import os
+import random
+import statistics
 import sys
+import threading
+import time
+import zipfile
+
+import requests
 from pydantic import ValidationError
 
 # Dynamically add the parent directory to sys.path to resolve imports when run inside the folder
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
-from NHIOTSub.models.payloads import CommandPayload
+from NHIOTSub.config import Config, Envs
 from NHIOTSub.executors.Executor import Executor
-from NHIOTSub.config import Envs, Config
+from NHIOTSub.models.payloads import CommandPayload
+
 
 class SimulationEvaluationSuite:
     """
     SimulationEvaluationSuite aggregates and executes simulated scientific quantitative evaluations
     measuring OTA deployment latency, Pydantic type validation, mTLS security resiliency, and AWS broker RTT.
     """
-    
+
     def __init__(self, output_dir=None):
         if output_dir is None:
             if os.path.exists("artifacts"):
@@ -39,19 +41,19 @@ class SimulationEvaluationSuite:
         print("==================================================")
         print("NHIOTPIPELINE QUANTITATIVE SIMULATION EVALUATION SUITE")
         print("==================================================")
-        
+
         t0 = time.perf_counter()
-        
+
         ds1 = self.run_dataset_1_ota_performance()
         ds2 = self.run_dataset_2_security_sanitization()
         ds3 = self.run_dataset_3_network_interruption()
         ds4_rtts, ds4_stats = self.run_dataset_4_e2e_throughput()
-        
+
         total_duration = time.perf_counter() - t0
         print("\n==================================================")
         print(f"ALL SIMULATION TEST SUITES COMPLETED IN {total_duration:.2f} SECONDS")
         print("==================================================")
-        
+
         # Structure final results
         results = {
             "dataset_1": ds1,
@@ -59,24 +61,24 @@ class SimulationEvaluationSuite:
             "dataset_3": ds3,
             "dataset_4": {
                 "stats": ds4_stats,
-                "rtts": ds4_rtts[:20] # save a subset of first 20 RTTs
-            }
+                "rtts": ds4_rtts[:20],  # save a subset of first 20 RTTs
+            },
         }
-        
+
         self.save_metrics(results)
 
     def run_dataset_1_ota_performance(self):
         print("\n==================================================")
         print("RUNNING SUITE 1: OTA UPDATE AND INSTALLATION PERFORMANCE")
         print("==================================================")
-        
+
         download_times = []
         extract_times = []
         sizes = []
-        
+
         url = f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/workflows/{Envs.WORKFLOW_ID}/runs"
         print(f"Contacting GitHub API at {url}...")
-        
+
         try:
             response = requests.get(url, headers=Config.GITHUB_HEADERS, params={"per_page": 1})
             response.raise_for_status()
@@ -84,23 +86,25 @@ class SimulationEvaluationSuite:
             if runs:
                 latest_run = runs[0]
                 run_id = latest_run["id"]
-                
+
                 # Fetch artifacts url
                 art_url = f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/runs/{run_id}/artifacts"
                 art_resp = requests.get(art_url, headers=Config.GITHUB_HEADERS)
                 art_resp.raise_for_status()
                 artifacts = art_resp.json().get("artifacts", [])
-                
-                target_name = f"hello_x86_64"
+
+                target_name = "hello_x86_64"
                 artifact = next((a for a in artifacts if a["name"] == target_name), None)
-                
+
                 if artifact:
                     dl_url = artifact["archive_download_url"]
                     print(f"Downloading artifact '{target_name}' from GitHub Action run {run_id}...")
-                    
-                    dest_exec = "./Executables/temp_eval" if os.path.exists("./Executables") else "../Executables/temp_eval"
+
+                    dest_exec = (
+                        "./Executables/temp_eval" if os.path.exists("./Executables") else "../Executables/temp_eval"
+                    )
                     os.makedirs(dest_exec, exist_ok=True)
-                    
+
                     # Measure 10 downloads to gather simulated baseline data points
                     for i in range(1, 11):
                         t_start = time.perf_counter()
@@ -108,16 +112,16 @@ class SimulationEvaluationSuite:
                         dl_resp.raise_for_status()
                         t_dl = time.perf_counter() - t_start
                         download_times.append(t_dl)
-                        
+
                         content = dl_resp.content
-                        sizes.append(len(content) / 1024) # KB
-                        
+                        sizes.append(len(content) / 1024)  # KB
+
                         t_ext_start = time.perf_counter()
                         with zipfile.ZipFile(io.BytesIO(content)) as z:
                             z.extractall(dest_exec)
                         t_ext = time.perf_counter() - t_ext_start
                         extract_times.append(t_ext)
-                        
+
                         if i <= 3 or i % 3 == 0:
                             print(f"Trial {i:02d}: size = {sizes[-1]:.1f} KB | DL = {t_dl:.3f} s | EXT = {t_ext:.4f} s")
                 else:
@@ -126,38 +130,34 @@ class SimulationEvaluationSuite:
                 print("No workflow runs found. Using offline empirical stubs.")
         except Exception as e:
             print(f"Error accessing GitHub: {e}. Using offline empirical stubs.")
-            
+
         # Fallback offline empirical stubs if network request is unreachable
         if not download_times:
             sizes = [16.4 for _ in range(10)]
             download_times = [random.uniform(0.18, 0.45) for _ in range(10)]
             extract_times = [random.uniform(0.002, 0.005) for _ in range(10)]
-            
+
         mean_dl = statistics.mean(download_times)
         mean_ext = statistics.mean(extract_times)
         mean_size = statistics.mean(sizes)
-        
+
         print("\n--- DATASET 1 SUMMARY STATISTICS ---")
         print(f"Average Artifact Size : {mean_size:.2f} KB")
         print(f"Average Download Time : {mean_dl:.3f} sec")
         print(f"Average Extraction    : {mean_ext:.4f} sec")
-        
-        return {
-            "size": mean_size,
-            "dl": mean_dl,
-            "ext": mean_ext
-        }
+
+        return {"size": mean_size, "dl": mean_dl, "ext": mean_ext}
 
     def run_dataset_2_security_sanitization(self):
         print("\n==================================================")
         print("RUNNING SUITE 2: SECURITY SANITIZATION & RESILIENCY")
         print("==================================================")
-        
+
         mtls_success = 0
         pydantic_success = 0
         injection_success = 0
         crash_survival = 0
-        
+
         for i in range(1, 101):
             phase = (i - 1) % 4
             if phase == 0:
@@ -165,7 +165,7 @@ class SimulationEvaluationSuite:
                 mtls_success += 1
             elif phase == 1:
                 # Pydantic Schema rejection test
-                bad_payload = {"parameters": [1, 2]} # Missing 'function' key
+                bad_payload = {"parameters": [1, 2]}  # Missing 'function' key
                 try:
                     CommandPayload(**bad_payload)
                 except ValidationError:
@@ -191,37 +191,55 @@ class SimulationEvaluationSuite:
                         crash_survival += 1
                 except Exception:
                     pass
-                    
+
         print("\n--- DATASET 2 SUMMARY STATISTICS ---")
         print(f"mTLS Connection Blocks         : {mtls_success}/25 (100% Secure)")
         print(f"Pydantic Schema Rejections     : {pydantic_success}/25 (100% Secure)")
         print(f"Command Injection Neutralised  : {injection_success}/25 (100% Secure)")
         print(f"Native App Crashes Safely Trapped: {crash_survival}/25 (100% Secure)")
         print("Survival Rate: 100% | Host System Uptime: 100%")
-        
+
         return {
             "mtls": mtls_success,
             "pydantic": pydantic_success,
             "injection": injection_success,
-            "crashes": crash_survival
+            "crashes": crash_survival,
         }
 
     def run_dataset_3_network_interruption(self):
         print("\n==================================================")
         print("RUNNING SUITE 3: NETWORK INTERRUPTION & RESUMPTION RESILIENCE")
         print("==================================================")
-        
+
         reconnect_times = [
-            0.112, 0.125, 0.145, 0.108, 0.119, 0.134, 0.121, 0.128, 0.115, 0.142,
-            0.105, 0.138, 0.122, 0.117, 0.129, 0.670, 0.803, 0.602, 0.126, 0.148
+            0.112,
+            0.125,
+            0.145,
+            0.108,
+            0.119,
+            0.134,
+            0.121,
+            0.128,
+            0.115,
+            0.142,
+            0.105,
+            0.138,
+            0.122,
+            0.117,
+            0.129,
+            0.670,
+            0.803,
+            0.602,
+            0.126,
+            0.148,
         ]
-        
+
         mean_rec = statistics.mean(reconnect_times)
         median_rec = statistics.median(reconnect_times)
         std_rec = statistics.stdev(reconnect_times)
         min_rec = min(reconnect_times)
         max_rec = max(reconnect_times)
-        
+
         print("\n--- DATASET 3 SUMMARY STATISTICS ---")
         print(f"Total Trials       : {len(reconnect_times)}")
         print(f"Mean Reconnect Time: {mean_rec:.4f} sec")
@@ -229,42 +247,40 @@ class SimulationEvaluationSuite:
         print(f"Std Dev            : {std_rec:.4f} sec")
         print(f"Min Reconnect Time : {min_rec:.4f} sec")
         print(f"Max Reconnect Time : {max_rec:.4f} sec")
-        
+
         return reconnect_times, {
             "mean": mean_rec,
             "median": median_rec,
             "std": std_rec,
             "min": min_rec,
-            "max": max_rec
+            "max": max_rec,
         }
 
     def run_dataset_4_e2e_throughput(self):
         print("\n==================================================")
         print("RUNNING SUITE 4: END-TO-END DIAGNOSTIC THROUGHPUT")
         print("==================================================")
-        
+
         client = NHIOTMQTT()
         client.connect(verbose=False)
-        
+
         rtts = []
         event = threading.Event()
-        current_fn = ""
-        current_params = []
         expected_result = ""
-        
+
         def callback(topic, payload):
             t_end = time.perf_counter()
-            res = json.loads(payload.decode("utf-8"))
+            json.loads(payload.decode("utf-8"))
             rtt = (t_end - t_start) * 1000
             rtts.append(rtt)
             event.set()
-            
+
         client.subscribe(callback, topic="nhiot/fleet/response", verbose=False)
-        
+
         # Run 100 successive assertions
         for i in range(1, 101):
             event.clear()
-            
+
             # Pick random math operation
             op = random.choice(["add", "minus", "multiply"])
             if op == "add":
@@ -279,17 +295,14 @@ class SimulationEvaluationSuite:
                 a, b = random.randint(1, 10), random.randint(1, 10)
                 params = [a, b]
                 expected_result = str(a * b)
-                
-            current_fn = op
-            current_params = params
-            
+
             t_start = time.perf_counter()
             client.publish(
                 json.dumps({"function": op, "parameters": params}),
                 topic="nhiot/fleet/command",
-                verbose=False
+                verbose=False,
             )
-            
+
             success = event.wait(timeout=3.0)
             if not success:
                 # Fallback to general RTT range if timeout
@@ -297,16 +310,16 @@ class SimulationEvaluationSuite:
             else:
                 if i <= 10 or i % 10 == 0:
                     print(f"Run {i:03d}: E2E RTT = {rtts[-1]:.2f} ms | {op}({params}) = {expected_result}")
-            time.sleep(0.05) # Prevent spamming AWS Core limits
-            
+            time.sleep(0.05)  # Prevent spamming AWS Core limits
+
         client.disconnect(verbose=False)
-        
+
         mean_rtt = statistics.mean(rtts)
         median_rtt = statistics.median(rtts)
         std_rtt = statistics.stdev(rtts)
         min_rtt = min(rtts)
         max_rtt = max(rtts)
-        
+
         print("\n--- DATASET 4 SUMMARY STATISTICS ---")
         print(f"Total Runs: {len(rtts)}")
         print(f"Mean RTT  : {mean_rtt:.2f} ms")
@@ -314,13 +327,13 @@ class SimulationEvaluationSuite:
         print(f"Std Dev   : {std_rtt:.2f} ms")
         print(f"Min RTT   : {min_rtt:.2f} ms")
         print(f"Max RTT   : {max_rtt:.2f} ms")
-        
+
         return rtts, {
             "mean": mean_rtt,
             "median": median_rtt,
             "std": std_rtt,
             "min": min_rtt,
-            "max": max_rtt
+            "max": max_rtt,
         }
 
     def save_metrics(self, results):
@@ -329,6 +342,7 @@ class SimulationEvaluationSuite:
         with open(metrics_path, "w") as f:
             json.dump(results, f, indent=4)
         print(f"Saved scientific simulation metrics to '{metrics_path}'")
+
 
 if __name__ == "__main__":
     suite = SimulationEvaluationSuite()

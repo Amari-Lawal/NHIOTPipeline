@@ -16,4 +16,3 @@ class CommandResponse(BaseModel):
             function, _ = stderr.split(":", 1)
 
         return cls(result=result, error=stderr, function=function)
-    

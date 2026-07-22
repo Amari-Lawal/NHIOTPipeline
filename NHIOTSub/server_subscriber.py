@@ -1,10 +1,14 @@
 import time
-import json
 from typing import Dict
+
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.config import Topics
 from NHIOTSub.dependencies.create_logger import create_logger
-from NHIOTSub.models.payloads import OTAStatusPayload, HeartbeatPayload, IsolationProtectionPayload
+from NHIOTSub.models.payloads import (
+    HeartbeatPayload,
+    IsolationProtectionPayload,
+    OTAStatusPayload,
+)
 
 logger = create_logger("SERVER_FLEET_AUDIT")
 
@@ -25,7 +29,7 @@ def main():
                 "branch": hb.active_branch,
                 "arch": hb.architecture,
                 "binary": hb.active_binary,
-                "status": hb.status
+                "status": hb.status,
             }
             logger.info(
                 f"[HEARTBEAT] Device: {hb.device_id} | Status: {hb.status} | "
@@ -39,7 +43,7 @@ def main():
         try:
             raw_str = payload.decode("utf-8")
             ota_event = OTAStatusPayload.model_validate_json(raw_str)
-            
+
             logger.info(
                 f"\n[OTA EVENT: {topic}]\n"
                 f"   Device ID:  {ota_event.device_id}\n"
@@ -57,7 +61,7 @@ def main():
         try:
             raw_str = payload.decode("utf-8")
             iso_evt = IsolationProtectionPayload.model_validate_json(raw_str)
-            
+
             logger.info(
                 f"\n[ISOLATION EVENT: {topic}]\n"
                 f"   Device ID:        {iso_evt.device_id}\n"

@@ -1,8 +1,5 @@
-from NHIOTSub.subscriber import NHIOTSubscriber
-from NHIOTSub.handlers import MQTTHandler
 from NHIOTSub.container import Container
-from NHIOTMQTT import NHIOTMQTT
-
+from NHIOTSub.subscriber import NHIOTSubscriber
 
 
 def main():

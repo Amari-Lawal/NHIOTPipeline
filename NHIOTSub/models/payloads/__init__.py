@@ -1,6 +1,11 @@
 from .CommandPayload import CommandPayload
-from .OTAStatusPayload import OTAStatusPayload
 from .HeartbeatPayload import HeartbeatPayload
 from .IsolationProtectionPayload import IsolationProtectionPayload
+from .OTAStatusPayload import OTAStatusPayload
 
-__all__ = ["CommandPayload", "OTAStatusPayload", "HeartbeatPayload", "IsolationProtectionPayload"]
+__all__ = [
+    "CommandPayload",
+    "OTAStatusPayload",
+    "HeartbeatPayload",
+    "IsolationProtectionPayload",
+]

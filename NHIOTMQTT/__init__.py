@@ -1,1 +1,3 @@
-from .NHIOTMQTT import NHIOTMQTT
+from .NHIOTMQTT import NHIOTMQTT as NHIOTMQTT
+
+__all__ = ["NHIOTMQTT"]

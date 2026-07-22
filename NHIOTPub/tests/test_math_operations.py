@@ -1,9 +1,7 @@
-
-
 from NHIOTPub.NHUnitPub import BaseMQTTTest
 
-class TestMathOperations(BaseMQTTTest):
 
+class TestMathOperations(BaseMQTTTest):
     def test_basic_operations(self):
         cases = [
             ("add", [1, 2], "3"),

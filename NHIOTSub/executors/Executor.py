@@ -10,7 +10,7 @@ class Executor:
         result = subprocess.run(
             [file_path, function] + list(map(str, parameters)),
             capture_output=True,
-            text=True
+            text=True,
         )
 
         stdout = result.stdout

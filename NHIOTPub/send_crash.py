@@ -1,6 +1,6 @@
 import json
-import sys
 import threading
+
 from NHIOTMQTT.NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.config import Topics
 

@@ -1,15 +1,15 @@
 import hashlib
 import io
-from logging import Logger
 import os
 import struct
-from typing import List, Optional
 import zipfile
+from logging import Logger
+from typing import List, Optional
 
 import requests
 
-from NHIOTSub.models.dtos import Artifact
 from NHIOTSub.config import Config, Envs
+from NHIOTSub.models.dtos import Artifact
 
 
 class ArtifactService:
@@ -34,7 +34,9 @@ class ArtifactService:
             self.logger.info(f"SHA-256 Integrity Verified! Hash: {calculated_hash[:16]}...")
             return True
         else:
-            self.logger.error(f"CRITICAL: SHA-256 Checksum Mismatch! Expected: {expected_hash[:16]}..., Calculated: {calculated_hash[:16]}...")
+            self.logger.error(
+                f"CRITICAL: SHA-256 Checksum Mismatch! Expected: {expected_hash[:16]}..., Calculated: {calculated_hash[:16]}..."
+            )
             return False
 
     def verify_elf_header(self, binary_path: str, expected_arch: str) -> bool:
@@ -47,12 +49,16 @@ class ArtifactService:
             header = f.read(64)
 
         if len(header) < 52:
-            self.logger.error(f"ELF VERIFICATION FAILED: Binary file '{binary_path}' is truncated ({len(header)} bytes).")
+            self.logger.error(
+                f"ELF VERIFICATION FAILED: Binary file '{binary_path}' is truncated ({len(header)} bytes)."
+            )
             return False
 
         # 1. Magic bytes: \x7fELF
         if header[:4] != b"\x7fELF":
-            self.logger.error(f"ELF VERIFICATION FAILED: Invalid magic bytes {header[:4]} in '{binary_path}' (not a Linux ELF binary).")
+            self.logger.error(
+                f"ELF VERIFICATION FAILED: Invalid magic bytes {header[:4]} in '{binary_path}' (not a Linux ELF binary)."
+            )
             return False
 
         # 2. ELF Class: 2 = 64-bit
@@ -66,14 +72,20 @@ class ArtifactService:
 
         # 0x3E (62) = x86_64, 0xB7 (183) = aarch64
         if expected_arch == "x86_64" and e_machine != 0x3E:
-            self.logger.error(f"ELF VERIFICATION FAILED: Expected x86_64 (e_machine 0x3E), but binary has e_machine {hex(e_machine)}.")
+            self.logger.error(
+                f"ELF VERIFICATION FAILED: Expected x86_64 (e_machine 0x3E), but binary has e_machine {hex(e_machine)}."
+            )
             return False
         elif expected_arch in ("aarch64", "arm64") and e_machine != 0xB7:
-            self.logger.error(f"ELF VERIFICATION FAILED: Expected aarch64 (e_machine 0xB7), but binary has e_machine {hex(e_machine)}.")
+            self.logger.error(
+                f"ELF VERIFICATION FAILED: Expected aarch64 (e_machine 0xB7), but binary has e_machine {hex(e_machine)}."
+            )
             return False
 
         arch_name = "x86_64" if e_machine == 0x3E else "aarch64" if e_machine == 0xB7 else hex(e_machine)
-        self.logger.info(f"ELF Header Integrity Verified! Format: 64-bit ELF, Target Arch: {arch_name} ({hex(e_machine)})")
+        self.logger.info(
+            f"ELF Header Integrity Verified! Format: 64-bit ELF, Target Arch: {arch_name} ({hex(e_machine)})"
+        )
         return True
 
     def download(self, artifact: Artifact) -> str:

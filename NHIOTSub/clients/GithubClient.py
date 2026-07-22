@@ -1,23 +1,18 @@
-from typing import List, Optional
 import logging
+from typing import List, Optional
 
 import requests
 
-from NHIOTSub.config import Envs
+from NHIOTSub.config import Config, Envs
 from NHIOTSub.models.dtos import Artifact, WorkflowRun
 from NHIOTSub.models.responses import ArtifactsResponse, WorkflowRunsResponse
-from NHIOTSub.config import Config
 
 logger = logging.getLogger("NHIOT")
 
 
 class GitHubClient:
     def __init__(self):
-        self.workflow_url = (
-            f"{Config.BASE_URL}"
-            f"{Envs.OWNER}/{Envs.REPO}"
-            f"/actions/workflows/{Envs.WORKFLOW_ID}/runs"
-        )
+        self.workflow_url = f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/workflows/{Envs.WORKFLOW_ID}/runs"
 
     def _safe_get(self, url: str, params: dict = None) -> Optional[requests.Response]:
         """Make a GET request, returning None gracefully on rate-limit or auth errors."""
@@ -46,11 +41,7 @@ class GitHubClient:
 
     def get_recent_successful_runs(self, limit: int = 5) -> List[WorkflowRun]:
         """Fetches past completed successful workflow runs from GitHub Actions history."""
-        params = {
-            "per_page": limit,
-            "status": "completed",
-            "conclusion": "success"
-        }
+        params = {"per_page": limit, "status": "completed", "conclusion": "success"}
         if Envs.BRANCH:
             params["branch"] = Envs.BRANCH
         response = self._safe_get(self.workflow_url, params=params)
@@ -60,11 +51,7 @@ class GitHubClient:
         return data.workflow_runs
 
     def get_artifacts(self, run: WorkflowRun) -> List[Artifact]:
-        artifact_url = (
-            f"{Config.BASE_URL}"
-            f"{Envs.OWNER}/{Envs.REPO}"
-            f"/actions/runs/{run.id}/artifacts"
-        )
+        artifact_url = f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/runs/{run.id}/artifacts"
         response = self._safe_get(artifact_url)
         if response is None:
             return []

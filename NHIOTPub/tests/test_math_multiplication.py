@@ -1,10 +1,7 @@
-
-
 from NHIOTPub.NHUnitPub import BaseMQTTTest
 
 
 class TestMultiplication(BaseMQTTTest):
-
     def test_multiply_cases(self):
         cases = [
             ([3, 4], "12"),

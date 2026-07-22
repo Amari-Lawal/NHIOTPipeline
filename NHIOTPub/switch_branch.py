@@ -1,7 +1,7 @@
 import json
 import sys
 import threading
-import time
+
 from NHIOTPub.NHUnitPub import BaseMQTTTest
 
 
@@ -15,7 +15,9 @@ class BranchSwitcher(BaseMQTTTest):
             try:
                 msg = json.loads(payload.decode("utf-8"))
                 if msg.get("function") == "set_branch" and msg.get("result") == "READY":
-                    print(f"[PUBLISHER] Subscriber CONFIRMED: Downloaded & loaded artifact for branch '{msg.get('branch')}'!")
+                    print(
+                        f"[PUBLISHER] Subscriber CONFIRMED: Downloaded & loaded artifact for branch '{msg.get('branch')}'!"
+                    )
                     success = True
                     event.set()
             except Exception as e:
@@ -30,7 +32,9 @@ class BranchSwitcher(BaseMQTTTest):
             if event.wait(timeout):
                 return success
             else:
-                print(f"[PUBLISHER] WARNING: Subscriber did not send READY confirmation within {timeout}s (proceeding with tests).")
+                print(
+                    f"[PUBLISHER] WARNING: Subscriber did not send READY confirmation within {timeout}s (proceeding with tests)."
+                )
                 return False
         finally:
             try:

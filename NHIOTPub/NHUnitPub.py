@@ -1,7 +1,7 @@
-import threading
 import json
-import time
+import threading
 import unittest
+
 from NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.config import Topics
 
@@ -35,7 +35,7 @@ class BaseMQTTTest(unittest.TestCase):
                 pass
 
         self.client.subscribe(on_ready_callback, topic=self.subscribe_topic, verbose=False)
-        
+
         switch_payload = json.dumps({"command": "SET_BRANCH", "branch": target_branch})
         self.client.publish(switch_payload, topic=self.publish_topic, verbose=False)
 
@@ -46,7 +46,7 @@ class BaseMQTTTest(unittest.TestCase):
         def callback(topic, payload):
             try:
                 result_json = json.loads(payload.decode("utf-8"))
-                
+
                 # Filter out set_branch handshakes
                 if isinstance(result_json, dict) and result_json.get("function") == "set_branch":
                     return
@@ -78,7 +78,7 @@ class BaseMQTTTest(unittest.TestCase):
         event = threading.Event()
 
         cb = self._make_callback(event, expected_result, parameters, expected_function=function)
-        
+
         self.client.subscribe(cb, topic=self.subscribe_topic, verbose=False)
 
         payload = json.dumps({"function": function, "parameters": parameters})
@@ -88,7 +88,7 @@ class BaseMQTTTest(unittest.TestCase):
 
         self.assertTrue(
             received,
-            f"Timed out waiting for response for '{function}({parameters})' on '{self.subscribe_topic}'"
+            f"Timed out waiting for response for '{function}({parameters})' on '{self.subscribe_topic}'",
         )
         if self.error:
             self.fail(f"Error during execution of '{function}': {self.error}")
@@ -97,7 +97,7 @@ class BaseMQTTTest(unittest.TestCase):
             self.assertEqual(
                 self.received_result.replace(" ", ""),
                 expected_result.replace(" ", ""),
-                f"Expected '{expected_result}', got '{self.received_result}'"
+                f"Expected '{expected_result}', got '{self.received_result}'",
             )
 
         return self.received_result
