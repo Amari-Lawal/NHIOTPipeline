@@ -74,6 +74,41 @@ flowchart TD
 
 ---
 
+## Environment Configuration & Required Secrets (`.env.example`)
+
+Before executing the pipeline (locally or in containers), copy [.env.example](file:///home/amari/Desktop/NHIOTPipeline/.env.example) to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+### Required Configuration & Secrets Specification
+
+| Key / Variable | Category | Required / Optional | Description |
+| :--- | :--- | :--- | :--- |
+| `GITHUB_TOKEN` | GitHub API Secret | **Required** | Personal Access Token (PAT) with `repo` and `actions` scope used to query GitHub Actions API, download multi-arch build artifacts, and dispatch rollback workflows. |
+| `OWNER` | GitHub Config | **Required** | GitHub repository owner / organization name (e.g., `Amari-Lawal`). |
+| `REPO` | GitHub Config | **Required** | Target GitHub repository name (e.g., `NHIOTPipeline`). |
+| `WORKFLOW_ID` | GitHub Config | **Required** | Workflow file name responsible for cross-compilation (`build.yml`). |
+| `BRANCH` | Target Deployment | **Required** | Target git branch for OTA artifact fetching (default: `main`). |
+| `POLL_INTERVAL` | Telemetry Config | **Required** | Artifact polling & telemetry interval in seconds (default: `10`). |
+| `SUBSCRIBER_ARCHITECTURE` | Edge Architecture | **Required** | Target CPU architecture filter for ELF binary header verification (`x86_64` or `aarch64`). |
+| `ARTIFACT_NAME` | Build Artifact | **Required** | Name prefix of the compiled executable artifact (default: `hello`). |
+| `RPI_IP` | Secure Edge Credentials | Optional | Target IP address of the physical smart gateway / Raspberry Pi device (e.g., `192.168.1.11`). |
+| `RPI_USERNAME` | Secure Edge Credentials | Optional | SSH username for remote edge device access (e.g., `amari`). |
+| `RPI_PASSWORD` | Secure Edge Credentials | Optional | SSH password / key passphrase for secure remote execution. |
+| `ENDPOINT` / `MQTT_BROKER` | MQTT Control Plane | **Required** | Hostname of the MQTT broker (local Docker hostname `mqtt-broker`, `localhost`, or AWS IoT endpoint). |
+| `MQTT_PORT` | MQTT Control Plane | **Required** | Broker port (`1883` for unencrypted local, `18883` for Docker host-mapped, or `8883` for TLS). |
+| `USE_LOCAL_BROKER` | MQTT Control Plane | **Required** | Set to `true` for local Mosquitto / Docker sandbox evaluation; `false` for AWS IoT Core TLS. |
+| `CA_FILE` | TLS Certificates | Optional (AWS IoT) | Path to Root CA Certificate file (`root-CA.crt`). |
+| `CERT_FILE` | TLS Certificates | Optional (AWS IoT) | Path to X.509 Device Certificate (`device.pem.crt`). |
+| `PRIVATE_KEY_FILE` | TLS Certificates | Optional (AWS IoT) | Path to RSA/ECC Private Key file (`private.pem.key`). |
+
+> [!IMPORTANT]
+> **Secret Security & Leak Prevention**: Never commit raw `.env` files or `.pem` cryptographic keys to version control. The repository integrates **Gitleaks** in `.github/workflows/build.yml` to automatically block pull requests or pushes containing exposed API tokens or certificates.
+
+---
+
 ## Execution & Quick-Start Guide
 
 The pipeline supports two execution modes depending on your evaluation context:
