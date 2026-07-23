@@ -7,40 +7,16 @@ from NHIOTPub.NHUnitPub import BaseMQTTTest
 
 class BranchSwitcher(BaseMQTTTest):
     def switch_and_wait(self, branch_name: str, timeout: int = 30) -> bool:
-        event = threading.Event()
-        success = False
-
-        def callback(topic, payload):
-            nonlocal success
-            try:
-                msg = json.loads(payload.decode("utf-8"))
-                if msg.get("function") == "set_branch" and msg.get("result") == "READY":
-                    print(
-                        f"[PUBLISHER] Subscriber CONFIRMED: Downloaded & loaded artifact for branch '{msg.get('branch')}'!"
-                    )
-                    success = True
-                    event.set()
-            except Exception as e:
-                print(f"[PUBLISHER] Error parsing response: {e}")
-
-        self.client.subscribe(callback, topic=self.subscribe_topic, verbose=False)
-
-        try:
-            print(f"[PUBLISHER] Requesting subscriber to switch to branch '{branch_name}' and pull build artifact...")
-            self.set_subscriber_branch(branch_name)
-
-            if event.wait(timeout):
-                return success
-            else:
-                print(
-                    f"[PUBLISHER] WARNING: Subscriber did not send READY confirmation within {timeout}s (proceeding with tests)."
-                )
-                return False
-        finally:
-            try:
-                self.client.unsubscribe(self.subscribe_topic, verbose=False)
-            except Exception:
-                pass
+        print(f"[PUBLISHER] Requesting subscriber to switch to branch '{branch_name}' and pull build artifact...")
+        success = self.set_subscriber_branch(branch_name)
+        if success:
+            print(f"[PUBLISHER] Subscriber CONFIRMED: Downloaded & loaded artifact for branch '{branch_name}'!")
+            return True
+        else:
+            print(
+                f"[PUBLISHER] WARNING: Subscriber did not send READY confirmation within {timeout}s (proceeding with tests)."
+            )
+            return False
 
 
 def main():

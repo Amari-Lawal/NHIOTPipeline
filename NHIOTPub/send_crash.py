@@ -17,8 +17,8 @@ def main():
         nonlocal received_error
         try:
             data = json.loads(payload.decode("utf-8"))
-            stderr = data.get("stderr", "")
-            stdout = data.get("stdout", "")
+            stderr = data.get("error") if data.get("error") is not None else data.get("stderr", "")
+            stdout = data.get("result") if data.get("result") is not None else data.get("stdout", "")
             print(f"\n[PUBLISHER] Received Execution Response on '{topic}':")
             if stderr:
                 print(f"  CRASH / FAILURE TRAPPED (stderr):\n{stderr.strip()}")

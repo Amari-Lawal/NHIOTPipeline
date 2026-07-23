@@ -5,3 +5,5 @@ venv/
 Executables/
 *.json
 *.env
+__pycache__/
+*.pyc

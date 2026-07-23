@@ -11,6 +11,8 @@ services:
   server-audit:
     build: .
     container_name: nhiot-server-audit
+    volumes:
+      - .:/app
     env_file:
       - ./NHIOTSub/.env
     environment:
@@ -25,6 +27,8 @@ services:
   iot-subscriber:
     build: .
     container_name: nhiot-iot-subscriber
+    volumes:
+      - .:/app
     env_file:
       - ./NHIOTSub/.env
     environment:
@@ -39,6 +43,8 @@ services:
   publisher:
     build: .
     container_name: nhiot-publisher
+    volumes:
+      - .:/app
     env_file:
       - ./NHIOTSub/.env
     environment:

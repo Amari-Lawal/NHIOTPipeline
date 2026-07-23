@@ -3,7 +3,7 @@ from concurrent.futures import Future
 from logging import Logger
 from typing import Any
 
-from awscrt import mqtt
+from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 
 from NHIOTMQTT.config.Envs import Envs
@@ -29,11 +29,14 @@ class NHIOTMQTT:
 
         if use_local:
             broker_host = Envs.MQTT_BROKER or Envs.MQTT_HOST or "localhost"
-            broker_port = Envs.MQTT_PORT
+            broker_port = Envs.MQTT_PORT or 1883
             if verbose and self.logger:
                 self.logger.info(f"Using local unauthenticated MQTT connection: {broker_host}:{broker_port}")
-            self.mqtt_connection = mqtt_connection_builder.direct_mqtt_connect_builder(
-                endpoint=broker_host,
+            client_bootstrap = io.ClientBootstrap.get_or_create_static_default()
+            client = mqtt.Client(client_bootstrap)
+            self.mqtt_connection = mqtt.Connection(
+                client=client,
+                host_name=broker_host,
                 port=broker_port,
                 client_id=self.client_id,
                 clean_session=True,

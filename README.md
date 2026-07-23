@@ -74,54 +74,85 @@ flowchart TD
 
 ---
 
-## Step-by-Step Examiner Quick-Start Guide
+## Execution & Quick-Start Guide
 
-You can evaluate the system using **Method A (Docker Compose - Recommended)** or **Method B (Local Shell Setup)**.
-
-> [!TIP]
-> **Recommended Method**: Use **Method A (Docker Compose)** for a zero-friction evaluation. It isolates all ports and dependencies, preventing any collisions with your local machine setup.
-
----
-
-### Method A: Docker Compose Sandbox (RECOMMENDED — Zero Port/OS Collisions)
-
-To ensure zero port collisions, dependency conflicts, or local system pollution, Docker Compose launches a self-contained MQTT broker, Server Audit daemon, IoT Subscriber daemon, and Publisher suite.
-
-#### 1. Launch the System
-```bash
-docker compose up -d
-```
-
-#### 2. View Live Audit Telemetry Logs
-```bash
-# Watch live fleet heartbeats, OTA updates, and protection events:
-docker compose logs -f server-audit
-```
-
-#### 3. Run Examiner Verification Commands
-In another terminal, execute commands via the containerized publisher suite:
-
-```bash
-# A. Test Dynamic Branch Switch (dev, main)
-docker compose exec publisher ./run_pub.sh dev
-
-# B. Trigger Process Isolation Protection & Trapped Crash Telemetry
-docker compose exec publisher ./run_pub.sh crash
-
-# C. Trigger Automated GitHub Actions Version History Rollback
-docker compose exec publisher ./run_pub.sh revert
-```
-
-#### 4. Tear Down
-```bash
-docker compose down
-```
+The pipeline supports two execution modes depending on your evaluation context:
+1. **Mode 1: All-in-One Execution (Examiner / Fast Evaluation Mode)** — Launches all services concurrently using a single command or script.
+2. **Mode 2: Separate Terminals Execution (Intended Real-World Architecture)** — Runs each daemon in its own terminal to mirror distributed IoT edge hardware and server nodes.
 
 ---
 
-### Method B: Local Shell Setup
+### Mode 1: All-in-One Execution (Examiner / Fast Evaluation Mode)
 
-If you prefer running directly on your host operating system:
+> [!NOTE]
+> **Examiner Evaluation**: This mode is optimized for fast, single-step evaluation without requiring manual management of multiple terminal windows.
+
+#### Option 1A: Docker Compose Sandbox (RECOMMENDED — Zero Port/OS Collisions)
+
+Docker Compose orchestrates the entire ecosystem (MQTT Broker, Server Audit daemon, IoT Subscriber daemon, and Publisher suite) in a single containerized environment.
+
+1. **Launch All Services in One Command**:
+   ```bash
+   docker compose up -d
+   ```
+   *(Or run `docker compose up` without `-d` to stream all daemon logs directly in your current terminal).*
+
+2. **Watch Live Telemetry & Audit Logs**:
+   ```bash
+   docker compose logs -f server-audit
+   ```
+
+3. **Run Verification Commands**:
+   In a separate terminal, trigger commands via the containerized publisher suite:
+   ```bash
+   # Test Dynamic Branch Switch (dev, main)
+   docker compose exec publisher ./run_pub.sh dev
+
+   # Trigger Process Isolation Protection & Trapped Crash Telemetry
+   docker compose exec publisher ./run_pub.sh crash
+
+   # Trigger Automated GitHub Actions Version History Rollback
+   docker compose exec publisher ./run_pub.sh revert
+   ```
+
+4. **Tear Down**:
+   ```bash
+   docker compose down
+   ```
+
+#### Option 1B: Local All-in-One Script (`./run_all.sh`)
+
+If running directly on the host machine, use the provided `run_all.sh` script to spawn all daemons in a single terminal session:
+
+1. **Environment Setup**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+2. **Run All Daemons in One Terminal**:
+   ```bash
+   ./run_all.sh
+   ```
+   *(Both Server Audit and IoT Subscriber daemons will start in the background within the terminal. Press `Ctrl+C` at any time to cleanly stop all services).*
+
+3. **Run Verification Commands**:
+   In a second terminal:
+   ```bash
+   source venv/bin/activate
+
+   ./run_pub.sh dev
+   ./run_pub.sh crash
+   ./run_pub.sh revert
+   ```
+
+---
+
+### Mode 2: Separate Terminals Execution (Intended Real-World Architecture)
+
+> [!IMPORTANT]
+> **Intended System Architecture**: In a real production deployment, each component operates on physically isolated infrastructure (e.g., IoT Edge device hardware nodes, Server Audit Cloud/On-Prem servers, and MQTT Message Broker clusters). Running in separate terminals mirrors this intended distributed architecture, allowing clear isolation and real-time per-daemon log inspection.
 
 #### 1. Environment Setup
 ```bash
@@ -133,29 +164,34 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 2. Launch Services (3 Terminal Setup)
+#### 2. Launch Services across Dedicated Terminals
 
-- **Terminal 1 (Server Audit Daemon)**:
+- **Terminal 1: Server Audit Daemon**
+  *Simulates the centralized server monitoring fleet health, OTA status updates, and crash protection reports.*
   ```bash
   source venv/bin/activate
   ./run_sub_server.sh
   ```
-- **Terminal 2 (IoT Device Subscriber Daemon)**:
+
+- **Terminal 2: IoT Edge Device Subscriber Daemon**
+  *Simulates the IoT Edge device daemon listening to MQTT topics, verifying binary signatures/ELF headers, and executing process-isolated binaries.*
   ```bash
   source venv/bin/activate
   ./run_sub_iot.sh
   ```
-- **Terminal 3 (Publisher Verification Commands)**:
+
+- **Terminal 3: Publisher & Admin Control Suite**
+  *Simulates the administrative control plane issuing OTA deployment requests and health checks.*
   ```bash
   source venv/bin/activate
 
-  # A. Dynamic Branch Switch
+  # A. Dynamic Branch Switch (dev / main)
   ./run_pub.sh dev
 
-  # B. Trigger Crash Protection
+  # B. Trigger Process Isolation Crash Protection
   ./run_pub.sh crash
 
-  # C. Trigger GitHub Actions History Rollback
+  # C. Trigger Automated GitHub Actions Version History Rollback
   ./run_pub.sh revert
   ```
 

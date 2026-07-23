@@ -1,0 +1,15 @@
+.git
+.github
+venv
+artifacts
+artifacts_real
+__pycache__
+*.pyc
+.vscode
+.local
+.ruff_cache
+Docs
+Thesis
+Evaluation
+Simulation_Evaluation
+Deliverys

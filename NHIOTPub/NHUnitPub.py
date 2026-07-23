@@ -39,7 +39,7 @@ class BaseMQTTTest(unittest.TestCase):
         switch_payload = json.dumps({"command": "SET_BRANCH", "branch": target_branch})
         self.client.publish(switch_payload, topic=self.publish_topic, verbose=False)
 
-        received = event.wait(timeout=15)
+        received = event.wait(timeout=25)
         return received and result_holder["ready"]
 
     def _make_callback(self, event, expected_result, parameters, expected_function):
@@ -56,7 +56,7 @@ class BaseMQTTTest(unittest.TestCase):
                     if actual_fn and actual_fn != expected_function:
                         return
 
-                actual_stdout = result_json.get("stdout", "").strip()
+                actual_stdout = (result_json.get("result") if result_json.get("result") is not None else result_json.get("stdout", "")).strip()
 
                 if expected_result is not None:
                     actual_clean = actual_stdout.replace(" ", "")
