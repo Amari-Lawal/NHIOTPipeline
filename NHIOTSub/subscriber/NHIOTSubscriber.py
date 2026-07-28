@@ -52,9 +52,10 @@ class NHIOTSubscriber:
         self._start_heartbeat_loop()
 
     def _start_heartbeat_loop(self) -> None:
-        """Launches a background thread publishing Pydantic HeartbeatPayload every 15 seconds."""
+        """Launches a background thread publishing Pydantic HeartbeatPayload every 15 seconds with a Watchdog safety loop."""
 
         def heartbeat_worker():
+            consecutive_failures = 0
             while True:
                 try:
                     payload = HeartbeatPayload(
@@ -65,15 +66,46 @@ class NHIOTSubscriber:
                         status="HEALTHY",
                     )
                     self.client.publish(payload.model_dump_json(), topic=Topics.HEARTBEAT_TOPIC)
+                    if consecutive_failures > 0:
+                        self.logger.info("Heartbeat Watchdog: Connection restored. Resetting failure counter.")
+                    consecutive_failures = 0
                 except Exception as e:
-                    self.logger.debug(f"Heartbeat emission failed: {e}")
+                    consecutive_failures += 1
+                    self.logger.warning(
+                        f"Heartbeat emission failed (Consecutive Failures: {consecutive_failures}/3): {e}"
+                    )
+                    if consecutive_failures >= 3:
+                        self.logger.error(
+                            "CRITICAL WATCHDOG ALERT: 3 consecutive heartbeat emission failures detected! "
+                            "Step 1: Attempting retry pull of latest build artifact..."
+                        )
+                        self.send_ota_notification(
+                            "FAILURE",
+                            f"Heartbeat Watchdog alert: {consecutive_failures} consecutive heartbeat failures.",
+                            "heartbeat-watchdog",
+                        )
+                        # Step 1: Retry re-fetching/verifying the latest build first
+                        reloaded_path = self.fetch_artifact_for_branch(Envs.BRANCH)
+                        if not reloaded_path:
+                            # Step 2: If latest build retry fails, fallback to previous successful historical build
+                            self.logger.warning(
+                                "Step 2: Latest build retry failed. Reverting to previous successful GitHub build history..."
+                            )
+                            try:
+                                self.revert_to_previous_github_build(self.last_processed_run_id or 0, Envs.BRANCH)
+                            except Exception as revert_err:
+                                self.logger.error(f"Watchdog rollback attempt failed: {revert_err}")
+                        # Reset counter to avoid continuous loop trigger
+                        consecutive_failures = 0
+
                 time.sleep(15)
 
         thread = threading.Thread(target=heartbeat_worker, daemon=True, name="IoT-Heartbeat")
         thread.start()
         self.logger.info(
-            f"Started IoT Device Heartbeat thread (Device: '{self.device_id}', Topic: '{Topics.HEARTBEAT_TOPIC}', Interval: 15s)"
+            f"Started IoT Device Heartbeat Watchdog thread (Device: '{self.device_id}', Topic: '{Topics.HEARTBEAT_TOPIC}', Interval: 15s)"
         )
+
 
     def send_ota_notification(self, status: str, detail: str, commit_sha: str) -> None:
         """Publishes a Pydantic-validated OTA status payload to enterprise topic 'nhiot/ota/status'."""
@@ -207,9 +239,27 @@ class NHIOTSubscriber:
                     )
                     return self.current_file_path
                 else:
-                    # 2. Unit tests failed -> Revert using GitHub Actions Build History!
+                    # 2. Unit tests failed -> Step 1: Retry re-downloading/testing latest run once
                     self.logger.warning(
-                        f"Build run #{run.id} failed post-pull unit tests! Triggering GitHub version revert..."
+                        f"Build run #{run.id} failed post-pull unit tests! Step 1: Retrying pull of latest build run #{run.id}..."
+                    )
+                    try:
+                        retry_download_path = self.artifacts.download(artifact)
+                        if self.run_unit_tests(retry_download_path, target):
+                            self.current_file_path = retry_download_path
+                            self.last_processed_run_id = run.id
+                            self.send_ota_notification(
+                                "SUCCESS",
+                                f"Retry succeeded: All unit tests passed for build #{run.id}.",
+                                commit_sha,
+                            )
+                            return self.current_file_path
+                    except Exception as retry_err:
+                        self.logger.warning(f"Retry pull for run #{run.id} failed: {retry_err}")
+
+                    # Step 2: Latest build retry failed -> Revert to previous successful GitHub build!
+                    self.logger.warning(
+                        f"Step 2: Latest build run #{run.id} failed retry. Reverting to previous successful GitHub build history..."
                     )
                     reverted_path = self.revert_to_previous_github_build(run.id, branch)
                     if reverted_path:
@@ -221,6 +271,7 @@ class NHIOTSubscriber:
                             commit_sha,
                         )
                         return self.current_file_path
+
 
             except Exception as download_error:
                 self.logger.warning(
