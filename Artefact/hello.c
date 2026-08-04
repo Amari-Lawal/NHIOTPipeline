@@ -3,11 +3,12 @@
 #include <stdlib.h>
 // Trigger update check
 void add(int argc, char *argv[]) {
-    
+    int test_count = 1;
     int count = 0;
     for (int i = 0; i < argc; i++) {
         int num = atoi(argv[i]);
         count += num;
+        test_count += num;
     }
 
     printf("add:%d", count);
