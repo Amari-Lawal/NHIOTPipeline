@@ -6,7 +6,9 @@ from NHIOTSub.config import Topics
 
 
 def main():
-    print("[PUBLISHER] Requesting remote IoT Subscriber to trigger GitHub Actions Version Rollback...")
+    print(
+        "[PUBLISHER] Requesting remote IoT Subscriber to trigger GitHub Actions Version Rollback..."
+    )
     client = NHIOTMQTT()
     client.connect(verbose=False)
 
@@ -31,9 +33,13 @@ def main():
     if event.wait(timeout=15):
         result = received_data.get("result", "UNKNOWN")
         file_path = received_data.get("file_path", "")
-        print(f"\n[PUBLISHER SUCCESS] Subscriber CONFIRMED Rollback Result: '{result}' | Active Path: '{file_path}'!")
+        print(
+            f"\n[PUBLISHER SUCCESS] Subscriber CONFIRMED Rollback Result: '{result}' | Active Path: '{file_path}'!"
+        )
     else:
-        print("\n[PUBLISHER TIMEOUT] No rollback confirmation received from subscriber within 15 seconds.")
+        print(
+            "\n[PUBLISHER TIMEOUT] No rollback confirmation received from subscriber within 15 seconds."
+        )
 
     client.disconnect(verbose=False)
 

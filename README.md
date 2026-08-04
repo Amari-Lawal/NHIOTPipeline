@@ -182,6 +182,18 @@ If running directly on the host machine, use the provided `run_all.sh` script to
    ./run_pub.sh revert
    ```
 
+#### Option 1C: GCP e2-micro Examiner Web Terminal (`./setup_e2_micro.sh`)
+
+For cloud evaluation on GCP `e2-micro` instances, run the 1-click installer script to configure 1GB swap memory, dependencies, and a zero-friction web-accessible terminal on port 8080:
+
+1. **Run 1-Click Setup Script on GCP VM**:
+   ```bash
+   ./setup_e2_micro.sh
+   ```
+
+2. **Access Interactive Web Terminal**:
+   Open `http://<GCP-EXTERNAL-IP>:8080` in your web browser to view the multi-pane live daemons and interactive command prompt.
+
 ---
 
 ### Mode 2: Separate Terminals Execution (Intended Real-World Architecture)

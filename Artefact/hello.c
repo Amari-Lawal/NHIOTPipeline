@@ -34,6 +34,8 @@ void multiply(int argc, char *argv[]) {
 }
 
 void crash(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
     // Real CPU floating point exception
     volatile int a = 1;
     volatile int b = 0;
@@ -59,7 +61,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < sizeof(table) / sizeof(table[0]); i++) {
+    for (size_t i = 0; i < sizeof(table) / sizeof(table[0]); i++) {
         if (strcmp(argv[1], table[i].name) == 0) {
             /* pass remaining arguments to the function */
             table[i].fn(argc - 2, argv + 2);

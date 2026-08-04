@@ -54,3 +54,22 @@ services:
     command: tail -f /dev/null
     depends_on:
       - mqtt-broker
+
+  web-dashboard:
+    build: .
+    container_name: nhiot-web-dashboard
+    ports:
+      - "80:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - ./NHIOTSub/.env
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - USE_LOCAL_BROKER=true
+    command: python3 web_dashboard.py
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+

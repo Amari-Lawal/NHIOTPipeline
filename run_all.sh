@@ -20,18 +20,24 @@ if [ -d "venv" ]; then
     source venv/bin/activate
 fi
 
-echo "[1/2] Launching Server Audit Daemon..."
+echo "[1/3] Launching Server Audit Daemon..."
 python3 -m NHIOTSub.server_subscriber &
 SERVER_PID=$!
 
-echo "[2/2] Launching IoT Subscriber Daemon..."
+echo "[2/3] Launching IoT Subscriber Daemon..."
 python3 -m NHIOTSub.main &
 IOT_PID=$!
 
+echo "[3/3] Launching Examiner Web Dashboard..."
+python3 web_dashboard.py &
+WEB_PID=$!
+
 echo "======================================================"
-echo " All services running! (Server PID: $SERVER_PID, IoT PID: $IOT_PID)"
+echo " All services running! (Server PID: $SERVER_PID, IoT PID: $IOT_PID, Web PID: $WEB_PID)"
+echo " Examiner Web Portal: http://localhost:8000"
 echo " Press Ctrl+C to stop all daemons."
 echo "======================================================"
 
 # Keep running and waiting for background jobs
 wait
+
