@@ -40,15 +40,21 @@ def print_step(component, color, action):
     print(f"{BOLD}{color}[{timestamp}] [{component}]{RESET} {action}")
 
 
-print(f"{BOLD}{BLUE}======================================================================{RESET}")
+print(
+    f"{BOLD}{BLUE}======================================================================{RESET}"
+)
 print(f"{BOLD}{BLUE}       NHIOT PIPELINE: SYSTEM WORKFLOW & ARCHITECTURE DEMO{RESET}")
-print(f"{BOLD}{BLUE}======================================================================{RESET}")
+print(
+    f"{BOLD}{BLUE}======================================================================{RESET}"
+)
 time.sleep(3)
 
 # ----------------------------------------------------------------------
 # PART 1: DEVSECOPS BUILD & PACKAGING PIPELINE (CI/CD Gates)
 # ----------------------------------------------------------------------
-print(f"\n{BOLD}{YELLOW}--- PART 1: DEVSECOPS BUILD & PACKAGING PIPELINE (CI/CD Gates) ---{RESET}")
+print(
+    f"\n{BOLD}{YELLOW}--- PART 1: DEVSECOPS BUILD & PACKAGING PIPELINE (CI/CD Gates) ---{RESET}"
+)
 time.sleep(2)
 
 print_step(
@@ -68,12 +74,16 @@ subprocess.run(
 print_step("CI/CD WORKFLOW", CYAN, "Ruff lint and format check passed cleanly.")
 time.sleep(1.5)
 
-print_step("CI/CD WORKFLOW", CYAN, "Running C source vulnerability scan (Flawfinder)...")
+print_step(
+    "CI/CD WORKFLOW", CYAN, "Running C source vulnerability scan (Flawfinder)..."
+)
 time.sleep(1.5)
 print_step("CI/CD WORKFLOW", CYAN, "Flawfinder scan passed (Minimum risk level = 1).")
 time.sleep(1.5)
 
-print_step("CI/CD WORKFLOW", CYAN, "Cross-compiling hello.c with GCC Hardening Flags...")
+print_step(
+    "CI/CD WORKFLOW", CYAN, "Cross-compiling hello.c with GCC Hardening Flags..."
+)
 # Compile
 sec_flags = [
     "-O2",
@@ -112,7 +122,9 @@ time.sleep(3)
 # ----------------------------------------------------------------------
 # PART 2: LIVE FLEET TELEMETRY & MESSAGE PUBLISHING (MQTT Control Plane)
 # ----------------------------------------------------------------------
-print(f"\n{BOLD}{YELLOW}--- PART 2: LIVE FLEET TELEMETRY & MESSAGE PUBLISHING (MQTT Control Plane) ---{RESET}")
+print(
+    f"\n{BOLD}{YELLOW}--- PART 2: LIVE FLEET TELEMETRY & MESSAGE PUBLISHING (MQTT Control Plane) ---{RESET}"
+)
 time.sleep(2)
 
 # Clean up any stale python daemons
@@ -260,7 +272,9 @@ def on_isolation(topic, payload, **kwargs):
 monitor_client.subscribe(on_heartbeat, topic=Topics.HEARTBEAT_TOPIC, verbose=False)
 monitor_client.subscribe(on_response, topic=Topics.RESPONSE_TOPIC, verbose=False)
 monitor_client.subscribe(on_ota, topic=Topics.OTA_STATUS_TOPIC, verbose=False)
-monitor_client.subscribe(on_isolation, topic=Topics.ISOLATION_STATUS_TOPIC, verbose=False)
+monitor_client.subscribe(
+    on_isolation, topic=Topics.ISOLATION_STATUS_TOPIC, verbose=False
+)
 
 # Start background daemons
 server_log = open("server_audit.log", "w")
@@ -278,7 +292,9 @@ print_step(
 time.sleep(1.5)
 
 sub_log = open("iot_subscriber.log", "w")
-sub_proc = subprocess.Popen([sys.executable, "-m", "NHIOTSub.main"], env=env, stdout=sub_log, stderr=sub_log)
+sub_proc = subprocess.Popen(
+    [sys.executable, "-m", "NHIOTSub.main"], env=env, stdout=sub_log, stderr=sub_log
+)
 print_step(
     "IoT SUBSCRIBER",
     GREEN,
@@ -328,7 +344,9 @@ try:
     time.sleep(3)
 
     # 3. Crash Trapping
-    print(f"\n{BOLD}{YELLOW}--- WORKFLOW: PROCESS ISOLATION & FAULT TRAPPING ---{RESET}")
+    print(
+        f"\n{BOLD}{YELLOW}--- WORKFLOW: PROCESS ISOLATION & FAULT TRAPPING ---{RESET}"
+    )
     time.sleep(2)
     print_step(
         "PUBLISHER (Admin)",
@@ -362,7 +380,9 @@ try:
     time.sleep(3)
 
     # 4. OTA Promotion
-    print(f"\n{BOLD}{YELLOW}--- WORKFLOW: OTA ENVIRONMENT UPDATE & VERIFICATION ---{RESET}")
+    print(
+        f"\n{BOLD}{YELLOW}--- WORKFLOW: OTA ENVIRONMENT UPDATE & VERIFICATION ---{RESET}"
+    )
     time.sleep(2)
     print_step(
         "PUBLISHER (Admin)",
@@ -429,9 +449,15 @@ try:
         )
     time.sleep(3)
 
-    print(f"\n{BOLD}{GREEN}======================================================================{RESET}")
-    print(f"{BOLD}{GREEN}      ALL ARCHITECTURAL INTERACTIONS SUCCESSFULLY DEMONSTRATED!{RESET}")
-    print(f"{BOLD}{GREEN}======================================================================{RESET}")
+    print(
+        f"\n{BOLD}{GREEN}======================================================================{RESET}"
+    )
+    print(
+        f"{BOLD}{GREEN}      ALL ARCHITECTURAL INTERACTIONS SUCCESSFULLY DEMONSTRATED!{RESET}"
+    )
+    print(
+        f"{BOLD}{GREEN}======================================================================{RESET}"
+    )
     time.sleep(2)
 
 finally:

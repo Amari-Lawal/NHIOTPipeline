@@ -9,4 +9,6 @@ class HeartbeatPayload(BaseModel):
     active_branch: str
     active_binary: str
     status: str = "HEALTHY"
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )

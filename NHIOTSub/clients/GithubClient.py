@@ -22,7 +22,9 @@ class GitHubClient:
             msg = body.get("message", "")
             if "rate limit" in msg.lower():
                 reset_ts = response.headers.get("X-RateLimit-Reset", "unknown")
-                logger.warning(f"GitHub API rate limit hit — backing off. Reset at epoch: {reset_ts}")
+                logger.warning(
+                    f"GitHub API rate limit hit — backing off. Reset at epoch: {reset_ts}"
+                )
             else:
                 logger.warning(f"GitHub API returned {response.status_code}: {msg}")
             return None
@@ -51,7 +53,9 @@ class GitHubClient:
         return data.workflow_runs
 
     def get_artifacts(self, run: WorkflowRun) -> List[Artifact]:
-        artifact_url = f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/runs/{run.id}/artifacts"
+        artifact_url = (
+            f"{Config.BASE_URL}{Envs.OWNER}/{Envs.REPO}/actions/runs/{run.id}/artifacts"
+        )
         response = self._safe_get(artifact_url)
         if response is None:
             return []
