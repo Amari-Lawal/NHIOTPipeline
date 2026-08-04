@@ -12,6 +12,4 @@ class IsolationProtectionPayload(BaseModel):
     parameters: List[str]
     error_message: str
     status: str = "PROTECTED"
-    timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

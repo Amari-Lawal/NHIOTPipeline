@@ -10,6 +10,4 @@ class OTAStatusPayload(BaseModel):
     commit_sha: str
     status: str  # "SUCCESS", "ROLLBACK", "FAILURE"
     detail: str
-    timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

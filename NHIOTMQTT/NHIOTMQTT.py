@@ -25,17 +25,13 @@ class NHIOTMQTT:
         if verbose and self.logger:
             self.logger.info("Connecting to MQTT Broker...")
 
-        use_local = (
-            Envs.USE_LOCAL_BROKER or bool(Envs.MQTT_BROKER) or bool(Envs.MQTT_HOST)
-        )
+        use_local = Envs.USE_LOCAL_BROKER or bool(Envs.MQTT_BROKER) or bool(Envs.MQTT_HOST)
 
         if use_local:
             broker_host = Envs.MQTT_BROKER or Envs.MQTT_HOST or "localhost"
             broker_port = Envs.MQTT_PORT or 1883
             if verbose and self.logger:
-                self.logger.info(
-                    f"Using local unauthenticated MQTT connection: {broker_host}:{broker_port}"
-                )
+                self.logger.info(f"Using local unauthenticated MQTT connection: {broker_host}:{broker_port}")
             client_bootstrap = io.ClientBootstrap.get_or_create_static_default()
             client = mqtt.Client(client_bootstrap)
             self.mqtt_connection = mqtt.Connection(
@@ -67,9 +63,7 @@ class NHIOTMQTT:
             raise RuntimeError("MQTT client not connected")
         if verbose and self.logger:
             self.logger.info(f"Subscribing to topic '{topic}'...")
-        subscribe_future, _ = self.mqtt_connection.subscribe(
-            topic=topic, qos=self.QOS, callback=callback
-        )
+        subscribe_future, _ = self.mqtt_connection.subscribe(topic=topic, qos=self.QOS, callback=callback)
         subscribe_result = subscribe_future.result()
         if verbose and self.logger:
             self.logger.info(f"Subscribed to topic '{topic}'")
