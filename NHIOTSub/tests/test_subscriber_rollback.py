@@ -37,9 +37,7 @@ class TestSubscriberRollback(unittest.TestCase):
         self.github.get_artifacts.return_value = []
         self.artifacts.choose.return_value = None
 
-        with patch.object(
-            self.subscriber, "revert_to_previous_github_build"
-        ) as mock_revert:
+        with patch.object(self.subscriber, "revert_to_previous_github_build") as mock_revert:
             mock_revert.return_value = "/tmp/reverted_binary"
             result = self.subscriber.fetch_artifact_for_branch("main")
 

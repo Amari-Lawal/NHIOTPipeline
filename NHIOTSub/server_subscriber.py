@@ -81,9 +81,7 @@ def main():
     logger.info(f"Subscribing to OTA Status topic '{Topics.OTA_STATUS_TOPIC}'...")
     client.subscribe(on_ota_status, topic=Topics.OTA_STATUS_TOPIC)
 
-    logger.info(
-        f"Subscribing to Isolation Status topic '{Topics.ISOLATION_STATUS_TOPIC}'..."
-    )
+    logger.info(f"Subscribing to Isolation Status topic '{Topics.ISOLATION_STATUS_TOPIC}'...")
     client.subscribe(on_isolation_status, topic=Topics.ISOLATION_STATUS_TOPIC)
 
     logger.info("Server Fleet Audit Daemon active.")

@@ -28,19 +28,13 @@ class BaseMQTTTest(unittest.TestCase):
         def on_ready_callback(topic, payload):
             try:
                 msg = json.loads(payload.decode("utf-8"))
-                if (
-                    isinstance(msg, dict)
-                    and msg.get("function") == "set_branch"
-                    and msg.get("result") == "READY"
-                ):
+                if isinstance(msg, dict) and msg.get("function") == "set_branch" and msg.get("result") == "READY":
                     result_holder["ready"] = True
                     event.set()
             except Exception:
                 pass
 
-        self.client.subscribe(
-            on_ready_callback, topic=self.subscribe_topic, verbose=False
-        )
+        self.client.subscribe(on_ready_callback, topic=self.subscribe_topic, verbose=False)
 
         switch_payload = json.dumps({"command": "SET_BRANCH", "branch": target_branch})
         self.client.publish(switch_payload, topic=self.publish_topic, verbose=False)
@@ -54,10 +48,7 @@ class BaseMQTTTest(unittest.TestCase):
                 result_json = json.loads(payload.decode("utf-8"))
 
                 # Filter out set_branch handshakes
-                if (
-                    isinstance(result_json, dict)
-                    and result_json.get("function") == "set_branch"
-                ):
+                if isinstance(result_json, dict) and result_json.get("function") == "set_branch":
                     return
 
                 if expected_function is not None:
@@ -85,16 +76,12 @@ class BaseMQTTTest(unittest.TestCase):
 
         return callback
 
-    def send_command(
-        self, function: str, parameters: list, expected_result: str = None
-    ):
+    def send_command(self, function: str, parameters: list, expected_result: str = None):
         self.received_result = None
         self.error = None
         event = threading.Event()
 
-        cb = self._make_callback(
-            event, expected_result, parameters, expected_function=function
-        )
+        cb = self._make_callback(event, expected_result, parameters, expected_function=function)
 
         self.client.subscribe(cb, topic=self.subscribe_topic, verbose=False)
 
@@ -112,15 +99,12 @@ class BaseMQTTTest(unittest.TestCase):
 
         if expected_result is not None:
             self.assertTrue(
-                str(expected_result).replace(" ", "")
-                in self.received_result.replace(" ", ""),
+                str(expected_result).replace(" ", "") in self.received_result.replace(" ", ""),
                 f"Expected '{expected_result}' in '{self.received_result}'",
             )
 
         return self.received_result
 
-    def run_mqtt_test(
-        self, function: str, parameters: list, expected_result: str = None
-    ):
+    def run_mqtt_test(self, function: str, parameters: list, expected_result: str = None):
         """Alias method for unit test suite compatibility."""
         return self.send_command(function, parameters, expected_result)

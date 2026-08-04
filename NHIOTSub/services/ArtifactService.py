@@ -21,9 +21,7 @@ class ArtifactService:
 
     def verify_checksum(self, binary_path: str, checksum_path: str) -> bool:
         if not os.path.exists(checksum_path):
-            self.logger.info(
-                f"No SHA-256 file found at '{checksum_path}' — proceeding."
-            )
+            self.logger.info(f"No SHA-256 file found at '{checksum_path}' — proceeding.")
             return True
 
         with open(binary_path, "rb") as f:
@@ -33,9 +31,7 @@ class ArtifactService:
             expected_hash = f.read().split()[0].strip()
 
         if calculated_hash.lower() == expected_hash.lower():
-            self.logger.info(
-                f"SHA-256 Integrity Verified! Hash: {calculated_hash[:16]}..."
-            )
+            self.logger.info(f"SHA-256 Integrity Verified! Hash: {calculated_hash[:16]}...")
             return True
         else:
             self.logger.error(
@@ -46,9 +42,7 @@ class ArtifactService:
     def verify_elf_header(self, binary_path: str, expected_arch: str) -> bool:
         """Inspects Linux ELF magic bytes, 64-bit class, and machine architecture (x86_64 vs aarch64)."""
         if not os.path.exists(binary_path):
-            self.logger.error(
-                f"ELF VERIFICATION FAILED: Binary file '{binary_path}' does not exist."
-            )
+            self.logger.error(f"ELF VERIFICATION FAILED: Binary file '{binary_path}' does not exist.")
             return False
 
         with open(binary_path, "rb") as f:
@@ -70,9 +64,7 @@ class ArtifactService:
         # 2. ELF Class: 2 = 64-bit
         elf_class = header[4]
         if elf_class != 2:
-            self.logger.error(
-                f"ELF VERIFICATION FAILED: Binary is not 64-bit ELF (class {elf_class})."
-            )
+            self.logger.error(f"ELF VERIFICATION FAILED: Binary is not 64-bit ELF (class {elf_class}).")
             return False
 
         # 3. Machine Architecture e_machine at offset 18 (2 bytes, little-endian)
@@ -90,13 +82,7 @@ class ArtifactService:
             )
             return False
 
-        arch_name = (
-            "x86_64"
-            if e_machine == 0x3E
-            else "aarch64"
-            if e_machine == 0xB7
-            else hex(e_machine)
-        )
+        arch_name = "x86_64" if e_machine == 0x3E else "aarch64" if e_machine == 0xB7 else hex(e_machine)
         self.logger.info(
             f"ELF Header Integrity Verified! Format: 64-bit ELF, Target Arch: {arch_name} ({hex(e_machine)})"
         )
@@ -105,9 +91,7 @@ class ArtifactService:
     def download(self, artifact: Artifact) -> str:
         self.logger.info(f"Downloading {artifact.name}")
 
-        response = requests.get(
-            artifact.archive_download_url, headers=Config.GITHUB_HEADERS
-        )
+        response = requests.get(artifact.archive_download_url, headers=Config.GITHUB_HEADERS)
         response.raise_for_status()
 
         extract_path = f"./Executables/{artifact.name}"
@@ -121,14 +105,10 @@ class ArtifactService:
 
         # 1. SHA-256 Checksum Verification
         if not self.verify_checksum(binary_path, checksum_path):
-            raise ValueError(
-                f"SHA-256 checksum verification failed for binary '{binary_path}'!"
-            )
+            raise ValueError(f"SHA-256 checksum verification failed for binary '{binary_path}'!")
 
         # 2. ELF Header & Machine Architecture Integrity Verification
         if not self.verify_elf_header(binary_path, Envs.SUBSCRIBER_ARCHITECTURE):
-            raise ValueError(
-                f"ELF header integrity verification failed for binary '{binary_path}'!"
-            )
+            raise ValueError(f"ELF header integrity verification failed for binary '{binary_path}'!")
 
         return binary_path

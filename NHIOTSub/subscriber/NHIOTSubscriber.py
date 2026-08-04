@@ -61,18 +61,12 @@ class NHIOTSubscriber:
                         device_id=self.device_id,
                         architecture=Envs.SUBSCRIBER_ARCHITECTURE or "unknown",
                         active_branch=Envs.BRANCH or "unknown",
-                        active_binary=os.path.basename(self.current_file_path)
-                        if self.current_file_path
-                        else "none",
+                        active_binary=os.path.basename(self.current_file_path) if self.current_file_path else "none",
                         status="HEALTHY",
                     )
-                    self.client.publish(
-                        payload.model_dump_json(), topic=Topics.HEARTBEAT_TOPIC
-                    )
+                    self.client.publish(payload.model_dump_json(), topic=Topics.HEARTBEAT_TOPIC)
                     if consecutive_failures > 0:
-                        self.logger.info(
-                            "Heartbeat Watchdog: Connection restored. Resetting failure counter."
-                        )
+                        self.logger.info("Heartbeat Watchdog: Connection restored. Resetting failure counter.")
                     consecutive_failures = 0
                 except Exception as e:
                     consecutive_failures += 1
@@ -97,21 +91,15 @@ class NHIOTSubscriber:
                                 "Step 2: Latest build retry failed. Reverting to previous successful GitHub build history..."
                             )
                             try:
-                                self.revert_to_previous_github_build(
-                                    self.last_processed_run_id or 0, Envs.BRANCH
-                                )
+                                self.revert_to_previous_github_build(self.last_processed_run_id or 0, Envs.BRANCH)
                             except Exception as revert_err:
-                                self.logger.error(
-                                    f"Watchdog rollback attempt failed: {revert_err}"
-                                )
+                                self.logger.error(f"Watchdog rollback attempt failed: {revert_err}")
                         # Reset counter to avoid continuous loop trigger
                         consecutive_failures = 0
 
                 time.sleep(15)
 
-        thread = threading.Thread(
-            target=heartbeat_worker, daemon=True, name="IoT-Heartbeat"
-        )
+        thread = threading.Thread(target=heartbeat_worker, daemon=True, name="IoT-Heartbeat")
         thread.start()
         self.logger.info(
             f"Started IoT Device Heartbeat Watchdog thread (Device: '{self.device_id}', Topic: '{Topics.HEARTBEAT_TOPIC}', Interval: 15s)"
@@ -128,9 +116,7 @@ class NHIOTSubscriber:
                 status=status,
                 detail=detail,
             )
-            self.client.publish(
-                payload.model_dump_json(), topic=Topics.OTA_STATUS_TOPIC
-            )
+            self.client.publish(payload.model_dump_json(), topic=Topics.OTA_STATUS_TOPIC)
             self.logger.info(
                 f"Published OTA Notification to '{Topics.OTA_STATUS_TOPIC}': Status={status} | SHA={commit_sha[:7] if commit_sha else 'unknown'}"
             )
@@ -146,9 +132,7 @@ class NHIOTSubscriber:
         ]
 
         os.chmod(binary_path, 0o755)
-        self.logger.info(
-            f"Running post-pull operational unit tests for binary '{target}'..."
-        )
+        self.logger.info(f"Running post-pull operational unit tests for binary '{target}'...")
 
         passed_count = 0
         for fn, args, expected in test_cases:
@@ -160,9 +144,7 @@ class NHIOTSubscriber:
                 )
                 return False
             passed_count += 1
-            self.logger.info(
-                f"  [PASS] Unit Test {fn}({args}) -> Output: '{stdout.strip()}'"
-            )
+            self.logger.info(f"  [PASS] Unit Test {fn}({args}) -> Output: '{stdout.strip()}'")
 
         self.logger.info(
             f"ALL OPERATIONAL UNIT TESTS PASSED ({passed_count}/{len(test_cases)})! Binary '{target}' verified functional."
@@ -171,16 +153,10 @@ class NHIOTSubscriber:
 
     def trigger_revert_from_mqtt(self) -> str | None:
         """Callback invoked when publisher sends TRIGGER_REVERT MQTT command."""
-        self.logger.info(
-            "Publisher requested manual GitHub Actions version rollback over MQTT..."
-        )
-        return self.revert_to_previous_github_build(
-            self.last_processed_run_id or 0, Envs.BRANCH
-        )
+        self.logger.info("Publisher requested manual GitHub Actions version rollback over MQTT...")
+        return self.revert_to_previous_github_build(self.last_processed_run_id or 0, Envs.BRANCH)
 
-    def revert_to_previous_github_build(
-        self, failed_run_id: int, branch: str
-    ) -> str | None:
+    def revert_to_previous_github_build(self, failed_run_id: int, branch: str) -> str | None:
         """Queries GitHub Actions API for previous successful build runs and reverts to the latest working one."""
         self.logger.warning(
             f"Searching GitHub Actions build history for previous successful build run on branch '{branch}'..."
@@ -208,9 +184,7 @@ class NHIOTSubscriber:
                 downloaded_path = self.artifacts.download(artifact)
                 if self.run_unit_tests(downloaded_path, target):
                     self.current_file_path = downloaded_path
-                    self.last_processed_run_id = (
-                        failed_run_id if failed_run_id else prev_run.id
-                    )
+                    self.last_processed_run_id = failed_run_id if failed_run_id else prev_run.id
                     self.logger.info(
                         f"AUTOMATED GITHUB REVERT SUCCESSFUL: Reverted to verified GitHub build run #{prev_run.id} (SHA: {prev_sha[:7]})!"
                     )
@@ -225,9 +199,7 @@ class NHIOTSubscriber:
                     f"Revert attempt on run #{prev_run.id} failed: {e}. Trying next historical build..."
                 )
 
-        self.logger.error(
-            "CRITICAL: No operational historical build run found in GitHub Actions history."
-        )
+        self.logger.error("CRITICAL: No operational historical build run found in GitHub Actions history.")
         return None
 
     def fetch_artifact_for_branch(self, branch: str) -> str | None:
@@ -245,9 +217,7 @@ class NHIOTSubscriber:
         artifact = self.artifacts.choose(artifacts, target)
 
         if artifact:
-            self.logger.info(
-                f"Artifact '{target}' found for branch '{branch}' (run #{run.id}) — downloading..."
-            )
+            self.logger.info(f"Artifact '{target}' found for branch '{branch}' (run #{run.id}) — downloading...")
             try:
                 downloaded_path = self.artifacts.download(artifact)
 
@@ -282,9 +252,7 @@ class NHIOTSubscriber:
                             )
                             return self.current_file_path
                     except Exception as retry_err:
-                        self.logger.warning(
-                            f"Retry pull for run #{run.id} failed: {retry_err}"
-                        )
+                        self.logger.warning(f"Retry pull for run #{run.id} failed: {retry_err}")
 
                     # Step 2: Latest build retry failed -> Revert to previous successful GitHub build!
                     self.logger.warning(
@@ -316,9 +284,7 @@ class NHIOTSubscriber:
                     )
                     return self.current_file_path
         else:
-            self.logger.warning(
-                f"No matching artifact '{target}' found in run #{run.id} for branch '{branch}'."
-            )
+            self.logger.warning(f"No matching artifact '{target}' found in run #{run.id} for branch '{branch}'.")
             self.send_ota_notification(
                 "FAILURE",
                 f"No matching artifact '{target}' found in run #{run.id}",
@@ -352,20 +318,14 @@ class NHIOTSubscriber:
         while True:
             # Check if a remote branch change command was received via MQTT
             if self.branch_changed:
-                self.logger.info(
-                    f"Switched active target branch to '{Envs.BRANCH}'. Re-polling GitHub Actions..."
-                )
+                self.logger.info(f"Switched active target branch to '{Envs.BRANCH}'. Re-polling GitHub Actions...")
                 self.last_processed_run_id = None
                 self.current_file_path = None
                 self.branch_changed = False
 
             # 1. Get the local HEAD commit SHA
             try:
-                local_sha = (
-                    subprocess.check_output(["git", "rev-parse", "HEAD"])
-                    .decode("utf-8")
-                    .strip()
-                )
+                local_sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
             except Exception as git_err:
                 local_sha = ""
                 self.logger.warning(f"Could not resolve local HEAD SHA: {git_err}")
@@ -377,9 +337,7 @@ class NHIOTSubscriber:
             run = self.github.get_latest_run()
 
             if not run:
-                self.logger.warning(
-                    f"No workflow run found for branch '{Envs.BRANCH}'. Retrying in 5s..."
-                )
+                self.logger.warning(f"No workflow run found for branch '{Envs.BRANCH}'. Retrying in 5s...")
                 time.sleep(5)
                 continue
 
