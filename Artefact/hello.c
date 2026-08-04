@@ -4,7 +4,7 @@
 // Trigger update check
 void add(int argc, char *argv[]) {
     int test_count = 1;
-    int count = 0;
+    int count = 14;
     for (int i = 0; i < argc; i++) {
         int num = atoi(argv[i]);
         count += num;
@@ -12,6 +12,8 @@ void add(int argc, char *argv[]) {
     }
 
     printf("add:%d", count);
+    printf("test_count:%d", test_count);
+    Broken syntax
 }
 
 void minus(int argc, char *argv[]) {
