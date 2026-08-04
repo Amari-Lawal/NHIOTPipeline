@@ -10,7 +10,6 @@ void add(int argc, char *argv[]) {
         count += num;
         test_count += num;
     }
-    Bad Syntax Test case
 
     printf("add:%d", count);
 }
