@@ -38,7 +38,7 @@ void crash(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
     // Real CPU floating point exception
-    // Hello This is another test.
+    // Hell This is the test
     volatile int a = 1;
     volatile int b = 0;
     volatile int c = a / b;
