@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-if [ "$1" = "crash" ]; then
+if [ "$1" = "crash" ] || [ "$1" = "--crash" ]; then
     echo "[PUBLISHER] Running Critical Failure / Crash Test over MQTT..."
     python3 -m NHIOTPub.send_crash
     exit 0
 fi
 
-if [ "$1" = "revert" ] || [ "$1" = "rollback" ]; then
+if [ "$1" = "revert" ] || [ "$1" = "rollback" ] || [ "$1" = "--revert" ] || [ "$1" = "--rollback" ]; then
     echo "[PUBLISHER] Requesting Remote Subscriber to Trigger GitHub Actions Version Rollback..."
     python3 -m NHIOTPub.send_revert
     exit 0
@@ -15,5 +15,6 @@ if [ -n "$1" ]; then
     echo "[PUBLISHER] Requesting remote subscriber to switch branch to '$1'..."
     python3 -m NHIOTPub.switch_branch "$1"
 fi
+
 
 python3 -m unittest discover -s NHIOTPub/tests -t .

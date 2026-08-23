@@ -8,6 +8,7 @@ from NHIOTSub.models.payloads import (
     HeartbeatPayload,
     IsolationProtectionPayload,
     OTAStatusPayload,
+    UnitTestStatusPayload,
 )
 
 logger = create_logger("SERVER_FLEET_AUDIT")
@@ -75,6 +76,23 @@ def main():
         except Exception as e:
             logger.error(f"Failed to parse Isolation Event on topic '{topic}': {e}")
 
+    def on_unittest_status(topic, payload, **kwargs):
+        try:
+            raw_str = payload.decode("utf-8")
+            ut_evt = UnitTestStatusPayload.model_validate_json(raw_str)
+
+            logger.info(
+                f"\n[UNITTEST EVENT: {topic}]\n"
+                f"   Suite Name:  {ut_evt.suite_name}\n"
+                f"   Status:      {ut_evt.status}\n"
+                f"   Passed:      {ut_evt.passed_tests}/{ut_evt.total_tests}\n"
+                f"   Failed:      {ut_evt.failed_tests}\n"
+                f"   Detail:      {ut_evt.detail}\n"
+                f"   Timestamp:   {ut_evt.timestamp}\n"
+            )
+        except Exception as e:
+            logger.error(f"Failed to parse Unittest Event on topic '{topic}': {e}")
+
     logger.info(f"Subscribing to Heartbeat topic '{Topics.HEARTBEAT_TOPIC}'...")
     client.subscribe(on_heartbeat, topic=Topics.HEARTBEAT_TOPIC)
 
@@ -83,6 +101,9 @@ def main():
 
     logger.info(f"Subscribing to Isolation Status topic '{Topics.ISOLATION_STATUS_TOPIC}'...")
     client.subscribe(on_isolation_status, topic=Topics.ISOLATION_STATUS_TOPIC)
+
+    logger.info(f"Subscribing to Unittest Status topic '{Topics.UNITTEST_STATUS_TOPIC}'...")
+    client.subscribe(on_unittest_status, topic=Topics.UNITTEST_STATUS_TOPIC)
 
     logger.info("Server Fleet Audit Daemon active.")
     try:

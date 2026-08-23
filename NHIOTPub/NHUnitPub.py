@@ -4,20 +4,41 @@ import unittest
 
 from NHIOTMQTT import NHIOTMQTT
 from NHIOTSub.config import Topics
+from NHIOTSub.models.payloads import UnitTestStatusPayload
 
 
 class BaseMQTTTest(unittest.TestCase):
     publish_topic = Topics.COMMAND_TOPIC
     subscribe_topic = Topics.RESPONSE_TOPIC
     timeout = 10
+    total_count = 0
+    passed_count = 0
+    failed_count = 0
 
     @classmethod
     def setUpClass(cls):
         cls.client = NHIOTMQTT()
         cls.client.connect(verbose=False)
+        cls.total_count = 0
+        cls.passed_count = 0
+        cls.failed_count = 0
 
     @classmethod
     def tearDownClass(cls):
+        if cls.total_count > 0:
+            try:
+                status = "PASSED" if cls.failed_count == 0 else "FAILED"
+                payload = UnitTestStatusPayload(
+                    suite_name=cls.__name__,
+                    total_tests=cls.total_count,
+                    passed_tests=cls.passed_count,
+                    failed_tests=cls.failed_count,
+                    status=status,
+                    detail=f"Operational Unit Test Suite '{cls.__name__}' completed over MQTT ({cls.passed_count}/{cls.total_count} passed).",
+                )
+                cls.client.publish(payload.model_dump_json(), topic=Topics.UNITTEST_STATUS_TOPIC, verbose=False)
+            except Exception:
+                pass
         cls.client.disconnect(verbose=False)
 
     def set_subscriber_branch(self, target_branch: str) -> bool:
@@ -90,18 +111,24 @@ class BaseMQTTTest(unittest.TestCase):
 
         received = event.wait(timeout=self.timeout)
 
-        self.assertTrue(
-            received,
-            f"Timed out waiting for response for '{function}({parameters})' on '{self.subscribe_topic}'",
-        )
-        if self.error:
-            self.fail(f"Error during execution of '{function}': {self.error}")
-
-        if expected_result is not None:
+        self.__class__.total_count += 1
+        try:
             self.assertTrue(
-                str(expected_result).replace(" ", "") in self.received_result.replace(" ", ""),
-                f"Expected '{expected_result}' in '{self.received_result}'",
+                received,
+                f"Timed out waiting for response for '{function}({parameters})' on '{self.subscribe_topic}'",
             )
+            if self.error:
+                self.fail(f"Error during execution of '{function}': {self.error}")
+
+            if expected_result is not None:
+                self.assertTrue(
+                    str(expected_result).replace(" ", "") in self.received_result.replace(" ", ""),
+                    f"Expected '{expected_result}' in '{self.received_result}'",
+                )
+            self.__class__.passed_count += 1
+        except Exception:
+            self.__class__.failed_count += 1
+            raise
 
         return self.received_result
 

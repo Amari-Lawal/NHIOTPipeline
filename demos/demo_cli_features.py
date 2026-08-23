@@ -257,10 +257,30 @@ def on_isolation(topic, payload, **kwargs):
         print(f"Error: {e}")
 
 
+def on_unittest(topic, payload, **kwargs):
+    try:
+        data = json.loads(payload.decode("utf-8"))
+        print_step(
+            "MQTT BROKER",
+            YELLOW,
+            f"Routing UnitTestStatusPayload on topic '{Topics.UNITTEST_STATUS_TOPIC}'...",
+        )
+        time.sleep(1.2)
+        print_step(
+            "SERVER AUDIT",
+            CYAN,
+            f"Audited Unittest Completion Event [{data.get('status')}] | Suite: {data.get('suite_name')} | Passed: {data.get('passed_tests')}/{data.get('total_tests')}",
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+
+
 monitor_client.subscribe(on_heartbeat, topic=Topics.HEARTBEAT_TOPIC, verbose=False)
 monitor_client.subscribe(on_response, topic=Topics.RESPONSE_TOPIC, verbose=False)
 monitor_client.subscribe(on_ota, topic=Topics.OTA_STATUS_TOPIC, verbose=False)
 monitor_client.subscribe(on_isolation, topic=Topics.ISOLATION_STATUS_TOPIC, verbose=False)
+monitor_client.subscribe(on_unittest, topic=Topics.UNITTEST_STATUS_TOPIC, verbose=False)
+
 
 # Start background daemons
 server_log = open("server_audit.log", "w")

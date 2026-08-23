@@ -4,3 +4,4 @@ class Topics:
     OTA_STATUS_TOPIC = "nhiot/ota/status"
     HEARTBEAT_TOPIC = "nhiot/heartbeat"
     ISOLATION_STATUS_TOPIC = "nhiot/isolation/status"
+    UNITTEST_STATUS_TOPIC = "nhiot/unittest/status"
