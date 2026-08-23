@@ -22,7 +22,6 @@ void minus(int argc, char *argv[]) {
     }
 
     printf("minus:%d", result);
-djdjdjdj
 
 }
 void multiply(int argc, char *argv[]) {
