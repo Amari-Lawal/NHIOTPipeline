@@ -23,6 +23,7 @@ void minus(int argc, char *argv[]) {
 
     printf("minus:%d", result);
 
+
 }
 void multiply(int argc, char *argv[]) {
     int count = 1;
@@ -37,7 +38,6 @@ void crash(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
     // Real CPU floating point exception
-    // Hell This is the test
     volatile int a = 1;
     volatile int b = 0;
     volatile int c = a / b;
