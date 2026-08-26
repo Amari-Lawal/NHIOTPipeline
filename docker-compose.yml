@@ -59,7 +59,7 @@ services:
     build: .
     container_name: nhiot-web-dashboard
     ports:
-      - "8000:8000"
+      - "7000:7000"
     volumes:
       - .:/app
     env_file:
@@ -68,9 +68,21 @@ services:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
       - USE_LOCAL_BROKER=true
+      - PORT=7000
     command: python3 web_dashboard.py
     depends_on:
       - mqtt-broker
     restart: unless-stopped
+
+  ngrok-tunnel:
+    image: ngrok/ngrok:latest
+    container_name: nhiot-ngrok-tunnel
+    restart: unless-stopped
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command: http web-dashboard:7000 --url ${NGROK_DOMAIN:-https://delay-gusty-purity.ngrok-free.dev}
+    depends_on:
+      - web-dashboard
+
 
 

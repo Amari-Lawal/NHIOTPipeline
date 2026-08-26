@@ -14,6 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-RUN chmod +x run_sub_server.sh run_sub_iot.sh run_pub.sh
+RUN chmod +x *.sh
 
 CMD ["/bin/bash"]
