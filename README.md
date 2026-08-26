@@ -257,3 +257,14 @@ pip install -r requirements.txt
 - **SHA-256 Checksum Verification**: Downloaded binaries are compared against `.sha256` files generated during compilation.
 - **ELF Header Architecture Check**: Reads the 64-byte ELF header using Python `struct` to verify magic bytes (`\x7fELF`), 64-bit class (`2`), and target architecture (`0x3E` for `x86_64`, `0xB7` for `aarch64`).
 - **Post-Pull Operational Unit Test Suite**: Executes standard arithmetic tests (`add 10 20`, `minus 50 20`, `multiply 6 7`). If tests fail, the system automatically triggers a GitHub Actions version history revert.
+
+---
+
+## FastAPI Web UI System Admin Dashboard
+
+The system features a standalone, interactive FastAPI Web Admin Dashboard (`web_dashboard.py` / `web-dashboard` Docker service) running on port `8000`:
+
+- **Web Dashboard URL**: `http://localhost:8000`
+- **Real-Time WebSockets**: Live event streaming for fleet heartbeats, OTA deployments, process isolation crashes, and unit test execution.
+- **Daemon Process Control**: Interactively start, stop, and inspect `./run_sub_server.sh` and `./run_sub_iot.sh` daemons.
+- **Publisher Controls**: Trigger dynamic branch switches, critical crash tests, automated version rollbacks, and arithmetic binary executions directly from the UI.

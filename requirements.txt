@@ -2,6 +2,7 @@ awsiotsdk
 pydantic
 fastapi
 uvicorn
+websockets
 pandas
 python-dotenv
 requests

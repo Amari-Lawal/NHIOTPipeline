@@ -14,7 +14,7 @@ services:
     volumes:
       - .:/app
     env_file:
-      - ./NHIOTSub/.env
+      - ./.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -30,7 +30,7 @@ services:
     volumes:
       - .:/app
     env_file:
-      - ./NHIOTSub/.env
+      - ./.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -46,7 +46,7 @@ services:
     volumes:
       - .:/app
     env_file:
-      - ./NHIOTSub/.env
+      - ./.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -59,11 +59,11 @@ services:
     build: .
     container_name: nhiot-web-dashboard
     ports:
-      - "80:8000"
+      - "8000:8000"
     volumes:
       - .:/app
     env_file:
-      - ./NHIOTSub/.env
+      - ./.env
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
@@ -72,4 +72,5 @@ services:
     depends_on:
       - mqtt-broker
     restart: unless-stopped
+
 
