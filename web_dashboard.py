@@ -35,6 +35,7 @@ logger = logging.getLogger("WEB_ADMIN_DASHBOARD")
 
 from contextlib import asynccontextmanager
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global main_loop
@@ -42,6 +43,7 @@ async def lifespan(app: FastAPI):
     init_mqtt()
     logger.info("FastAPI Web UI Admin Dashboard backend initialized.")
     yield
+
 
 # Initialize FastAPI App
 app = FastAPI(
@@ -74,6 +76,7 @@ daemon_processes: Dict[str, Optional[subprocess.Popen]] = {
     "iot_subscriber": None,
 }
 
+
 # WebSocket Connection Manager
 class ConnectionManager:
     def __init__(self):
@@ -97,8 +100,10 @@ class ConnectionManager:
                 logger.error(f"Error broadcasting to WebSocket client: {e}")
                 self.disconnect(connection)
 
+
 manager = ConnectionManager()
 main_loop = None
+
 
 def broadcast_sync(message: dict):
     """Bridge background thread MQTT callbacks to asyncio WebSocket broadcast."""
@@ -113,6 +118,7 @@ def broadcast_sync(message: dict):
 
     if main_loop and main_loop.is_running():
         asyncio.run_coroutine_threadsafe(manager.broadcast(message), main_loop)
+
 
 # ============================================================================
 # MQTT Background Subscriber Loop
@@ -231,15 +237,18 @@ def init_mqtt():
     thread = threading.Thread(target=mqtt_worker, daemon=True)
     thread.start()
 
+
 # ============================================================================
 # API Models
 # ============================================================================
 class BranchSwitchRequest(BaseModel):
     branch: str
 
+
 class CustomCommandRequest(BaseModel):
     function: str
     parameters: List[str] = []
+
 
 # ============================================================================
 # Helper Process Controller
@@ -248,7 +257,7 @@ def get_daemon_status(daemon_name: str) -> dict:
     proc = daemon_processes.get(daemon_name)
     if proc is not None and proc.poll() is None:
         return {"status": "RUNNING", "pid": proc.pid}
-    
+
     # Check system pgrep as fallback
     target_cmd = "NHIOTSub.server_subscriber" if daemon_name == "server_subscriber" else "NHIOTSub.main"
     try:
@@ -261,23 +270,31 @@ def get_daemon_status(daemon_name: str) -> dict:
 
     return {"status": "STOPPED", "pid": None}
 
+
 def start_daemon(daemon_name: str) -> dict:
     current = get_daemon_status(daemon_name)
     if current["status"] == "RUNNING":
         return {"status": "ALREADY_RUNNING", "pid": current["pid"]}
 
-    cmd = [sys.executable, "-m", "NHIOTSub.server_subscriber"] if daemon_name == "server_subscriber" else [sys.executable, "-m", "NHIOTSub.main"]
+    cmd = (
+        [sys.executable, "-m", "NHIOTSub.server_subscriber"]
+        if daemon_name == "server_subscriber"
+        else [sys.executable, "-m", "NHIOTSub.main"]
+    )
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     daemon_processes[daemon_name] = proc
     logger.info(f"Started daemon {daemon_name} with PID {proc.pid}")
-    
-    broadcast_sync({
-        "type": "DAEMON_STATUS_CHANGE",
-        "daemon": daemon_name,
-        "action": "START",
-        "pid": proc.pid,
-    })
+
+    broadcast_sync(
+        {
+            "type": "DAEMON_STATUS_CHANGE",
+            "daemon": daemon_name,
+            "action": "START",
+            "pid": proc.pid,
+        }
+    )
     return {"status": "STARTED", "pid": proc.pid}
+
 
 def stop_daemon(daemon_name: str) -> dict:
     target_cmd = "NHIOTSub.server_subscriber" if daemon_name == "server_subscriber" else "NHIOTSub.main"
@@ -285,15 +302,18 @@ def stop_daemon(daemon_name: str) -> dict:
         res = subprocess.run(["pkill", "-f", target_cmd], capture_output=True, text=True)
         daemon_processes[daemon_name] = None
         logger.info(f"Stopped daemon {daemon_name}")
-        broadcast_sync({
-            "type": "DAEMON_STATUS_CHANGE",
-            "daemon": daemon_name,
-            "action": "STOP",
-        })
+        broadcast_sync(
+            {
+                "type": "DAEMON_STATUS_CHANGE",
+                "daemon": daemon_name,
+                "action": "STOP",
+            }
+        )
         return {"status": "STOPPED", "detail": res.stdout}
     except Exception as e:
         logger.error(f"Failed to stop daemon {daemon_name}: {e}")
         return {"status": "ERROR", "message": str(e)}
+
 
 # ============================================================================
 # REST API Endpoints
@@ -302,7 +322,7 @@ def stop_daemon(daemon_name: str) -> dict:
 def get_system_status():
     server_status = get_daemon_status("server_subscriber")
     iot_status = get_daemon_status("iot_subscriber")
-    
+
     active_branches = list({d.get("branch", "main") for d in fleet_registry.values()})
     active_branch = active_branches[0] if active_branches else "main"
 
@@ -323,6 +343,7 @@ def get_system_status():
         },
     }
 
+
 @app.get("/api/telemetry")
 def get_telemetry():
     return {
@@ -333,14 +354,18 @@ def get_telemetry():
         "command_responses": list(reversed(command_responses[-20:])),
     }
 
+
 @app.get("/api/logs")
 def get_logs():
     return {"logs": list(reversed(recent_logs[-50:]))}
 
+
 @app.post("/api/daemons/{daemon_name}/{action}")
 def control_daemon(daemon_name: str, action: str):
     if daemon_name not in ["server_subscriber", "iot_subscriber"]:
-        raise HTTPException(status_code=400, detail="Invalid daemon name. Must be 'server_subscriber' or 'iot_subscriber'.")
+        raise HTTPException(
+            status_code=400, detail="Invalid daemon name. Must be 'server_subscriber' or 'iot_subscriber'."
+        )
 
     action = action.lower()
     if action == "status":
@@ -355,6 +380,7 @@ def control_daemon(daemon_name: str, action: str):
         return start_daemon(daemon_name)
     else:
         raise HTTPException(status_code=400, detail=f"Invalid action '{action}'. Use status, start, stop, or restart.")
+
 
 @app.post("/api/command/switch-branch")
 def trigger_switch_branch(req: BranchSwitchRequest):
@@ -382,11 +408,14 @@ def trigger_switch_branch(req: BranchSwitchRequest):
         try:
             client = NHIOTMQTT()
             client.connect(verbose=False)
-            client.publish(json.dumps({"command": "SET_BRANCH", "branch": branch}), topic=Topics.COMMAND_TOPIC, verbose=False)
+            client.publish(
+                json.dumps({"command": "SET_BRANCH", "branch": branch}), topic=Topics.COMMAND_TOPIC, verbose=False
+            )
             client.disconnect(verbose=False)
             return {"status": "MQTT_SENT", "branch": branch, "detail": "Published SET_BRANCH via MQTT direct client"}
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Failed to issue branch switch: {ex}")
+
 
 @app.post("/api/command/crash")
 def trigger_crash_test():
@@ -409,11 +438,14 @@ def trigger_crash_test():
         try:
             client = NHIOTMQTT()
             client.connect(verbose=False)
-            client.publish(json.dumps({"function": "crash", "parameters": []}), topic=Topics.COMMAND_TOPIC, verbose=False)
+            client.publish(
+                json.dumps({"function": "crash", "parameters": []}), topic=Topics.COMMAND_TOPIC, verbose=False
+            )
             client.disconnect(verbose=False)
             return {"status": "MQTT_SENT", "detail": "Published crash payload via MQTT direct client"}
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Failed to issue crash payload: {ex}")
+
 
 @app.post("/api/command/revert")
 def trigger_revert_rollback():
@@ -441,6 +473,7 @@ def trigger_revert_rollback():
             return {"status": "MQTT_SENT", "detail": "Published TRIGGER_REVERT payload via MQTT direct client"}
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Failed to issue revert payload: {ex}")
+
 
 @app.post("/api/command/unittests")
 def trigger_run_unittests():
@@ -497,8 +530,10 @@ def trigger_run_unittests():
         logger.error(f"Unittest execution failed: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute unit tests: {e}")
 
+
 class CommitPushRequest(BaseModel):
     message: str = "Trigger OTA Artifact Build via Admin Dashboard"
+
 
 @app.post("/api/github/commit-and-push")
 def github_commit_and_push(req: CommitPushRequest):
@@ -514,6 +549,7 @@ def github_commit_and_push(req: CommitPushRequest):
             new_comment = f"// Dashboard OTA Build Trigger: {datetime.now().isoformat()}\n"
             if "// Dashboard OTA Build Trigger:" in content:
                 import re
+
                 content = re.sub(r"// Dashboard OTA Build Trigger:.*\n", new_comment, content)
             else:
                 content = new_comment + content
@@ -521,21 +557,23 @@ def github_commit_and_push(req: CommitPushRequest):
                 f.write(content)
 
         subprocess.run(["git", "add", "Artefact/hello.c"], check=True, capture_output=True)
-        
+
         msg = req.message.strip() or "Trigger OTA Artifact Build via Admin Dashboard"
         commit_res = subprocess.run(["git", "commit", "-m", msg], capture_output=True, text=True)
-        
+
         push_res = subprocess.run(["git", "push", "origin", active_branch], capture_output=True, text=True)
-        
+
         sha_res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
         head_sha = sha_res.stdout.strip()[:7] if sha_res.returncode == 0 else "UNKNOWN"
 
-        broadcast_sync({
-            "type": "BUILD_TRIGGERED",
-            "branch": active_branch,
-            "commit_sha": head_sha,
-            "message": msg,
-        })
+        broadcast_sync(
+            {
+                "type": "BUILD_TRIGGERED",
+                "branch": active_branch,
+                "commit_sha": head_sha,
+                "message": msg,
+            }
+        )
 
         return {
             "status": "SUCCESS",
@@ -547,6 +585,7 @@ def github_commit_and_push(req: CommitPushRequest):
     except Exception as e:
         logger.error(f"Failed to commit & push: {e}")
         raise HTTPException(status_code=500, detail=f"Git commit/push failed: {e}")
+
 
 class DashboardGitHubClient:
     def __init__(self):
@@ -586,6 +625,7 @@ class DashboardGitHubClient:
             logger.error(f"Dashboard GitHub API jobs error: {e}")
         return []
 
+
 @app.get("/api/github/build-status")
 def get_github_build_status(branch: Optional[str] = None):
     try:
@@ -593,7 +633,7 @@ def get_github_build_status(branch: Optional[str] = None):
         run = gh.get_latest_run(branch=branch)
         if not run:
             return {"status": "NO_RUNS_FOUND"}
-        
+
         jobs = gh.get_workflow_jobs(run["id"])
         head_commit = run.get("head_commit") or {}
         return {
@@ -622,6 +662,7 @@ def get_github_build_status(branch: Optional[str] = None):
         logger.error(f"Failed to fetch GitHub build status: {e}")
         return {"status": "ERROR", "detail": str(e)}
 
+
 @app.post("/api/command/custom")
 def trigger_custom_command(req: CustomCommandRequest):
     if req.function == "RUN_ALL_UNITTESTS":
@@ -637,7 +678,6 @@ def trigger_custom_command(req: CustomCommandRequest):
         return {"status": "COMMAND_PUBLISHED", "function": req.function, "parameters": req.parameters}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to publish custom command: {e}")
-
 
 
 # ============================================================================
@@ -668,6 +708,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         manager.disconnect(websocket)
+
 
 # ============================================================================
 # HTML Dashboard Frontend UI
@@ -1564,9 +1605,11 @@ HTML_TEMPLATE = """
 </html>
 """
 
+
 @app.get("/", response_class=HTMLResponse)
 def index_page():
     return HTMLResponse(content=HTML_TEMPLATE, status_code=200)
+
 
 # ============================================================================
 # Main Entry Point
