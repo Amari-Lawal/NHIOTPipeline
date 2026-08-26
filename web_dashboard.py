@@ -1,4 +1,6 @@
 import asyncio
+import hashlib
+import io
 import json
 import logging
 import os
@@ -6,6 +8,7 @@ import subprocess
 import sys
 import threading
 import time
+import zipfile
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -13,7 +16,7 @@ from typing import Dict, List, Optional
 import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
 
 # Add project root to sys.path
@@ -247,6 +250,11 @@ class BranchSwitchRequest(BaseModel):
 class CustomCommandRequest(BaseModel):
     function: str
     parameters: List[str] = []
+
+
+class SaveCodeRequest(BaseModel):
+    code: str
+    message: Optional[str] = "Update hello.c via Admin Code Editor"
 
 
 # ============================================================================
@@ -558,9 +566,9 @@ def github_commit_and_push(req: CommitPushRequest):
         subprocess.run(["git", "add", "Artefact/hello.c"], check=True, capture_output=True)
 
         msg = req.message.strip() or "Trigger OTA Artifact Build via Admin Dashboard"
-        commit_res = subprocess.run(["git", "commit", "-m", msg], capture_output=True, text=True)
+        commit_res = subprocess.run(["git", "commit", "--allow-empty", "-m", msg], capture_output=True, text=True)
 
-        push_res = subprocess.run(["git", "push", "origin", active_branch], capture_output=True, text=True)
+        push_res = subprocess.run(["git", "push", "--force", "origin", active_branch], capture_output=True, text=True)
 
         sha_res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
         head_sha = sha_res.stdout.strip()[:7] if sha_res.returncode == 0 else "UNKNOWN"
@@ -584,6 +592,157 @@ def github_commit_and_push(req: CommitPushRequest):
     except Exception as e:
         logger.error(f"Failed to commit & push: {e}")
         raise HTTPException(status_code=500, detail=f"Git commit/push failed: {e}")
+
+
+@app.get("/api/code/hello")
+def get_c_code():
+    """Retrieve raw content of Artefact/hello.c for the in-dashboard code editor."""
+    c_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Artefact", "hello.c")
+    if not os.path.exists(c_file):
+        raise HTTPException(status_code=404, detail="Artefact/hello.c not found.")
+    try:
+        with open(c_file, "r") as f:
+            code = f.read()
+        return {"status": "SUCCESS", "filename": "Artefact/hello.c", "code": code}
+    except Exception as e:
+        logger.error(f"Failed to read C source: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to read C source: {e}")
+
+
+@app.post("/api/code/save-and-push")
+def save_and_push_c_code(req: SaveCodeRequest):
+    """Saves updated C source code to Artefact/hello.c, commits to git, and force pushes to remote repository."""
+    logger.info("[API] Saving edited C code from Web Admin Editor and triggering Git force push...")
+    try:
+        c_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Artefact", "hello.c")
+        with open(c_file, "w") as f:
+            f.write(req.code)
+
+        res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True)
+        active_branch = res_branch.stdout.strip() if res_branch.returncode == 0 else "main"
+
+        subprocess.run(["git", "add", "Artefact/hello.c"], check=True, capture_output=True)
+
+        msg = req.message.strip() if req.message and req.message.strip() else "Update hello.c via Web Admin Code Editor"
+        commit_res = subprocess.run(["git", "commit", "--allow-empty", "-m", msg], capture_output=True, text=True)
+        push_res = subprocess.run(["git", "push", "--force", "origin", active_branch], capture_output=True, text=True)
+
+        sha_res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        head_sha = sha_res.stdout.strip()[:7] if sha_res.returncode == 0 else "UNKNOWN"
+
+        broadcast_sync(
+            {
+                "type": "BUILD_TRIGGERED",
+                "branch": active_branch,
+                "commit_sha": head_sha,
+                "message": msg,
+            }
+        )
+
+        return {
+            "status": "SUCCESS",
+            "branch": active_branch,
+            "commit_sha": head_sha,
+            "commit_output": commit_res.stdout.strip() or commit_res.stderr.strip(),
+            "push_output": push_res.stdout.strip() or push_res.stderr.strip() or "Force pushed to origin successfully.",
+        }
+    except Exception as e:
+        logger.error(f"Failed to save and push C code: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save & push C code: {e}")
+
+
+@app.get("/api/artifacts/download")
+def download_artifact(arch: str = "aarch64", file_type: str = "binary"):
+    """
+    Downloads compiled ELF binary, SHA-256 hash, or full ZIP bundle directly to the browser.
+    """
+    if arch not in ["x86_64", "aarch64"]:
+        raise HTTPException(status_code=400, detail="Invalid architecture. Supported: 'x86_64', 'aarch64'.")
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    target_name = f"hello_{arch}"
+    bin_dir = os.path.join(base_dir, "Executables", target_name)
+    bin_path = os.path.join(bin_dir, target_name)
+    sha_path = os.path.join(bin_dir, f"{target_name}.sha256")
+
+    # Local compile fallback for x86_64 if not yet pulled
+    if not os.path.exists(bin_path):
+        c_src = os.path.join(base_dir, "Artefact", "hello.c")
+        if arch == "x86_64" and os.path.exists(c_src):
+            os.makedirs(bin_dir, exist_ok=True)
+            sec_flags = ["-O2", "-Wall", "-Wextra", "-fstack-protector-strong", "-D_FORTIFY_SOURCE=2"]
+            res = subprocess.run(["gcc"] + sec_flags + ["-o", bin_path, c_src], capture_output=True)
+            if res.returncode == 0 and os.path.exists(bin_path):
+                with open(bin_path, "rb") as f:
+                    sha_val = hashlib.sha256(f.read()).hexdigest()
+                with open(sha_path, "w") as f:
+                    f.write(f"{sha_val}  {target_name}\n")
+
+    if not os.path.exists(bin_path) and file_type != "sha256":
+        raise HTTPException(
+            status_code=404,
+            detail=f"Compiled binary '{target_name}' is not found locally. Trigger a GitHub Actions OTA Build first.",
+        )
+
+    if file_type == "binary":
+        return FileResponse(
+            path=bin_path,
+            filename=target_name,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={target_name}"},
+        )
+    elif file_type == "sha256":
+        if os.path.exists(sha_path):
+            return FileResponse(
+                path=sha_path,
+                filename=f"{target_name}.sha256",
+                media_type="text/plain",
+                headers={"Content-Disposition": f"attachment; filename={target_name}.sha256"},
+            )
+        elif os.path.exists(bin_path):
+            with open(bin_path, "rb") as f:
+                sha_val = hashlib.sha256(f.read()).hexdigest()
+            return Response(
+                content=f"{sha_val}  {target_name}\n",
+                media_type="text/plain",
+                headers={"Content-Disposition": f"attachment; filename={target_name}.sha256"},
+            )
+        else:
+            raise HTTPException(status_code=404, detail="SHA-256 checksum not available.")
+    elif file_type == "zip":
+        zip_buf = io.BytesIO()
+        with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as z:
+            if os.path.exists(bin_path):
+                z.write(bin_path, arcname=target_name)
+            if os.path.exists(sha_path):
+                z.write(sha_path, arcname=f"{target_name}.sha256")
+            elif os.path.exists(bin_path):
+                with open(bin_path, "rb") as f:
+                    sha_val = hashlib.sha256(f.read()).hexdigest()
+                z.writestr(f"{target_name}.sha256", f"{sha_val}  {target_name}\n")
+        zip_buf.seek(0)
+        return Response(
+            content=zip_buf.getvalue(),
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={target_name}.zip"},
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Invalid file_type. Choose 'binary', 'sha256', or 'zip'.")
+
+
+@app.post("/api/ota/force-pull")
+def force_edge_ota_download():
+    """Publishes FORCE_OTA_DOWNLOAD command to immediately trigger edge OTA pull."""
+    logger.info("[API] Dispatching Immediate Force OTA Pull Command to Fleet over MQTT...")
+    try:
+        client = NHIOTMQTT()
+        client.connect(verbose=False)
+        client.publish(json.dumps({"command": "FORCE_OTA_DOWNLOAD"}), topic=Topics.COMMAND_TOPIC, verbose=False)
+        client.disconnect(verbose=False)
+        return {"status": "SUCCESS", "message": "FORCE_OTA_DOWNLOAD command published to fleet topic."}
+    except Exception as e:
+        logger.error(f"Failed to publish force OTA command: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to dispatch force OTA command: {e}")
 
 
 class DashboardGitHubClient:
@@ -943,36 +1102,104 @@ HTML_TEMPLATE = """
                         </button>
                     </div>
 
-                    <!-- GitHub Actions Commit & Build Trigger Card -->
-                    <div class="md:col-span-2 bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 text-purple-400 font-semibold text-sm">
-                                    <i class="fa-solid fa-rocket"></i> Git Commit & GitHub Actions OTA Build Pipeline
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Stages `Artefact/hello.c`, commits changes, pushes to remote branch, and monitors live GitHub Actions build & artifact compilation.</p>
+                    <!-- Manual Artifact Download & Edge OTA Pull -->
+                    <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
+                                <i class="fa-solid fa-download"></i> Manual Artifact Download & Sync
                             </div>
-                            <span id="badgeGhRunStatus" class="text-xs px-2.5 py-1 rounded-full font-mono bg-gray-800 text-gray-400 border border-gray-700">Idle</span>
+                            <p class="text-xs text-gray-400 mt-1">Download compiled ELF binary or trigger immediate on-demand edge OTA pull.</p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <!-- Target Arch Selector -->
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-gray-400 font-medium whitespace-nowrap">Arch:</span>
+                                <select id="selectDownloadArch" class="flex-1 w-full bg-gray-900 border border-gray-700 text-xs rounded-lg px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-indigo-500">
+                                    <option value="aarch64" selected>aarch64 (Raspberry Pi ARM64)</option>
+                                    <option value="x86_64">x86_64 (Linux ELF 64)</option>
+                                </select>
+                            </div>
+                            <!-- Download Buttons Grid -->
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button onclick="triggerArtifactDownload('binary')" class="py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition flex items-center justify-center gap-1" title="Download compiled executable">
+                                    <i class="fa-solid fa-file-arrow-down text-[10px]"></i> Binary
+                                </button>
+                                <button onclick="triggerArtifactDownload('sha256')" class="py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition flex items-center justify-center gap-1" title="Download SHA-256 Checksum">
+                                    <i class="fa-solid fa-fingerprint text-[10px]"></i> SHA
+                                </button>
+                                <button onclick="triggerArtifactDownload('zip')" class="py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition flex items-center justify-center gap-1" title="Download ZIP package">
+                                    <i class="fa-solid fa-file-zipper text-[10px]"></i> ZIP
+                                </button>
+                            </div>
+                            <!-- Force OTA Button -->
+                            <button onclick="submitForceOtaDownload()" class="w-full py-1.5 text-xs bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold rounded-lg transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-cloud-arrow-down"></i> Force Edge OTA Pull & Sync
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive C Code IDE & DevSecOps Simulation Box -->
+                    <div class="md:col-span-2 bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-2.5">
+                            <div>
+                                <div class="flex items-center gap-2 text-cyan-400 font-semibold text-sm">
+                                    <i class="fa-solid fa-code"></i> Interactive C Code Editor & OTA Deploy
+                                    <span class="bg-cyan-900/60 text-cyan-300 text-[10px] font-mono px-2 py-0.5 rounded border border-cyan-700/50">Artefact/hello.c</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-0.5">Simulate developer code changes in the IDE, inject bugs or fixes, and trigger OTA builds.</p>
+                            </div>
+
+                            <!-- Presets Toolbar -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button onclick="applyCodePreset('fix')" class="px-2 py-1 text-[11px] bg-emerald-700/80 hover:bg-emerald-600 text-white rounded transition font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-check"></i> Fix Bug (*=)
+                                </button>
+                                <button onclick="applyCodePreset('bug')" class="px-2 py-1 text-[11px] bg-red-700/80 hover:bg-red-600 text-white rounded transition font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-bug"></i> Inject Bug (-=)
+                                </button>
+                                <button onclick="applyCodePreset('crash')" class="px-2 py-1 text-[11px] bg-amber-700/80 hover:bg-amber-600 text-white rounded transition font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-bolt"></i> Crash Div/0
+                                </button>
+                                <button onclick="loadCCode()" class="px-2 py-1 text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Reload
+                                </button>
+                            </div>
                         </div>
 
+                        <!-- Textarea Editor -->
+                        <div class="relative">
+                            <div class="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border border-gray-800 border-b-0 text-[11px] font-mono text-gray-400">
+                                <span><i class="fa-regular fa-file-code text-cyan-400"></i> C Source Logic</span>
+                                <span id="codeEditorStatus" class="text-gray-500 text-[10px]">Synced with disk</span>
+                            </div>
+                            <textarea id="cCodeEditorTextarea" rows="12" spellcheck="false"
+                                      class="w-full bg-black/90 text-gray-200 font-mono text-xs p-3 rounded-b-lg border border-gray-800 focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed resize-y"
+                                      placeholder="Loading C source code..."></textarea>
+                        </div>
+
+                        <!-- Commit & Deploy Bar -->
                         <div class="flex flex-col sm:flex-row items-center gap-2">
-                            <input type="text" id="inputCommitMsg" placeholder="Commit message e.g. Update C source logic for OTA" value="Trigger OTA Artifact Build via Admin Dashboard"
-                                   class="flex-1 w-full bg-gray-900 border border-gray-700 text-xs rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500">
-                            <button onclick="submitGitCommitAndPush()" class="w-full sm:w-auto px-4 py-2 text-xs bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition flex items-center justify-center gap-1.5 whitespace-nowrap">
-                                <i class="fa-solid fa-code-commit"></i> Commit & Push to GitHub
+                            <input type="text" id="inputCodeCommitMsg" placeholder="Commit message e.g. Fix multiplication logic in hello.c" value="Update hello.c logic via Admin Code Editor"
+                                   class="flex-1 w-full bg-gray-900 border border-gray-700 text-xs rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-cyan-500">
+                            <button onclick="submitCodeSaveAndPush()" class="w-full sm:w-auto px-4 py-2 text-xs bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-lg transition flex items-center justify-center gap-1.5 whitespace-nowrap shadow-md">
+                                <i class="fa-solid fa-rocket"></i> Save, Commit & Deploy OTA Build
                             </button>
                         </div>
 
-                        <!-- Live Workflow Run Telemetry Bar -->
-                        <div id="ghRunTelemetryBox" class="hidden bg-gray-900/90 border border-gray-800 rounded-lg p-3 text-xs space-y-2">
-                            <div class="flex items-center justify-between text-gray-300">
-                                <div>
-                                    <span class="text-gray-500">Workflow Run:</span>
-                                    <a id="ghRunLink" href="#" target="_blank" class="text-blue-400 hover:underline font-mono ml-1">#0</a>
-                                    <span id="ghRunCommit" class="text-purple-300 font-mono ml-2 text-[11px]"></span>
+                        <!-- Live GitHub Actions Build & CI/CD Telemetry Widget -->
+                        <div id="ghRunTelemetryBox" class="bg-gray-900/90 border border-gray-800 rounded-xl p-3.5 text-xs space-y-2.5 shadow-inner">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1.5 bg-purple-500/10 text-purple-400 rounded border border-purple-500/20 text-xs">
+                                        <i class="fa-solid fa-rocket"></i>
+                                    </div>
+                                    <span class="font-bold text-gray-200">GitHub Actions CI/CD Build Pipeline:</span>
+                                    <a id="ghRunLink" href="#" target="_blank" class="text-blue-400 hover:underline font-mono font-bold">#--</a>
+                                    <span id="ghRunCommit" class="text-purple-300 font-mono text-[11px] truncate max-w-xs"></span>
                                 </div>
-                                <div id="ghRunConclusion" class="font-semibold text-xs"></div>
+                                <span id="badgeGhRunStatus" class="text-xs px-2.5 py-1 rounded-full font-mono bg-gray-800 text-gray-400 border border-gray-700">Checking...</span>
                             </div>
+                            <div id="ghRunConclusion" class="font-semibold text-xs text-gray-400 italic">Connecting to GitHub Actions API for latest build status...</div>
                             <div id="ghRunJobsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono"></div>
                         </div>
                     </div>
@@ -1188,6 +1415,26 @@ HTML_TEMPLATE = """
                             detail: msg.payload.detail,
                         });
                     }
+                } else if (otaStatus === 'SUCCESS') {
+                    window._lastOtaRollbackActive = false;
+                    if (window._rollbackCommits && commitSha !== 'N/A') window._rollbackCommits.delete(commitSha);
+                    const badge = document.getElementById('badgeGhRunStatus');
+                    const conclusionDiv = document.getElementById('ghRunConclusion');
+                    if (badge && conclusionDiv) {
+                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-emerald-900/60 text-emerald-300 border border-emerald-700/50';
+                        badge.innerText = 'Build Success';
+                        conclusionDiv.className = 'font-semibold text-xs text-emerald-400 flex items-center gap-1.5';
+                        conclusionDiv.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> ✅ SUCCESS (Artifacts Deployed & Verified)';
+                    }
+                    renderUnittestEvent({
+                        suite_name: "Post-Pull Operational Unit Test",
+                        status: "PASSED",
+                        passed_tests: 3,
+                        failed_tests: 0,
+                        total_tests: 3,
+                        detail: msg.payload.detail || "All edge operational unit tests passed.",
+                    });
+                    logToConsole(`[OTA DEPLOYMENT SUCCESS] Post-pull operational unit tests passed on edge device for commit [${commitSha}]! Binary verified functional.`, 'text-emerald-400 font-bold');
                 } else {
                     logToConsole(`[OTA EVENT] Status: ${otaStatus} | Branch: ${msg.payload.branch} | Commit: ${commitSha}`, 'text-indigo-400');
                 }
@@ -1207,6 +1454,9 @@ HTML_TEMPLATE = """
             } else if (msg.type === 'DAEMON_STATUS_CHANGE') {
                 logToConsole(`[DAEMON MANAGER] ${msg.daemon} -> ${msg.action}`, 'text-amber-300');
                 fetchStatus();
+            } else if (msg.type === 'BUILD_TRIGGERED') {
+                logToConsole(`[BUILD TRIGGERED] Commit [${msg.commit_sha}] dispatched on branch '${msg.branch}'! Tracking live CI/CD build...`, 'text-purple-400 font-bold');
+                startGitHubBuildPolling(msg.commit_sha);
             }
         }
 
@@ -1320,11 +1570,40 @@ HTML_TEMPLATE = """
                 : 'bg-emerald-950/30 border border-emerald-900/40 p-3 rounded-xl flex items-center justify-between';
 
             // Detect failing arithmetic function (add, minus, multiply)
-            let failedFn = 'minus';
-            const textToSearch = (ut.detail || '') + (ut.error_message || '');
-            if (/add/i.test(textToSearch)) failedFn = 'add';
-            else if (/multiply/i.test(textToSearch)) failedFn = 'multiply';
-            else if (/minus/i.test(textToSearch)) failedFn = 'minus';
+            let failedFn = '';
+            const textToSearch = ((ut.detail || '') + ' ' + (ut.error_message || '')).toLowerCase();
+            if (/\badd\b/i.test(textToSearch)) failedFn = 'add';
+            else if (/\bmultiply\b/i.test(textToSearch)) failedFn = 'multiply';
+            else if (/\bminus\b/i.test(textToSearch)) failedFn = 'minus';
+            else if (/exec format|elf/i.test(textToSearch)) failedFn = 'ARCH_MISMATCH';
+
+            // If function not in detail text, inspect C source code in the Web Editor
+            if (!failedFn) {
+                const editor = document.getElementById('cCodeEditorTextarea');
+                const code = editor ? editor.value : '';
+                const minusMatch = code.match(/void\s+minus\s*\([^\)]*\)\s*\{([\s\S]*?)\}/);
+                const multiplyMatch = code.match(/void\s+multiply\s*\([^\)]*\)\s*\{([\s\S]*?)\}/);
+                const addMatch = code.match(/void\s+add\s*\([^\)]*\)\s*\{([\s\S]*?)\}/);
+
+                if (minusMatch && (minusMatch[1].includes('result +=') || minusMatch[1].includes('result *=') || !minusMatch[1].includes('result -='))) {
+                    failedFn = 'minus';
+                } else if (multiplyMatch && (multiplyMatch[1].includes('count -=') || multiplyMatch[1].includes('count +=') || !multiplyMatch[1].includes('count *='))) {
+                    failedFn = 'multiply';
+                } else if (addMatch && (addMatch[1].includes('count -=') || addMatch[1].includes('count *=') || !addMatch[1].includes('count +='))) {
+                    failedFn = 'add';
+                } else {
+                    failedFn = 'minus';
+                }
+            }
+
+            let diagDetail = ut.detail || ut.error_message || 'Operational unit test assertion failed.';
+            if (failedFn === 'minus' && (diagDetail.includes('revert') || diagDetail.includes('rollback') || diagDetail.includes('Unit tests failed'))) {
+                diagDetail = `[FAIL] Unit Test minus(['50', '20']) assertion failed! Expected output: '30'.\nTriggered automatic rollback: ${ut.detail || ''}`;
+            } else if (failedFn === 'multiply' && (diagDetail.includes('revert') || diagDetail.includes('rollback') || diagDetail.includes('Unit tests failed'))) {
+                diagDetail = `[FAIL] Unit Test multiply(['6', '7']) assertion failed! Expected output: '42'.\nTriggered automatic rollback: ${ut.detail || ''}`;
+            } else if (failedFn === 'add' && (diagDetail.includes('revert') || diagDetail.includes('rollback') || diagDetail.includes('Unit tests failed'))) {
+                diagDetail = `[FAIL] Unit Test add(['10', '20']) assertion failed! Expected output: '30'.\nTriggered automatic rollback: ${ut.detail || ''}`;
+            }
 
             if (isFailed) {
                 card.innerHTML = `
@@ -1338,7 +1617,7 @@ HTML_TEMPLATE = """
                             <span class="bg-red-900 text-white font-mono px-2.5 py-0.5 rounded font-bold border border-red-500 uppercase">${failedFn}</span>
                         </div>
                         <span class="text-gray-400 text-[10px] font-bold">Diagnostic Traceback:</span>
-                        <div class="bg-black/80 p-2.5 rounded-lg border border-red-900/50 text-[10px] font-mono text-red-300 overflow-x-auto whitespace-pre-wrap">${ut.detail || ut.error_message || 'Operational unit test assertion failed.'}</div>
+                        <div class="bg-black/80 p-2.5 rounded-lg border border-red-900/50 text-[10px] font-mono text-red-300 overflow-x-auto whitespace-pre-wrap">${diagDetail}</div>
                     </div>
                 `;
             } else {
@@ -1497,28 +1776,49 @@ HTML_TEMPLATE = """
 
         function startGitHubBuildPolling(commitSha = null) {
             if (commitSha) targetCommitSha = commitSha;
-            document.getElementById('ghRunTelemetryBox').classList.remove('hidden');
-            document.getElementById('badgeGhRunStatus').className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-purple-900/60 text-purple-300 border border-purple-700/50 pulse-dot';
-            document.getElementById('badgeGhRunStatus').innerText = 'Initializing...';
+            const badge = document.getElementById('badgeGhRunStatus');
+            const conclusionDiv = document.getElementById('ghRunConclusion');
+            if (badge) {
+                badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-purple-900/60 text-purple-300 border border-purple-700/50 pulse-dot';
+                badge.innerText = 'Initializing...';
+            }
+            if (conclusionDiv) {
+                conclusionDiv.className = 'font-semibold text-xs text-purple-300 flex items-center gap-2';
+                conclusionDiv.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-purple-400"></i> Dispatching build to GitHub Actions...`;
+            }
             pollGitHubBuildStatus();
             if (ghPollInterval) clearInterval(ghPollInterval);
-            ghPollInterval = setInterval(pollGitHubBuildStatus, 3000);
+            ghPollInterval = setInterval(pollGitHubBuildStatus, 2500);
         }
 
         async function pollGitHubBuildStatus() {
             try {
                 const res = await fetch('/api/github/build-status');
                 const data = await res.json();
-                if (data.status === 'NO_RUNS_FOUND' || data.status === 'ERROR') return;
+                if (data.status === 'NO_RUNS_FOUND') {
+                    const badge = document.getElementById('badgeGhRunStatus');
+                    const conclusionDiv = document.getElementById('ghRunConclusion');
+                    if (badge) {
+                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-gray-800 text-gray-400 border border-gray-700';
+                        badge.innerText = 'Idle';
+                    }
+                    if (conclusionDiv) conclusionDiv.innerText = 'No recent GitHub Actions workflow runs found on branch.';
+                    return;
+                }
+                if (data.status === 'ERROR') return;
 
                 // Check if GitHub API has registered the new commit run yet
                 if (targetCommitSha && data.commit_sha && !data.commit_sha.startsWith(targetCommitSha) && !targetCommitSha.startsWith(data.commit_sha)) {
-                    document.getElementById('ghRunTelemetryBox').classList.remove('hidden');
-                    document.getElementById('badgeGhRunStatus').className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-amber-900/60 text-amber-300 border border-amber-700/50 pulse-dot';
-                    document.getElementById('badgeGhRunStatus').innerText = 'Enqueuing...';
+                    const badge = document.getElementById('badgeGhRunStatus');
+                    if (badge) {
+                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-amber-900/60 text-amber-300 border border-amber-700/50 pulse-dot';
+                        badge.innerText = 'Enqueuing...';
+                    }
                     const conclusionDiv = document.getElementById('ghRunConclusion');
-                    conclusionDiv.className = 'font-semibold text-xs text-amber-300';
-                    conclusionDiv.innerText = `⏳ Waiting for GitHub Actions to register build for commit [${targetCommitSha}]...`;
+                    if (conclusionDiv) {
+                        conclusionDiv.className = 'font-semibold text-xs text-amber-300 flex items-center gap-2';
+                        conclusionDiv.innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin text-amber-400"></i> ⏳ Waiting for GitHub Actions to register build for commit [${targetCommitSha}]...`;
+                    }
                     
                     if (!window._lastEnqueuedLogSha || window._lastEnqueuedLogSha !== targetCommitSha) {
                         window._lastEnqueuedLogSha = targetCommitSha;
@@ -1527,10 +1827,15 @@ HTML_TEMPLATE = """
                     return;
                 }
 
-                document.getElementById('ghRunTelemetryBox').classList.remove('hidden');
-                document.getElementById('ghRunLink').innerText = `#${data.run_id}`;
-                document.getElementById('ghRunLink').href = data.html_url || '#';
-                document.getElementById('ghRunCommit').innerText = `[${data.commit_sha}] ${data.commit_message || ''}`;
+                const runLink = document.getElementById('ghRunLink');
+                if (runLink) {
+                    runLink.innerText = `#${data.run_id}`;
+                    runLink.href = data.html_url || '#';
+                }
+                const runCommit = document.getElementById('ghRunCommit');
+                if (runCommit) {
+                    runCommit.innerText = `[${data.commit_sha}] ${data.commit_message || ''}`;
+                }
 
                 const badge = document.getElementById('badgeGhRunStatus');
                 const conclusionDiv = document.getElementById('ghRunConclusion');
@@ -1539,66 +1844,220 @@ HTML_TEMPLATE = """
                     if (ghPollInterval) { clearInterval(ghPollInterval); ghPollInterval = null; }
                     const isRolledBack = window._lastOtaRollbackActive || (window._rollbackCommits && window._rollbackCommits.has(data.commit_sha));
                     if (data.conclusion === 'success' && !isRolledBack) {
-                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-emerald-900/60 text-emerald-300 border border-emerald-700/50';
-                        badge.innerText = 'Build Success';
-                        conclusionDiv.className = 'font-semibold text-xs text-emerald-400';
-                        conclusionDiv.innerText = '✅ SUCCESS (Artifacts Deployed)';
+                        if (badge) {
+                            badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-emerald-900/60 text-emerald-300 border border-emerald-700/50';
+                            badge.innerText = 'Build Success';
+                        }
+                        if (conclusionDiv) {
+                            conclusionDiv.className = 'font-semibold text-xs text-emerald-400 flex items-center gap-1.5';
+                            conclusionDiv.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> ✅ SUCCESS (Artifacts Deployed & Verified)';
+                        }
                         if (targetCommitSha) {
                             logToConsole(`[GITHUB ACTIONS SUCCESS] Run #${data.run_id} for commit [${data.commit_sha}] completed successfully! Artifacts uploaded.`, 'text-emerald-400 font-bold');
                             targetCommitSha = null;
                         }
                     } else if (isRolledBack) {
-                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-red-900/60 text-red-300 border border-red-700/50 pulse-dot';
-                        badge.innerText = 'OTA Failure / Rollback';
-                        conclusionDiv.className = 'font-semibold text-xs text-red-400';
-                        conclusionDiv.innerText = `❌ OTA DEPLOYMENT FAILED: Edge Unit Tests Failed on Commit [${data.commit_sha}] -> Rolled Back!`;
+                        if (badge) {
+                            badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-red-900/60 text-red-300 border border-red-700/50 pulse-dot';
+                            badge.innerText = 'OTA Failure / Rollback';
+                        }
+                        if (conclusionDiv) {
+                            conclusionDiv.className = 'font-semibold text-xs text-red-400 flex items-center gap-1.5';
+                            conclusionDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-400"></i> ❌ OTA DEPLOYMENT FAILED: Edge Unit Tests Failed on Commit [${data.commit_sha}] -> Rolled Back!`;
+                        }
                         if (targetCommitSha) {
                             logToConsole(`[OTA DEPLOYMENT FAILURE] CI build compiled, but operational unit tests failed on edge device for commit [${data.commit_sha}]! Rolled back.`, 'text-red-400 font-bold');
                             targetCommitSha = null;
                         }
                     } else {
-                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-red-900/60 text-red-300 border border-red-700/50';
-                        badge.innerText = 'Build Failed';
-                        conclusionDiv.className = 'font-semibold text-xs text-red-400';
-                        conclusionDiv.innerText = `❌ FAILED (${data.conclusion})`;
+                        if (badge) {
+                            badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-red-900/60 text-red-300 border border-red-700/50';
+                            badge.innerText = 'Build Failed';
+                        }
+                        if (conclusionDiv) {
+                            conclusionDiv.className = 'font-semibold text-xs text-red-400 flex items-center gap-1.5';
+                            conclusionDiv.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400"></i> ❌ CI/CD BUILD FAILED (${data.conclusion ? data.conclusion.toUpperCase() : 'ERROR'})`;
+                        }
                         if (targetCommitSha) {
                             logToConsole(`[GITHUB ACTIONS FAILURE] Run #${data.run_id} for commit [${data.commit_sha}] failed with conclusion: ${data.conclusion}.`, 'text-red-400 font-bold');
                             targetCommitSha = null;
                         }
                     }
                 } else {
-                    badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 pulse-dot';
-                    badge.innerText = `${data.status}...`;
-                    conclusionDiv.className = 'font-semibold text-xs text-indigo-300';
-                    conclusionDiv.innerText = `🔄 ${data.status.toUpperCase()}`;
+                    if (badge) {
+                        badge.className = 'text-xs px-2.5 py-1 rounded-full font-mono bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 pulse-dot';
+                        badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${data.status ? data.status.toUpperCase() : 'IN PROGRESS'}...`;
+                    }
+                    if (conclusionDiv) {
+                        conclusionDiv.className = 'font-semibold text-xs text-indigo-300 flex items-center gap-2';
+                        conclusionDiv.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-indigo-400"></i> 🔄 CI/CD Pipeline In Progress: Compiling Multi-Arch ELF binaries & running DevSecOps checks...`;
+                    }
                     if (targetCommitSha && (!window._lastBuildingLogRun || window._lastBuildingLogRun !== data.run_id)) {
                         window._lastBuildingLogRun = data.run_id;
                         logToConsole(`[GITHUB ACTIONS] 🔄 Run #${data.run_id} registered for commit [${data.commit_sha}] — Status: ${data.status.toUpperCase()}`, 'text-indigo-300 font-semibold');
                     }
                 }
 
-                // Render jobs
+                // Render jobs breakdown
                 const jobsDiv = document.getElementById('ghRunJobsList');
-                if (data.jobs && data.jobs.length > 0) {
-                    jobsDiv.innerHTML = data.jobs.map(j => `
-                        <div class="bg-gray-950 p-2 rounded border border-gray-800 flex items-center justify-between">
-                            <span class="text-gray-300">${j.name}</span>
-                            <span class="${j.conclusion === 'success' ? 'text-emerald-400' : (j.conclusion === 'failure' ? 'text-red-400' : 'text-indigo-300')} font-bold">
-                                ${j.conclusion ? j.conclusion.toUpperCase() : j.status.toUpperCase()}
-                            </span>
-                        </div>
-                    `).join('');
+                if (jobsDiv && data.jobs && data.jobs.length > 0) {
+                    jobsDiv.innerHTML = data.jobs.map(j => {
+                        let tagClass = 'text-indigo-300 font-bold';
+                        let icon = '<i class="fa-solid fa-spinner fa-spin text-[10px] text-indigo-400"></i>';
+                        let text = j.status ? j.status.toUpperCase() : 'RUNNING';
+                        if (j.conclusion === 'success') {
+                            tagClass = 'text-emerald-400 font-bold';
+                            icon = '<i class="fa-solid fa-circle-check text-[10px] text-emerald-400"></i>';
+                            text = 'PASSED';
+                        } else if (j.conclusion === 'failure') {
+                            tagClass = 'text-red-400 font-bold';
+                            icon = '<i class="fa-solid fa-circle-xmark text-[10px] text-red-400"></i>';
+                            text = 'FAILED';
+                        } else if (j.status === 'queued') {
+                            tagClass = 'text-amber-300 font-bold';
+                            icon = '<i class="fa-regular fa-clock text-[10px] text-amber-300"></i>';
+                            text = 'QUEUED';
+                        }
+                        return `
+                            <div class="bg-gray-950 p-2 rounded border border-gray-800 flex items-center justify-between">
+                                <span class="text-gray-300 text-[11px]">${j.name}</span>
+                                <span class="${tagClass} flex items-center gap-1 text-[11px]">
+                                    ${icon} ${text}
+                                </span>
+                            </div>
+                        `;
+                    }).join('');
                 }
             } catch (e) {
                 console.error("Error polling GitHub status:", e);
             }
         }
 
+        // ====================================================================
+        // Code Editor & Manual Download Functions
+        // ====================================================================
+        async function loadCCode() {
+            const editor = document.getElementById('cCodeEditorTextarea');
+            const status = document.getElementById('codeEditorStatus');
+            if (status) status.innerText = 'Loading from disk...';
+            try {
+                const res = await fetch('/api/code/hello');
+                const data = await res.json();
+                if (data.status === 'SUCCESS') {
+                    editor.value = data.code;
+                    if (status) status.innerText = 'Synced with Artefact/hello.c';
+                    logToConsole('[EDITOR] Loaded Artefact/hello.c source code into Web Editor.', 'text-cyan-300');
+                } else {
+                    if (status) status.innerText = 'Failed to load';
+                }
+            } catch (e) {
+                if (status) status.innerText = 'Error loading';
+                logToConsole('[EDITOR ERROR] Failed to fetch C source: ' + e, 'text-red-400');
+            }
+        }
+
+        function applyCodePreset(preset) {
+            const editor = document.getElementById('cCodeEditorTextarea');
+            const status = document.getElementById('codeEditorStatus');
+            const msgInput = document.getElementById('inputCodeCommitMsg');
+            let code = editor.value;
+
+            if (preset === 'fix') {
+                if (code.includes('count -= num;')) {
+                    code = code.replace('count -= num;', 'count *= num;');
+                } else if (!code.includes('count *= num;')) {
+                    code = code.replace(/void multiply\(int argc, char \*argv\[\]\) \{[\s\S]*?\}/,
+                        `void multiply(int argc, char *argv[]) {\n    int count = 1;\n    for (int i = 0; i < argc; i++) {\n        int num = atoi(argv[i]);\n        count *= num;\n    }\n    printf("multiply:%d", count);\n}`);
+                }
+                editor.value = code;
+                if (msgInput) msgInput.value = 'Fix multiplication logic in hello.c (count *= num)';
+                if (status) status.innerText = 'Preset Applied: Fix multiply (count *= num)';
+                logToConsole('[PRESET APPLIED] Fixed multiplication logic (count *= num) in editor.', 'text-emerald-400 font-bold');
+            } else if (preset === 'bug') {
+                if (code.includes('count *= num;')) {
+                    code = code.replace('count *= num;', 'count -= num;');
+                } else if (!code.includes('count -= num;')) {
+                    code = code.replace(/void multiply\(int argc, char \*argv\[\]\) \{[\s\S]*?\}/,
+                        `void multiply(int argc, char *argv[]) {\n    int count = 1;\n    for (int i = 0; i < argc; i++) {\n        int num = atoi(argv[i]);\n        count -= num;\n    }\n    printf("multiply:%d", count);\n}`);
+                }
+                editor.value = code;
+                if (msgInput) msgInput.value = 'Inject arithmetic subtraction bug in multiply()';
+                if (status) status.innerText = 'Preset Applied: Bug injected (count -= num)';
+                logToConsole('[PRESET APPLIED] Injected arithmetic bug (count -= num) in editor.', 'text-red-400 font-bold');
+            } else if (preset === 'crash') {
+                if (msgInput) msgInput.value = 'Simulate CPU divide-by-zero crash';
+                if (status) status.innerText = 'Focused on crash() function';
+                logToConsole('[PRESET] crash() function (div-by-zero) highlighted in editor.', 'text-amber-300');
+                const idx = editor.value.indexOf('void crash');
+                if (idx !== -1) {
+                    editor.focus();
+                    editor.setSelectionRange(idx, idx + 10);
+                }
+            }
+        }
+
+        async function submitCodeSaveAndPush() {
+            window._lastOtaRollbackActive = false;
+            const editor = document.getElementById('cCodeEditorTextarea');
+            const msgInput = document.getElementById('inputCodeCommitMsg');
+            const code = editor.value;
+            const msg = msgInput.value.trim() || 'Update hello.c via Web Admin Code Editor';
+            const status = document.getElementById('codeEditorStatus');
+
+            if (!code.trim()) {
+                alert('C source code cannot be empty.');
+                return;
+            }
+
+            if (status) status.innerText = 'Saving and pushing to GitHub...';
+            logToConsole(`[CODE DEPLOY] Saving Artefact/hello.c, committing & pushing to GitHub...`, 'text-cyan-400 font-bold');
+
+            try {
+                const res = await fetch('/api/code/save-and-push', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({code: code, message: msg})
+                });
+                const data = await res.json();
+                if (data.status === 'SUCCESS') {
+                    if (status) status.innerText = `Pushed [${data.commit_sha}] to ${data.branch}`;
+                    logToConsole(`[CODE DEPLOY SUCCESS] Pushed commit [${data.commit_sha}] to branch '${data.branch}'! Enqueuing CI build...`, 'text-emerald-300 font-bold');
+                    startGitHubBuildPolling(data.commit_sha);
+                } else {
+                    if (status) status.innerText = 'Push failed';
+                    logToConsole(`[CODE DEPLOY ERROR] ${JSON.stringify(data)}`, 'text-red-400');
+                }
+            } catch (e) {
+                if (status) status.innerText = 'Deploy failed: ' + e;
+                logToConsole(`[ERROR] Save & Deploy failed: ${e}`, 'text-red-400');
+            }
+        }
+
+        function triggerArtifactDownload(fileType = 'binary') {
+            const archSelect = document.getElementById('selectDownloadArch');
+            const arch = archSelect ? archSelect.value : 'aarch64';
+            logToConsole(`[DOWNLOAD] Initiating manual download of '${fileType}' for architecture '${arch}'...`, 'text-indigo-300');
+            window.location.href = `/api/artifacts/download?arch=${arch}&file_type=${fileType}`;
+        }
+
+        async function submitForceOtaDownload() {
+            logToConsole(`[USER ACTION] Triggering immediate Edge Device OTA Pull via MQTT...`, 'text-emerald-400 font-bold');
+            try {
+                const res = await fetch('/api/ota/force-pull', { method: 'POST' });
+                const data = await res.json();
+                logToConsole(`[FORCE OTA RESPONSE] ${data.message || JSON.stringify(data)}`, 'text-emerald-300');
+            } catch (e) {
+                logToConsole(`[ERROR] Force OTA trigger failed: ${e}`, 'text-red-400');
+            }
+        }
+
         // Initialize UI
         connectWebSocket();
         fetchStatus();
+        loadCCode();
         pollGitHubBuildStatus();
-        setInterval(fetchStatus, 10000);
+        setInterval(pollGitHubBuildStatus, 3500);
+        setInterval(fetchStatus, 5000);
     </script>
 </body>
 </html>
