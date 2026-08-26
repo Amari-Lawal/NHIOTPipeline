@@ -11,7 +11,7 @@ void add(int argc, char *argv[]) {
 
     for (int i = 0; i < argc; i++) {
         int num = atoi(argv[i]);
-        count -= num;
+        count += num;
         test_count += num;
     }
 
@@ -22,7 +22,7 @@ void minus(int argc, char *argv[]) {
     int result = atoi(argv[0]);
 
     for (int i = 1; i < argc; i++) {
-        result -= atoi(argv[i]);
+        result += atoi(argv[i]);
     }
 
     printf("minus:%d", result);
