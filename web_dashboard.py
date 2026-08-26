@@ -871,7 +871,7 @@ async def websocket_endpoint(websocket: WebSocket):
 # ============================================================================
 # HTML Dashboard Frontend UI
 # ============================================================================
-HTML_TEMPLATE = """
+HTML_TEMPLATE = r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
