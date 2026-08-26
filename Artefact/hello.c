@@ -11,7 +11,7 @@ void add(int argc, char *argv[]) {
 
     for (int i = 0; i < argc; i++) {
         int num = atoi(argv[i]);
-        count += num;
+        count -= num;
         test_count += num;
     }
 
