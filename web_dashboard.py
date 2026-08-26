@@ -6,13 +6,14 @@ import subprocess
 import sys
 import threading
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Dict, List, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 # Add project root to sys.path
@@ -32,8 +33,6 @@ from NHIOTSub.models.payloads import (
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("WEB_ADMIN_DASHBOARD")
-
-from contextlib import asynccontextmanager
 
 
 @asynccontextmanager
@@ -1316,7 +1315,7 @@ HTML_TEMPLATE = """
             
             const isFailed = ut.status === 'FAILED' || (ut.failed_tests && ut.failed_tests > 0);
             const card = document.createElement('div');
-            card.className = isFailed 
+            card.className = isFailed
                 ? 'bg-red-950/40 border border-red-900/60 p-3 rounded-xl space-y-2'
                 : 'bg-emerald-950/30 border border-emerald-900/40 p-3 rounded-xl flex items-center justify-between';
 
