@@ -1,4 +1,4 @@
-// Dashboard OTA Build Trigger: 2026-08-26T19:23:21.867813
+// Dashboard OTA Build Trigger: 2026-08-26T19:25:56.157847
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ void minus(int argc, char *argv[]) {
     int result = atoi(argv[0]);
 
     for (int i = 1; i < argc; i++) {
-        result += atoi(argv[i]);
+        result -= atoi(argv[i]);
     }
 
     printf("minus:%d", result);
