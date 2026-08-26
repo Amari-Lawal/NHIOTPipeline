@@ -7,6 +7,7 @@ void add(int argc, char *argv[]) {
     int test_count = 1;
     int count = 0;
 // Hello World
+//Test
 
     for (int i = 0; i < argc; i++) {
         int num = atoi(argv[i]);
