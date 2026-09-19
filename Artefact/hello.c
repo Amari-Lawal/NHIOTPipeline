@@ -38,7 +38,7 @@ void multiply(int argc, char *argv[]) {
     }
     printf("multiply:%d", count);
 }
-
+//Hello
 void crash(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
