@@ -8,6 +8,7 @@ void add(int argc, char *argv[]) {
     int count = 0;
 // Hello World
 //Test
+//Hi
 // Test again
 //Hello Oct
 /// Hello
